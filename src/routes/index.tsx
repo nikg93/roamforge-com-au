@@ -77,10 +77,10 @@ function Index() {
         <div className="relative">
           <img
             src={heroPatrol}
-            alt="Roamforge TROLL3N Nissan Patrol at sunset"
-            className="h-[420px] w-full object-cover sm:h-[520px] lg:h-[620px]"
+            alt="Roamforge TROLL3N Nissan Patrol"
+            className="h-[420px] w-full object-cover object-center sm:h-[520px] lg:h-[620px]"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-rf-dark/80 via-rf-dark/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-rf-dark/85 via-rf-dark/55 to-rf-dark/10" />
           <div className="absolute inset-0">
             <div className="mx-auto h-full max-w-7xl px-4 lg:px-8 flex items-center">
               <div className="max-w-xl text-rf-cream">
