@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Mountain, Map, ShieldCheck, Wrench, Zap, Tent, Shirt } from "lucide-react";
+import { Mountain, Map as MapIcon, ShieldCheck, Wrench, Zap, Tent, Shirt } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SectionHeading } from "@/components/SectionHeading";
@@ -50,7 +50,7 @@ const WHY = [
     desc: "Products chosen by 4WD enthusiasts who live the lifestyle.",
   },
   {
-    Icon: Map,
+    Icon: MapIcon,
     title: "AUSTRALIAN OWNED",
     desc: "WA based adventure brand supporting local.",
   },
