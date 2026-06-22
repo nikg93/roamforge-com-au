@@ -50,7 +50,7 @@ const WHY = [
     desc: "Products chosen by 4WD enthusiasts who live the lifestyle.",
   },
   {
-    Icon: Map,
+    Icon: MapIcon,
     title: "AUSTRALIAN OWNED",
     desc: "WA based adventure brand supporting local.",
   },
