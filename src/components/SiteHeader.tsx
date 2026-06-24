@@ -9,8 +9,8 @@ const nav = [
   { label: "ELECTRICAL", to: "/" },
   { label: "CAMPING", to: "/" },
   { label: "MERCH", to: "/" },
-  { label: "ABOUT", to: "/" },
-  { label: "CONTACT", to: "/" },
+  { label: "ABOUT", to: "/about" },
+  { label: "CONTACT", to: "/contact" },
 ];
 
 export function SiteHeader() {

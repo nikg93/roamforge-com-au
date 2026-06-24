@@ -2,10 +2,36 @@ import { Link } from "@tanstack/react-router";
 import { Facebook, Instagram, Youtube } from "lucide-react";
 import logo from "@/assets/logo.png";
 
-const cols: { title: string; links: string[] }[] = [
-  { title: "SHOP", links: ["All Products", "Recovery Gear", "Electrical", "Camping", "Merch"] },
-  { title: "INFORMATION", links: ["About Us", "Shipping", "Returns & Refunds", "Terms & Conditions", "Privacy Policy"] },
-  { title: "CUSTOMER CARE", links: ["Contact Us", "FAQ", "Warranty"] },
+type FooterLink = { label: string; to: string };
+const cols: { title: string; links: FooterLink[] }[] = [
+  {
+    title: "SHOP",
+    links: [
+      { label: "All Products", to: "/" },
+      { label: "Recovery Gear", to: "/" },
+      { label: "Electrical", to: "/" },
+      { label: "Camping", to: "/" },
+      { label: "Merch", to: "/" },
+    ],
+  },
+  {
+    title: "INFORMATION",
+    links: [
+      { label: "About Us", to: "/about" },
+      { label: "Shipping", to: "/shipping" },
+      { label: "Returns & Refunds", to: "/returns" },
+      { label: "Terms & Conditions", to: "/terms" },
+      { label: "Privacy Policy", to: "/privacy" },
+    ],
+  },
+  {
+    title: "CUSTOMER CARE",
+    links: [
+      { label: "Contact Us", to: "/contact" },
+      { label: "FAQ", to: "/faq" },
+      { label: "Warranty", to: "/warranty" },
+    ],
+  },
 ];
 
 export function SiteFooter() {
@@ -23,9 +49,9 @@ export function SiteFooter() {
             <h4 className="font-display text-sm tracking-[0.2em] text-rf-cream mb-4">{c.title}</h4>
             <ul className="space-y-2 text-sm">
               {c.links.map((l) => (
-                <li key={l}>
-                  <Link to="/" className="text-rf-cream/70 hover:text-rf-tan transition-colors">
-                    {l}
+                <li key={l.label}>
+                  <Link to={l.to} className="text-rf-cream/70 hover:text-rf-tan transition-colors">
+                    {l.label}
                   </Link>
                 </li>
               ))}
