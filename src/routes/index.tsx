@@ -100,7 +100,7 @@ function Index() {
                     SHOP GEAR
                   </a>
                   <a
-                    href="#categories"
+                    href="#featured"
                     className="border border-rf-cream/80 text-rf-cream font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-cream hover:text-rf-dark transition-colors"
                   >
                     SHOP MERCH
@@ -125,9 +125,9 @@ function Index() {
           <SectionHeading>SHOP BY CATEGORY</SectionHeading>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {CATEGORIES.map(({ label, img, Icon }) => (
-              <Link
+              <a
                 key={label}
-                to="/"
+                href={label === "MERCH" ? "#featured" : "#categories"}
                 className="group relative block aspect-[4/3] overflow-hidden bg-rf-dark"
               >
                 <img
@@ -145,7 +145,7 @@ function Index() {
                 <div className="absolute bottom-4 left-0 right-0 text-center">
                   <span className="font-display tracking-[0.2em] text-rf-cream text-sm">{label}</span>
                 </div>
-              </Link>
+              </a>
             ))}
           </div>
         </div>
