@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Mountain, Map as MapIcon, ShieldCheck, Wrench, Zap, Tent, Shirt } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";

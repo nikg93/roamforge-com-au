@@ -21,8 +21,8 @@ export function SiteHeader() {
           <img src={logo} alt="Roamforge" className="h-12 w-auto" />
         </Link>
         <nav className="hidden lg:flex items-center gap-7 text-[12px] font-semibold tracking-[0.15em]">
-          {nav.map((n) => (
-            {"href" in n ? (
+          {nav.map((n) =>
+            "href" in n ? (
               <a
                 key={n.label}
                 href={n.href}
@@ -38,8 +38,8 @@ export function SiteHeader() {
               >
                 {n.label}
               </Link>
-            )}
-          ))}
+            )
+          )}
         </nav>
         <div className="flex items-center gap-2">
           <button aria-label="Search" className="grid h-9 w-9 place-items-center text-rf-cream/90 hover:text-rf-tan">
