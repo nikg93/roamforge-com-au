@@ -3,12 +3,17 @@ import { Search, User } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { CartDrawer } from "./CartDrawer";
 
-const nav = [
-  { label: "SHOP", href: "/#featured" },
-  { label: "RECOVERY GEAR", href: "/#categories" },
-  { label: "ELECTRICAL", href: "/#categories" },
-  { label: "CAMPING", href: "/#categories" },
-  { label: "MERCH", href: "/#featured" },
+type NavItem =
+  | { label: string; href: string }
+  | { label: string; to: "/about" | "/contact" }
+  | { label: string; to: "/category/$slug"; params: { slug: string } };
+
+const nav: NavItem[] = [
+  { label: "PERFORMANCE", to: "/category/$slug", params: { slug: "performance" } },
+  { label: "RECOVERY", to: "/category/$slug", params: { slug: "recovery" } },
+  { label: "ELECTRICAL", to: "/category/$slug", params: { slug: "electrical" } },
+  { label: "CAMPING", to: "/category/$slug", params: { slug: "camping" } },
+  { label: "MERCH", to: "/category/$slug", params: { slug: "merch" } },
   { label: "ABOUT", to: "/about" },
   { label: "CONTACT", to: "/contact" },
 ];
@@ -30,6 +35,15 @@ export function SiteHeader() {
               >
                 {n.label}
               </a>
+            ) : "params" in n ? (
+              <Link
+                key={n.label}
+                to={n.to}
+                params={n.params}
+                className="text-rf-cream/90 hover:text-rf-tan transition-colors"
+              >
+                {n.label}
+              </Link>
             ) : (
               <Link
                 key={n.label}

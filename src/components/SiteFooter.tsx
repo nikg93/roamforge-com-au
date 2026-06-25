@@ -2,16 +2,19 @@ import { Link } from "@tanstack/react-router";
 import { Facebook, Instagram, Youtube } from "lucide-react";
 import logo from "@/assets/logo.png";
 
-type FooterLink = { label: string; to?: string; href?: string };
+type FooterLink =
+  | { label: string; href: string }
+  | { label: string; to: "/about" | "/shipping" | "/returns" | "/terms" | "/privacy" | "/contact" | "/faq" | "/warranty" }
+  | { label: string; to: "/category/$slug"; params: { slug: string } };
 const cols: { title: string; links: FooterLink[] }[] = [
   {
     title: "SHOP",
     links: [
-      { label: "All Products", href: "/#featured" },
-      { label: "Recovery Gear", href: "/#categories" },
-      { label: "Electrical", href: "/#categories" },
-      { label: "Camping", href: "/#categories" },
-      { label: "Merch", href: "/#featured" },
+      { label: "Performance", to: "/category/$slug", params: { slug: "performance" } },
+      { label: "Recovery Gear", to: "/category/$slug", params: { slug: "recovery" } },
+      { label: "Electrical", to: "/category/$slug", params: { slug: "electrical" } },
+      { label: "Camping", to: "/category/$slug", params: { slug: "camping" } },
+      { label: "Merch", to: "/category/$slug", params: { slug: "merch" } },
     ],
   },
   {
@@ -50,12 +53,16 @@ export function SiteFooter() {
             <ul className="space-y-2 text-sm">
               {c.links.map((l) => (
                 <li key={l.label}>
-                  {l.href ? (
+                  {"href" in l ? (
                     <a href={l.href} className="text-rf-cream/70 hover:text-rf-tan transition-colors">
                       {l.label}
                     </a>
+                  ) : "params" in l ? (
+                    <Link to={l.to} params={l.params} className="text-rf-cream/70 hover:text-rf-tan transition-colors">
+                      {l.label}
+                    </Link>
                   ) : (
-                    <Link to={l.to!} className="text-rf-cream/70 hover:text-rf-tan transition-colors">
+                    <Link to={l.to} className="text-rf-cream/70 hover:text-rf-tan transition-colors">
                       {l.label}
                     </Link>
                   )}

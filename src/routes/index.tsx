@@ -1,17 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { Mountain, Map as MapIcon, ShieldCheck, Wrench, Zap, Tent, Shirt } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Mountain, Map as MapIcon, ShieldCheck, Wrench, Zap, Tent, Shirt, Gauge } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SectionHeading } from "@/components/SectionHeading";
-import { ProductCard } from "@/components/ProductCard";
-import { EmptyProducts } from "@/components/EmptyProducts";
 import { useCartSync } from "@/hooks/useCartSync";
-import { fetchProducts } from "@/lib/shopify";
 import logo from "@/assets/logo.png";
 import heroPatrolAsset from "@/assets/troll3n-real.jpg.asset.json";
 import troll3n from "@/assets/troll3n.jpg";
 const heroPatrol = heroPatrolAsset.url;
+import catPerformance from "@/assets/cat-performance.jpg";
 import catRecovery from "@/assets/cat-recovery.jpg";
 import catElectrical from "@/assets/cat-electrical.jpg";
 import catCamping from "@/assets/cat-camping.jpg";
@@ -37,10 +34,11 @@ export const Route = createFileRoute("/")({
 });
 
 const CATEGORIES = [
-  { label: "RECOVERY GEAR", img: catRecovery, Icon: Wrench },
-  { label: "ELECTRICAL", img: catElectrical, Icon: Zap },
-  { label: "CAMPING", img: catCamping, Icon: Tent },
-  { label: "MERCH", img: catMerch, Icon: Shirt },
+  { label: "PERFORMANCE", slug: "performance", img: catPerformance, Icon: Gauge },
+  { label: "RECOVERY GEAR", slug: "recovery", img: catRecovery, Icon: Wrench },
+  { label: "ELECTRICAL", slug: "electrical", img: catElectrical, Icon: Zap },
+  { label: "CAMPING", slug: "camping", img: catCamping, Icon: Tent },
+  { label: "MERCH", slug: "merch", img: catMerch, Icon: Shirt },
 ];
 
 const WHY = [
@@ -63,10 +61,6 @@ const WHY = [
 
 function Index() {
   useCartSync();
-  const { data: products = [] } = useQuery({
-    queryKey: ["products", "featured"],
-    queryFn: () => fetchProducts(12),
-  });
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -93,18 +87,20 @@ function Index() {
                   Premium 4WD, camping and touring gear tested for Australian conditions.
                 </p>
                 <div className="mt-7 flex flex-wrap gap-3">
-                  <a
-                    href="#featured"
+                  <Link
+                    to="/category/$slug"
+                    params={{ slug: "performance" }}
                     className="bg-rf-tan text-rf-dark font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-tan-bright transition-colors"
                   >
                     SHOP GEAR
-                  </a>
-                  <a
-                    href="#featured"
+                  </Link>
+                  <Link
+                    to="/category/$slug"
+                    params={{ slug: "merch" }}
                     className="border border-rf-cream/80 text-rf-cream font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-cream hover:text-rf-dark transition-colors"
                   >
                     SHOP MERCH
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -123,11 +119,12 @@ function Index() {
       <section id="categories" className="bg-rf-cream py-14">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <SectionHeading>SHOP BY CATEGORY</SectionHeading>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {CATEGORIES.map(({ label, img, Icon }) => (
-              <a
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+            {CATEGORIES.map(({ label, slug, img, Icon }) => (
+              <Link
                 key={label}
-                href={label === "MERCH" ? "#featured" : "#categories"}
+                to="/category/$slug"
+                params={{ slug }}
                 className="group relative block aspect-[4/3] overflow-hidden bg-rf-dark"
               >
                 <img
@@ -145,7 +142,7 @@ function Index() {
                 <div className="absolute bottom-4 left-0 right-0 text-center">
                   <span className="font-display tracking-[0.2em] text-rf-cream text-sm">{label}</span>
                 </div>
-              </a>
+              </Link>
             ))}
           </div>
         </div>
@@ -165,20 +162,6 @@ function Index() {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* FEATURED PRODUCTS */}
-      <section id="featured" className="bg-rf-cream py-14">
-        <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <SectionHeading>FEATURED PRODUCTS</SectionHeading>
-          <div className="mt-10 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {products.length === 0 ? (
-              <EmptyProducts />
-            ) : (
-              products.map((p) => <ProductCard key={p.node.id} product={p} />)
-            )}
           </div>
         </div>
       </section>
