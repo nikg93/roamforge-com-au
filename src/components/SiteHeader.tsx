@@ -4,11 +4,11 @@ import logo from "@/assets/logo.png";
 import { CartDrawer } from "./CartDrawer";
 
 const nav = [
-  { label: "SHOP", to: "/" },
-  { label: "RECOVERY GEAR", to: "/" },
-  { label: "ELECTRICAL", to: "/" },
-  { label: "CAMPING", to: "/" },
-  { label: "MERCH", to: "/" },
+  { label: "SHOP", href: "/#featured" },
+  { label: "RECOVERY GEAR", href: "/#categories" },
+  { label: "ELECTRICAL", href: "/#categories" },
+  { label: "CAMPING", href: "/#categories" },
+  { label: "MERCH", href: "/#featured" },
   { label: "ABOUT", to: "/about" },
   { label: "CONTACT", to: "/contact" },
 ];
@@ -21,15 +21,25 @@ export function SiteHeader() {
           <img src={logo} alt="Roamforge" className="h-12 w-auto" />
         </Link>
         <nav className="hidden lg:flex items-center gap-7 text-[12px] font-semibold tracking-[0.15em]">
-          {nav.map((n) => (
-            <Link
-              key={n.label}
-              to={n.to}
-              className="text-rf-cream/90 hover:text-rf-tan transition-colors"
-            >
-              {n.label}
-            </Link>
-          ))}
+          {nav.map((n) =>
+            "href" in n ? (
+              <a
+                key={n.label}
+                href={n.href}
+                className="text-rf-cream/90 hover:text-rf-tan transition-colors"
+              >
+                {n.label}
+              </a>
+            ) : (
+              <Link
+                key={n.label}
+                to={n.to}
+                className="text-rf-cream/90 hover:text-rf-tan transition-colors"
+              >
+                {n.label}
+              </Link>
+            )
+          )}
         </nav>
         <div className="flex items-center gap-2">
           <button aria-label="Search" className="grid h-9 w-9 place-items-center text-rf-cream/90 hover:text-rf-tan">

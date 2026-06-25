@@ -2,16 +2,16 @@ import { Link } from "@tanstack/react-router";
 import { Facebook, Instagram, Youtube } from "lucide-react";
 import logo from "@/assets/logo.png";
 
-type FooterLink = { label: string; to: string };
+type FooterLink = { label: string; to?: string; href?: string };
 const cols: { title: string; links: FooterLink[] }[] = [
   {
     title: "SHOP",
     links: [
-      { label: "All Products", to: "/" },
-      { label: "Recovery Gear", to: "/" },
-      { label: "Electrical", to: "/" },
-      { label: "Camping", to: "/" },
-      { label: "Merch", to: "/" },
+      { label: "All Products", href: "/#featured" },
+      { label: "Recovery Gear", href: "/#categories" },
+      { label: "Electrical", href: "/#categories" },
+      { label: "Camping", href: "/#categories" },
+      { label: "Merch", href: "/#featured" },
     ],
   },
   {
@@ -50,9 +50,15 @@ export function SiteFooter() {
             <ul className="space-y-2 text-sm">
               {c.links.map((l) => (
                 <li key={l.label}>
-                  <Link to={l.to} className="text-rf-cream/70 hover:text-rf-tan transition-colors">
-                    {l.label}
-                  </Link>
+                  {l.href ? (
+                    <a href={l.href} className="text-rf-cream/70 hover:text-rf-tan transition-colors">
+                      {l.label}
+                    </a>
+                  ) : (
+                    <Link to={l.to!} className="text-rf-cream/70 hover:text-rf-tan transition-colors">
+                      {l.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>
