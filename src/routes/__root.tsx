@@ -82,6 +82,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "Roamforge" },
       { name: "description", content: "Premium 4WD, camping and touring gear tested for Australian conditions." },
       { name: "author", content: "Roamforge" },
+      { name: "google-site-verification", content: "mu2c75c6izPtXaUYCdNONswlHXEdBPLNSKjSY_nLPGQ" },
       { property: "og:title", content: "Roamforge — Forged for Adventure" },
       { property: "og:description", content: "Premium 4WD, camping and touring gear tested for Australian conditions." },
       { property: "og:type", content: "website" },
