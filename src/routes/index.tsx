@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Mountain, Map as MapIcon, ShieldCheck, Wrench, Zap, Tent, Shirt, Gauge } from "lucide-react";
+import { Mountain, Map as MapIcon, ShieldCheck, Wrench, Zap, Tent, Shirt, Gauge, BookOpen } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SectionHeading } from "@/components/SectionHeading";
@@ -13,6 +13,7 @@ import catRecovery from "@/assets/cat-recovery.jpg";
 import catElectrical from "@/assets/cat-electrical.jpg";
 import catCamping from "@/assets/cat-camping.jpg";
 import catMerch from "@/assets/cat-merch.jpg";
+import catPlanners from "@/assets/cat-planners.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -39,6 +40,7 @@ const CATEGORIES = [
   { label: "ELECTRICAL", slug: "electrical", img: catElectrical, Icon: Zap },
   { label: "CAMPING", slug: "camping", img: catCamping, Icon: Tent },
   { label: "MERCH", slug: "merch", img: catMerch, Icon: Shirt },
+  { label: "PLANNERS", slug: "planners", img: catPlanners, Icon: BookOpen },
 ];
 
 const WHY = [
