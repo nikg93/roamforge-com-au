@@ -25,6 +25,11 @@ const CATEGORY_MAP: Record<string, CategoryConfig> = {
     description: "Roamforge apparel and lifestyle.",
     query: 'vendor:"The Print Bar"',
   },
+  planners: {
+    title: "ADVENTURE PLANNERS",
+    description: "Digital trip-planning bundles for 4WD touring across Australia.",
+    query: "tag:planner",
+  },
   recovery: {
     title: "RECOVERY GEAR",
     description: "Recovery boards, straps, shackles and winches.",
