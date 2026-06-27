@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
+import { fetchProducts } from "@/lib/shopify";
 
 const BASE_URL = "https://roamforge.com.au";
 
@@ -9,7 +10,7 @@ interface SitemapEntry {
   priority?: string;
 }
 
-const entries: SitemapEntry[] = [
+const staticEntries: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
   { path: "/category/performance", changefreq: "weekly", priority: "0.9" },
   { path: "/category/merch", changefreq: "weekly", priority: "0.9" },
@@ -30,7 +31,18 @@ export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
-        const urls = entries
+        let productEntries: SitemapEntry[] = [];
+        try {
+          const products = await fetchProducts(100);
+          productEntries = products.map((p) => ({
+            path: `/product/${p.node.handle}`,
+            changefreq: "weekly" as const,
+            priority: "0.8",
+          }));
+        } catch {
+          // fall back to static entries only
+        }
+        const urls = [...staticEntries, ...productEntries]
           .map((e) =>
             [
               `  <url>`,
