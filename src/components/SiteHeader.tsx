@@ -14,6 +14,7 @@ const nav: NavItem[] = [
   { label: "ELECTRICAL", to: "/category/$slug", params: { slug: "electrical" } },
   { label: "CAMPING", to: "/category/$slug", params: { slug: "camping" } },
   { label: "MERCH", to: "/category/$slug", params: { slug: "merch" } },
+  { label: "PLANNERS", to: "/category/$slug", params: { slug: "planners" } },
   { label: "ABOUT", to: "/about" },
   { label: "CONTACT", to: "/contact" },
 ];
