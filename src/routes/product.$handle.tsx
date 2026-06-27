@@ -63,10 +63,15 @@ function ProductPage() {
                 <h1 className="font-display text-4xl tracking-wide text-rf-dark">
                   {data.node.title}
                 </h1>
-                <p className="mt-4 text-2xl font-semibold text-rf-dark">
-                  ${parseFloat(data.node.priceRange.minVariantPrice.amount).toFixed(2)}{" "}
-                  {data.node.priceRange.minVariantPrice.currencyCode}
-                </p>
+                {(() => {
+                  const v = data.node.variants.edges[variantIdx]?.node;
+                  const price = v?.price ?? data.node.priceRange.minVariantPrice;
+                  return (
+                    <p className="mt-4 text-2xl font-semibold text-rf-dark">
+                      ${parseFloat(price.amount).toFixed(2)} {price.currencyCode}
+                    </p>
+                  );
+                })()}
                 <p className="mt-6 text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
                   {data.node.description}
                 </p>
