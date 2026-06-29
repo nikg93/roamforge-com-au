@@ -17,8 +17,8 @@ type CategoryConfig = {
 const CATEGORY_MAP: Record<string, CategoryConfig> = {
   performance: {
     title: "PERFORMANCE",
-    description: "Airboxes, snorkels, intercoolers and more from JM FAB.",
-    query: 'vendor:"JM FAB"',
+    description: "Airboxes, snorkels, EGR modules and more from JM FAB & Aironboard.",
+    query: '(vendor:"JM FAB") OR (vendor:"Aironboard" AND (product_type:"EGR Module" OR product_type:"Snorkel Filter"))',
   },
   merch: {
     title: "MERCH",
@@ -32,7 +32,8 @@ const CATEGORY_MAP: Record<string, CategoryConfig> = {
   },
   recovery: {
     title: "RECOVERY GEAR",
-    description: "Recovery boards, straps, shackles and winches.",
+    description: "Air compressors, tyre deflators and inflation kits for the tracks.",
+    query: 'vendor:"Aironboard" AND (product_type:"Air Compressor" OR product_type:"Tyre Tools")',
   },
   electrical: {
     title: "ELECTRICAL",
