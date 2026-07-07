@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Mountain, Map as MapIcon, ShieldCheck, Gauge, Lightbulb, Shield, PackageOpen, Sun } from "lucide-react";
+import { Mountain, Map as MapIcon, ShieldCheck, Gauge, Lightbulb, BatteryCharging, Satellite, Wind, LifeBuoy, Tent, ClipboardList } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SectionHeading } from "@/components/SectionHeading";
@@ -12,7 +12,10 @@ import catLighting from "@/assets/cat-lighting.jpg";
 import catMonitoring from "@/assets/cat-monitoring.jpg";
 import catPerformance from "@/assets/cat-performance-new.jpg";
 import catTouring from "@/assets/cat-touring.jpg";
-import catNudge from "@/assets/cat-nudge.jpg";
+import catGps from "@/assets/cat-gps.jpg";
+import catCompressors from "@/assets/cat-compressors.jpg";
+import catRecovery from "@/assets/cat-recovery-new.jpg";
+import catPlanners from "@/assets/cat-planners.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -34,11 +37,14 @@ export const Route = createFileRoute("/")({
 });
 
 const CATEGORIES = [
-  { label: "THROTTLE CONTROLLERS", slug: "throttle-controllers", img: catPerformance, Icon: Gauge },
-  { label: "LED LIGHTING", slug: "lighting", img: catLighting, Icon: Lightbulb },
-  { label: "TAILGATE SYSTEMS", slug: "tailgate-systems", img: catTouring, Icon: PackageOpen },
-  { label: "NUDGE BARS", slug: "nudge-bars", img: catNudge, Icon: Shield },
-  { label: "LIGHTING PACKS", slug: "lighting-packs", img: catMonitoring, Icon: Sun },
+  { label: "PERFORMANCE", slug: "performance", img: catPerformance, Icon: Gauge },
+  { label: "12V & VEHICLE MONITORING", slug: "monitoring", img: catMonitoring, Icon: BatteryCharging },
+  { label: "GPS & TRACKING", slug: "gps-tracking", img: catGps, Icon: Satellite },
+  { label: "LIGHTING", slug: "lighting", img: catLighting, Icon: Lightbulb },
+  { label: "AIR COMPRESSORS", slug: "air-compressors", img: catCompressors, Icon: Wind },
+  { label: "RECOVERY GEAR", slug: "recovery", img: catRecovery, Icon: LifeBuoy },
+  { label: "TOURING ESSENTIALS", slug: "touring", img: catTouring, Icon: Tent },
+  { label: "PLANNERS", slug: "planners", img: catPlanners, Icon: ClipboardList },
 ];
 
 const WHY = [
@@ -89,7 +95,7 @@ function Index() {
                 <div className="mt-7 flex flex-wrap gap-3">
                   <Link
                     to="/category/$slug"
-                    params={{ slug: "throttle-controllers" }}
+                    params={{ slug: "performance" }}
                     className="bg-rf-tan text-rf-dark font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-tan-bright transition-colors"
                   >
                     SHOP GEAR
