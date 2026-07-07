@@ -100,13 +100,6 @@ function Index() {
                   >
                     SHOP GEAR
                   </Link>
-                  <Link
-                    to="/category/$slug"
-                    params={{ slug: "lighting" }}
-                    className="border border-rf-cream/80 text-rf-cream font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-cream hover:text-rf-dark transition-colors"
-                  >
-                    LED LIGHTING
-                  </Link>
                 </div>
               </div>
             </div>
