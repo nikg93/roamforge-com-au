@@ -20,6 +20,11 @@ const CATEGORY_MAP: Record<string, CategoryConfig> = {
     description: "Throttle controllers, tuning and performance upgrades that sharpen throttle response and unlock your 4WD's true drivability.",
     query: "tag:cat-performance",
   },
+  "throttle-controllers": {
+    title: "THROTTLE CONTROLLERS",
+    description: "Plug-and-play throttle controllers that kill factory pedal lag and sharpen response — Ultimate9 EVC and evcX Bluetooth units for every major 4WD.",
+    query: "tag:cat-throttle-controllers OR tag:throttle-controllers OR tag:throttle-controller",
+  },
   monitoring: {
     title: "12V & VEHICLE MONITORING",
     description: "Battery monitors, DC-DC chargers, isolators and live vehicle telemetry — full control over your 12V and touring electrical system.",
