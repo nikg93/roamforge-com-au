@@ -8,11 +8,15 @@ import logo from "@/assets/logo.png";
 import heroPatrolAsset from "@/assets/troll3n-real.jpg.asset.json";
 import troll3n from "@/assets/troll3n.jpg";
 const heroPatrol = heroPatrolAsset.url;
-import catPerformance from "@/assets/cat-performance.jpg";
-import catRecovery from "@/assets/cat-recovery.jpg";
-import catElectrical from "@/assets/cat-electrical.jpg";
-import catCamping from "@/assets/cat-camping.jpg";
-import catPlanners from "@/assets/cat-planners.jpg";
+import catElectrical from "@/assets/cat-electrical-new.jpg";
+import catRecovery from "@/assets/cat-recovery-new.jpg";
+import catLighting from "@/assets/cat-lighting.jpg";
+import catMonitoring from "@/assets/cat-monitoring.jpg";
+import catGps from "@/assets/cat-gps.jpg";
+import catPerformance from "@/assets/cat-performance-new.jpg";
+import catTouring from "@/assets/cat-touring.jpg";
+import catCompressors from "@/assets/cat-compressors.jpg";
+import catNudge from "@/assets/cat-nudge.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -36,13 +40,13 @@ export const Route = createFileRoute("/")({
 const CATEGORIES = [
   { label: "12V & ELECTRICAL", slug: "electrical", img: catElectrical, Icon: Zap },
   { label: "RECOVERY GEAR", slug: "recovery", img: catRecovery, Icon: Wrench },
-  { label: "LIGHTING", slug: "lighting", img: catElectrical, Icon: Lightbulb },
-  { label: "VEHICLE MONITORING", slug: "monitoring", img: catPerformance, Icon: Speedometer },
-  { label: "GPS & TRACKING", slug: "gps", img: catPlanners, Icon: Navigation },
+  { label: "LIGHTING", slug: "lighting", img: catLighting, Icon: Lightbulb },
+  { label: "VEHICLE MONITORING", slug: "monitoring", img: catMonitoring, Icon: Speedometer },
+  { label: "GPS & TRACKING", slug: "gps", img: catGps, Icon: Navigation },
   { label: "PERFORMANCE", slug: "performance", img: catPerformance, Icon: Gauge },
-  { label: "TOURING ESSENTIALS", slug: "touring", img: catCamping, Icon: Tent },
-  { label: "AIR COMPRESSORS", slug: "compressors", img: catRecovery, Icon: Wind },
-  { label: "NUDGE BARS", slug: "nudge", img: catPerformance, Icon: Shield },
+  { label: "TOURING ESSENTIALS", slug: "touring", img: catTouring, Icon: Tent },
+  { label: "AIR COMPRESSORS", slug: "compressors", img: catCompressors, Icon: Wind },
+  { label: "NUDGE BARS", slug: "nudge", img: catNudge, Icon: Shield },
 ];
 
 const WHY = [
