@@ -15,33 +15,50 @@ type CategoryConfig = {
 };
 
 const CATEGORY_MAP: Record<string, CategoryConfig> = {
-  performance: {
-    title: "PERFORMANCE",
-    description: "Airboxes, snorkels, EGR modules and more from JM FAB & Aironboard.",
-    query: '(vendor:"JM FAB") OR (vendor:"Aironboard" AND (product_type:"EGR Module" OR product_type:"Snorkel Filter"))',
-  },
-  merch: {
-    title: "MERCH",
-    description: "Roamforge apparel and lifestyle.",
-    query: 'vendor:"The Print Bar"',
-  },
-  planners: {
-    title: "ADVENTURE PLANNERS",
-    description: "Digital trip-planning bundles for 4WD touring across Australia.",
-    query: "tag:planner",
+  electrical: {
+    title: "12V & ELECTRICAL",
+    description: "Dual battery systems, DC-DC chargers, wiring harnesses and 12V accessories.",
+    query: "tag:cat-electrical",
   },
   recovery: {
     title: "RECOVERY GEAR",
-    description: "Air compressors, tyre deflators and inflation kits for the tracks.",
-    query: 'vendor:"Aironboard" AND (product_type:"Air Compressor" OR product_type:"Tyre Tools")',
+    description: "Recovery kits, snatch straps, jack bases and traction boards.",
+    query: "tag:cat-recovery",
   },
-  electrical: {
-    title: "ELECTRICAL",
-    description: "Dual battery systems, wiring and lighting.",
+  lighting: {
+    title: "LIGHTING",
+    description: "LED light bars, work lights, rock lights and driving lights.",
+    query: "tag:cat-lighting",
   },
-  camping: {
-    title: "CAMPING",
-    description: "Swags, awnings, cookware and touring essentials.",
+  monitoring: {
+    title: "VEHICLE MONITORING",
+    description: "Heads-up displays, OBD2 gauges and battery monitors.",
+    query: "tag:cat-monitoring",
+  },
+  gps: {
+    title: "GPS & TRACKING",
+    description: "Live GPS trackers and vehicle tracking hardware.",
+    query: "tag:cat-gps",
+  },
+  performance: {
+    title: "PERFORMANCE",
+    description: "Throttle controllers, snorkels and performance upgrades for 4WDs.",
+    query: "tag:cat-performance",
+  },
+  touring: {
+    title: "TOURING ESSENTIALS",
+    description: "Water storage, tailgate systems and touring accessories.",
+    query: "tag:cat-touring",
+  },
+  compressors: {
+    title: "AIR COMPRESSORS",
+    description: "12V air compressors, tyre deflators and inflation kits.",
+    query: "tag:cat-compressors",
+  },
+  nudge: {
+    title: "NUDGE BARS",
+    description: "Vehicle-specific and universal nudge bars for touring 4WDs and utes.",
+    query: "tag:cat-nudge",
   },
 };
 
