@@ -9,15 +9,11 @@ type NavItem =
   | { label: string; to: "/category/$slug"; params: { slug: string } };
 
 const nav: NavItem[] = [
-  { label: "12V & ELECTRICAL", to: "/category/$slug", params: { slug: "electrical" } },
-  { label: "RECOVERY", to: "/category/$slug", params: { slug: "recovery" } },
-  { label: "LIGHTING", to: "/category/$slug", params: { slug: "lighting" } },
-  { label: "MONITORING", to: "/category/$slug", params: { slug: "monitoring" } },
-  { label: "GPS", to: "/category/$slug", params: { slug: "gps" } },
-  { label: "PERFORMANCE", to: "/category/$slug", params: { slug: "performance" } },
-  { label: "TOURING", to: "/category/$slug", params: { slug: "touring" } },
-  { label: "COMPRESSORS", to: "/category/$slug", params: { slug: "compressors" } },
-  { label: "NUDGE BARS", to: "/category/$slug", params: { slug: "nudge" } },
+  { label: "THROTTLE CONTROLLERS", to: "/category/$slug", params: { slug: "throttle-controllers" } },
+  { label: "LED LIGHTING", to: "/category/$slug", params: { slug: "lighting" } },
+  { label: "TAILGATE SYSTEMS", to: "/category/$slug", params: { slug: "tailgate-systems" } },
+  { label: "NUDGE BARS", to: "/category/$slug", params: { slug: "nudge-bars" } },
+  { label: "LIGHTING PACKS", to: "/category/$slug", params: { slug: "lighting-packs" } },
   { label: "ABOUT", to: "/about" },
   { label: "CONTACT", to: "/contact" },
 ];
