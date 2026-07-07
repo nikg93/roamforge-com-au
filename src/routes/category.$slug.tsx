@@ -15,30 +15,45 @@ type CategoryConfig = {
 };
 
 const CATEGORY_MAP: Record<string, CategoryConfig> = {
-  "throttle-controllers": {
-    title: "THROTTLE CONTROLLERS",
-    description: "Plug-and-play throttle response controllers for modern 4WDs, utes and SUVs. Instant throttle, sharper acceleration.",
-    query: "tag:cat-throttle-controllers",
+  performance: {
+    title: "PERFORMANCE",
+    description: "Throttle controllers, tuning and performance upgrades that sharpen throttle response and unlock your 4WD's true drivability.",
+    query: "tag:cat-performance",
+  },
+  monitoring: {
+    title: "12V & VEHICLE MONITORING",
+    description: "Battery monitors, DC-DC chargers, isolators and live vehicle telemetry — full control over your 12V and touring electrical system.",
+    query: "tag:cat-monitoring",
+  },
+  "gps-tracking": {
+    title: "GPS & TRACKING",
+    description: "Live GPS trackers, anti-theft units and touring telemetry so you always know where your rig — and your convoy — is.",
+    query: "tag:cat-gps-tracking",
   },
   lighting: {
-    title: "LED LIGHTING",
-    description: "Light bars, work lights, driving lights, rock lights, switches and wiring — engineered for touring 4WDs.",
+    title: "LIGHTING",
+    description: "Light bars, driving lights, work lights, rock lights, switches and wiring — engineered for touring 4WDs and long nights on the tracks.",
     query: "tag:cat-lighting",
   },
-  "tailgate-systems": {
-    title: "TAILGATE SYSTEMS",
-    description: "Tactical tailgate storage & protection platforms — configurable for any touring, work or expedition mission.",
-    query: "tag:cat-tailgate-systems",
+  "air-compressors": {
+    title: "AIR COMPRESSORS",
+    description: "Portable and in-vehicle air compressors, tyre deflators and inflation kits — air up fast after every low-pressure run.",
+    query: "tag:cat-air-compressors",
   },
-  "nudge-bars": {
-    title: "NUDGE BARS",
-    description: "Vehicle-specific and universal nudge bars — designed, engineered and manufactured for Australian touring 4WDs and utes.",
-    query: "tag:cat-nudge-bars",
+  recovery: {
+    title: "RECOVERY GEAR",
+    description: "Snatch straps, soft shackles, recovery boards, kits and rated hardware — everything you need to get unstuck and keep touring.",
+    query: "tag:cat-recovery",
   },
-  "lighting-packs": {
-    title: "LIGHTING PACKS",
-    description: "Vehicle-specific low-profile lighting upgrade packs — plug-and-play kits engineered around your 4WD.",
-    query: "tag:cat-lighting-packs",
+  touring: {
+    title: "TOURING ESSENTIALS",
+    description: "Water tanks, storage, tailgate systems, snorkels and camp gear — the essentials that turn a 4WD into a proper touring rig.",
+    query: "tag:cat-touring",
+  },
+  planners: {
+    title: "PLANNERS",
+    description: "Trip planners, build planners and vehicle setup guides — plan every touring mission and every upgrade before you commit.",
+    query: "tag:cat-planners",
   },
 };
 

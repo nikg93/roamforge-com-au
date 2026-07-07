@@ -12,11 +12,14 @@ interface SitemapEntry {
 
 const staticEntries: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
-  { path: "/category/throttle-controllers", changefreq: "weekly", priority: "0.9" },
+  { path: "/category/performance", changefreq: "weekly", priority: "0.9" },
+  { path: "/category/monitoring", changefreq: "weekly", priority: "0.9" },
+  { path: "/category/gps-tracking", changefreq: "weekly", priority: "0.9" },
   { path: "/category/lighting", changefreq: "weekly", priority: "0.9" },
-  { path: "/category/tailgate-systems", changefreq: "weekly", priority: "0.9" },
-  { path: "/category/nudge-bars", changefreq: "weekly", priority: "0.9" },
-  { path: "/category/lighting-packs", changefreq: "weekly", priority: "0.9" },
+  { path: "/category/air-compressors", changefreq: "weekly", priority: "0.9" },
+  { path: "/category/recovery", changefreq: "weekly", priority: "0.9" },
+  { path: "/category/touring", changefreq: "weekly", priority: "0.9" },
+  { path: "/category/planners", changefreq: "weekly", priority: "0.9" },
   { path: "/about", changefreq: "monthly", priority: "0.6" },
   { path: "/contact", changefreq: "monthly", priority: "0.6" },
   { path: "/faq", changefreq: "monthly", priority: "0.5" },
