@@ -9,12 +9,15 @@ type NavItem =
   | { label: string; to: "/category/$slug"; params: { slug: string } };
 
 const nav: NavItem[] = [
-  { label: "PERFORMANCE", to: "/category/$slug", params: { slug: "performance" } },
+  { label: "12V & ELECTRICAL", to: "/category/$slug", params: { slug: "electrical" } },
   { label: "RECOVERY", to: "/category/$slug", params: { slug: "recovery" } },
-  { label: "ELECTRICAL", to: "/category/$slug", params: { slug: "electrical" } },
-  { label: "CAMPING", to: "/category/$slug", params: { slug: "camping" } },
-  { label: "MERCH", to: "/category/$slug", params: { slug: "merch" } },
-  { label: "PLANNERS", to: "/category/$slug", params: { slug: "planners" } },
+  { label: "LIGHTING", to: "/category/$slug", params: { slug: "lighting" } },
+  { label: "MONITORING", to: "/category/$slug", params: { slug: "monitoring" } },
+  { label: "GPS", to: "/category/$slug", params: { slug: "gps" } },
+  { label: "PERFORMANCE", to: "/category/$slug", params: { slug: "performance" } },
+  { label: "TOURING", to: "/category/$slug", params: { slug: "touring" } },
+  { label: "COMPRESSORS", to: "/category/$slug", params: { slug: "compressors" } },
+  { label: "NUDGE BARS", to: "/category/$slug", params: { slug: "nudge" } },
   { label: "ABOUT", to: "/about" },
   { label: "CONTACT", to: "/contact" },
 ];
