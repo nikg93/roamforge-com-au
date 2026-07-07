@@ -6,7 +6,6 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { useCartSync } from "@/hooks/useCartSync";
 import logo from "@/assets/logo.png";
 import heroPatrolAsset from "@/assets/troll3n-real.jpg.asset.json";
-import troll3n from "@/assets/troll3n.jpg";
 const heroPatrol = heroPatrolAsset.url;
 import catLighting from "@/assets/cat-lighting.jpg";
 import catMonitoring from "@/assets/cat-monitoring.jpg";
@@ -161,34 +160,6 @@ function Index() {
                 </div>
               </div>
             ))}
-          </div>
-        </div>
-      </section>
-
-      {/* MEET TROLL3N */}
-      <section className="bg-rf-cream pb-14">
-        <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <div className="relative overflow-hidden bg-rf-dark">
-            <img
-              src={troll3n}
-              alt="Roamforge project vehicle TROLL3N"
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover opacity-70"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-rf-dark via-rf-dark/70 to-transparent" />
-            <div className="relative p-8 sm:p-12 lg:p-16 max-w-xl text-rf-cream">
-              <p className="font-display tracking-[0.3em] text-rf-tan text-xs">MEET</p>
-              <h2 className="mt-2 font-display text-5xl sm:text-6xl tracking-tight">TROLL3N</h2>
-              <p className="mt-4 text-sm text-rf-cream/80 max-w-sm">
-                The Roamforge project vehicle. Real reviews, real installs and real adventures.
-              </p>
-              <a
-                href="#"
-                className="mt-6 inline-block bg-rf-tan text-rf-dark font-semibold tracking-[0.15em] text-xs px-5 py-3"
-              >
-                VIEW BUILD
-              </a>
-            </div>
           </div>
         </div>
       </section>
