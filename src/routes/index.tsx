@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Mountain, Map as MapIcon, ShieldCheck, Wrench, Zap, Tent, Shirt, Gauge, BookOpen } from "lucide-react";
+import { Mountain, Map as MapIcon, ShieldCheck, Wrench, Zap, Tent, Gauge, Lightbulb, Gauge as Speedometer, Navigation, Wind, Shield } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SectionHeading } from "@/components/SectionHeading";
@@ -12,7 +12,6 @@ import catPerformance from "@/assets/cat-performance.jpg";
 import catRecovery from "@/assets/cat-recovery.jpg";
 import catElectrical from "@/assets/cat-electrical.jpg";
 import catCamping from "@/assets/cat-camping.jpg";
-import catMerch from "@/assets/cat-merch.jpg";
 import catPlanners from "@/assets/cat-planners.jpg";
 
 export const Route = createFileRoute("/")({
@@ -35,12 +34,15 @@ export const Route = createFileRoute("/")({
 });
 
 const CATEGORIES = [
-  { label: "PERFORMANCE", slug: "performance", img: catPerformance, Icon: Gauge },
+  { label: "12V & ELECTRICAL", slug: "electrical", img: catElectrical, Icon: Zap },
   { label: "RECOVERY GEAR", slug: "recovery", img: catRecovery, Icon: Wrench },
-  { label: "ELECTRICAL", slug: "electrical", img: catElectrical, Icon: Zap },
-  { label: "CAMPING", slug: "camping", img: catCamping, Icon: Tent },
-  { label: "MERCH", slug: "merch", img: catMerch, Icon: Shirt },
-  { label: "PLANNERS", slug: "planners", img: catPlanners, Icon: BookOpen },
+  { label: "LIGHTING", slug: "lighting", img: catElectrical, Icon: Lightbulb },
+  { label: "VEHICLE MONITORING", slug: "monitoring", img: catPerformance, Icon: Speedometer },
+  { label: "GPS & TRACKING", slug: "gps", img: catPlanners, Icon: Navigation },
+  { label: "PERFORMANCE", slug: "performance", img: catPerformance, Icon: Gauge },
+  { label: "TOURING ESSENTIALS", slug: "touring", img: catCamping, Icon: Tent },
+  { label: "AIR COMPRESSORS", slug: "compressors", img: catRecovery, Icon: Wind },
+  { label: "NUDGE BARS", slug: "nudge", img: catPerformance, Icon: Shield },
 ];
 
 const WHY = [
@@ -98,10 +100,10 @@ function Index() {
                   </Link>
                   <Link
                     to="/category/$slug"
-                    params={{ slug: "merch" }}
+                    params={{ slug: "recovery" }}
                     className="border border-rf-cream/80 text-rf-cream font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-cream hover:text-rf-dark transition-colors"
                   >
-                    SHOP MERCH
+                    RECOVERY GEAR
                   </Link>
                 </div>
               </div>
@@ -121,7 +123,7 @@ function Index() {
       <section id="categories" className="bg-rf-cream py-14">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <SectionHeading>SHOP BY CATEGORY</SectionHeading>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3">
             {CATEGORIES.map(({ label, slug, img, Icon }) => (
               <Link
                 key={label}

@@ -10,11 +10,15 @@ const cols: { title: string; links: FooterLink[] }[] = [
   {
     title: "SHOP",
     links: [
-      { label: "Performance", to: "/category/$slug", params: { slug: "performance" } },
+      { label: "12V & Electrical", to: "/category/$slug", params: { slug: "electrical" } },
       { label: "Recovery Gear", to: "/category/$slug", params: { slug: "recovery" } },
-      { label: "Electrical", to: "/category/$slug", params: { slug: "electrical" } },
-      { label: "Camping", to: "/category/$slug", params: { slug: "camping" } },
-      { label: "Merch", to: "/category/$slug", params: { slug: "merch" } },
+      { label: "Lighting", to: "/category/$slug", params: { slug: "lighting" } },
+      { label: "Vehicle Monitoring", to: "/category/$slug", params: { slug: "monitoring" } },
+      { label: "GPS & Tracking", to: "/category/$slug", params: { slug: "gps" } },
+      { label: "Performance", to: "/category/$slug", params: { slug: "performance" } },
+      { label: "Touring Essentials", to: "/category/$slug", params: { slug: "touring" } },
+      { label: "Air Compressors", to: "/category/$slug", params: { slug: "compressors" } },
+      { label: "Nudge Bars", to: "/category/$slug", params: { slug: "nudge" } },
     ],
   },
   {
