@@ -10,15 +10,11 @@ const cols: { title: string; links: FooterLink[] }[] = [
   {
     title: "SHOP",
     links: [
-      { label: "12V & Electrical", to: "/category/$slug", params: { slug: "electrical" } },
-      { label: "Recovery Gear", to: "/category/$slug", params: { slug: "recovery" } },
-      { label: "Lighting", to: "/category/$slug", params: { slug: "lighting" } },
-      { label: "Vehicle Monitoring", to: "/category/$slug", params: { slug: "monitoring" } },
-      { label: "GPS & Tracking", to: "/category/$slug", params: { slug: "gps" } },
-      { label: "Performance", to: "/category/$slug", params: { slug: "performance" } },
-      { label: "Touring Essentials", to: "/category/$slug", params: { slug: "touring" } },
-      { label: "Air Compressors", to: "/category/$slug", params: { slug: "compressors" } },
-      { label: "Nudge Bars", to: "/category/$slug", params: { slug: "nudge" } },
+      { label: "Throttle Controllers", to: "/category/$slug", params: { slug: "throttle-controllers" } },
+      { label: "LED Lighting", to: "/category/$slug", params: { slug: "lighting" } },
+      { label: "Tailgate Systems", to: "/category/$slug", params: { slug: "tailgate-systems" } },
+      { label: "Nudge Bars", to: "/category/$slug", params: { slug: "nudge-bars" } },
+      { label: "Lighting Packs", to: "/category/$slug", params: { slug: "lighting-packs" } },
     ],
   },
   {
