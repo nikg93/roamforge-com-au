@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Mountain, Map as MapIcon, ShieldCheck, Wrench, Zap, Tent, Gauge, Lightbulb, Gauge as Speedometer, Navigation, Wind, Shield } from "lucide-react";
+import { Mountain, Map as MapIcon, ShieldCheck, Gauge, Lightbulb, Shield, PackageOpen, Sun } from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SectionHeading } from "@/components/SectionHeading";
@@ -8,14 +8,10 @@ import logo from "@/assets/logo.png";
 import heroPatrolAsset from "@/assets/troll3n-real.jpg.asset.json";
 import troll3n from "@/assets/troll3n.jpg";
 const heroPatrol = heroPatrolAsset.url;
-import catElectrical from "@/assets/cat-electrical-new.jpg";
-import catRecovery from "@/assets/cat-recovery-new.jpg";
 import catLighting from "@/assets/cat-lighting.jpg";
 import catMonitoring from "@/assets/cat-monitoring.jpg";
-import catGps from "@/assets/cat-gps.jpg";
 import catPerformance from "@/assets/cat-performance-new.jpg";
 import catTouring from "@/assets/cat-touring.jpg";
-import catCompressors from "@/assets/cat-compressors.jpg";
 import catNudge from "@/assets/cat-nudge.jpg";
 
 export const Route = createFileRoute("/")({
@@ -38,15 +34,11 @@ export const Route = createFileRoute("/")({
 });
 
 const CATEGORIES = [
-  { label: "12V & ELECTRICAL", slug: "electrical", img: catElectrical, Icon: Zap },
-  { label: "RECOVERY GEAR", slug: "recovery", img: catRecovery, Icon: Wrench },
-  { label: "LIGHTING", slug: "lighting", img: catLighting, Icon: Lightbulb },
-  { label: "VEHICLE MONITORING", slug: "monitoring", img: catMonitoring, Icon: Speedometer },
-  { label: "GPS & TRACKING", slug: "gps", img: catGps, Icon: Navigation },
-  { label: "PERFORMANCE", slug: "performance", img: catPerformance, Icon: Gauge },
-  { label: "TOURING ESSENTIALS", slug: "touring", img: catTouring, Icon: Tent },
-  { label: "AIR COMPRESSORS", slug: "compressors", img: catCompressors, Icon: Wind },
-  { label: "NUDGE BARS", slug: "nudge", img: catNudge, Icon: Shield },
+  { label: "THROTTLE CONTROLLERS", slug: "throttle-controllers", img: catPerformance, Icon: Gauge },
+  { label: "LED LIGHTING", slug: "lighting", img: catLighting, Icon: Lightbulb },
+  { label: "TAILGATE SYSTEMS", slug: "tailgate-systems", img: catTouring, Icon: PackageOpen },
+  { label: "NUDGE BARS", slug: "nudge-bars", img: catNudge, Icon: Shield },
+  { label: "LIGHTING PACKS", slug: "lighting-packs", img: catMonitoring, Icon: Sun },
 ];
 
 const WHY = [
@@ -97,17 +89,17 @@ function Index() {
                 <div className="mt-7 flex flex-wrap gap-3">
                   <Link
                     to="/category/$slug"
-                    params={{ slug: "performance" }}
+                    params={{ slug: "throttle-controllers" }}
                     className="bg-rf-tan text-rf-dark font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-tan-bright transition-colors"
                   >
                     SHOP GEAR
                   </Link>
                   <Link
                     to="/category/$slug"
-                    params={{ slug: "recovery" }}
+                    params={{ slug: "lighting" }}
                     className="border border-rf-cream/80 text-rf-cream font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-cream hover:text-rf-dark transition-colors"
                   >
-                    RECOVERY GEAR
+                    LED LIGHTING
                   </Link>
                 </div>
               </div>
