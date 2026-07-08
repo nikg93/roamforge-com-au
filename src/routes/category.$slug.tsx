@@ -1,5 +1,6 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SectionHeading } from "@/components/SectionHeading";
@@ -424,15 +425,17 @@ function CategoryPage() {
   useCartSync();
   const { slug } = Route.useParams();
   const cfg = CATEGORY_MAP[slug];
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ["products", "category", slug],
-    queryFn: () => (cfg.query ? fetchProducts(50, cfg.query) : Promise.resolve([])),
-    enabled: !!cfg.query,
-  });
-
   const parentCfg = cfg.parent ? CATEGORY_MAP[cfg.parent] : undefined;
   const subs = cfg.subcategories ?? parentCfg?.subcategories;
   const activeSlug = slug;
+  // On a parent category with subcategories, we render a section per subcategory
+  // (each fetching its own products) instead of a single flat grid.
+  const groupBySubcategory = !!cfg.subcategories && cfg.subcategories.length > 0;
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ["products", "category", slug],
+    queryFn: () => (cfg.query ? fetchProducts(50, cfg.query) : Promise.resolve([])),
+    enabled: !!cfg.query && !groupBySubcategory,
+  });
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -461,17 +464,19 @@ function CategoryPage() {
           {subs && subs.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-2">
               {parentCfg && (
-                <a
-                  href={`/category/${cfg.parent}`}
+                <Link
+                  to="/category/$slug"
+                  params={{ slug: cfg.parent! }}
                   className="rounded-full border border-rf-cream/30 px-3 py-1 text-[11px] font-display tracking-widest text-rf-cream/80 hover:border-rf-tan hover:text-rf-tan"
                 >
                   ALL
-                </a>
+                </Link>
               )}
               {subs.map((s) => (
-                <a
+                <Link
                   key={s.slug}
-                  href={`/category/${s.slug}`}
+                  to="/category/$slug"
+                  params={{ slug: s.slug }}
                   className={`rounded-full border px-3 py-1 text-[11px] font-display tracking-widest ${
                     activeSlug === s.slug
                       ? "border-rf-tan bg-rf-tan/20 text-rf-tan"
@@ -479,7 +484,7 @@ function CategoryPage() {
                   }`}
                 >
                   {s.label.toUpperCase()}
-                </a>
+                </Link>
               ))}
             </div>
           )}
@@ -487,19 +492,64 @@ function CategoryPage() {
       </section>
       <section className="bg-rf-cream py-14 flex-1">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <SectionHeading>{cfg.title}</SectionHeading>
-          <div className="mt-10 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {isLoading && cfg.query ? (
-              <p className="col-span-full text-center text-sm text-muted-foreground">Loading...</p>
-            ) : products.length === 0 ? (
-              <EmptyProducts />
-            ) : (
-              products.map((p) => <ProductCard key={p.node.id} product={p} />)
-            )}
-          </div>
+          {groupBySubcategory ? (
+            <div className="space-y-16">
+              {cfg.subcategories!.map((s) => {
+                const subCfg = CATEGORY_MAP[s.slug];
+                if (!subCfg) return null;
+                return <SubcategorySection key={s.slug} slug={s.slug} cfg={subCfg} />;
+              })}
+            </div>
+          ) : (
+            <>
+              <SectionHeading>{cfg.title}</SectionHeading>
+              <div className="mt-10 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                {isLoading && cfg.query ? (
+                  <p className="col-span-full text-center text-sm text-muted-foreground">Loading...</p>
+                ) : products.length === 0 ? (
+                  <EmptyProducts />
+                ) : (
+                  products.map((p) => <ProductCard key={p.node.id} product={p} />)
+                )}
+              </div>
+            </>
+          )}
         </div>
       </section>
       <SiteFooter />
+    </div>
+  );
+}
+
+function SubcategorySection({ slug, cfg }: { slug: string; cfg: CategoryConfig }) {
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ["products", "category", slug],
+    queryFn: () => (cfg.query ? fetchProducts(50, cfg.query) : Promise.resolve([])),
+    enabled: !!cfg.query,
+  });
+  return (
+    <div>
+      <div className="flex items-end justify-between gap-4 border-b border-rf-dark/10 pb-3">
+        <h2 className="font-display text-2xl sm:text-3xl tracking-tight text-rf-dark">
+          {cfg.title}
+        </h2>
+        <Link
+          to="/category/$slug"
+          params={{ slug }}
+          className="font-display text-[11px] tracking-widest text-rf-tan hover:text-rf-dark"
+        >
+          VIEW ALL →
+        </Link>
+      </div>
+      <div className="mt-6 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        {isLoading ? (
+          <p className="col-span-full text-sm text-muted-foreground">Loading...</p>
+        ) : products.length === 0 ? (
+          <p className="col-span-full text-sm text-muted-foreground">No products yet.</p>
+        ) : (
+          products.slice(0, 8).map((p) => <ProductCard key={p.node.id} product={p} />)
+        )}
+      </div>
     </div>
   );
 }
