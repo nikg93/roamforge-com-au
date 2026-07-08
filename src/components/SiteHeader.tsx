@@ -9,13 +9,16 @@ type NavItem =
   | { label: string; to: "/category/$slug"; params: { slug: string } };
 
 const nav: NavItem[] = [
-  { label: "THROTTLE CONTROLLERS", to: "/category/$slug", params: { slug: "throttle-controllers" } },
-  { label: "LED LIGHTING", to: "/category/$slug", params: { slug: "lighting" } },
-  { label: "TAILGATE SYSTEMS", to: "/category/$slug", params: { slug: "tailgate-systems" } },
-  { label: "NUDGE BARS", to: "/category/$slug", params: { slug: "nudge-bars" } },
-  { label: "LIGHTING PACKS", to: "/category/$slug", params: { slug: "lighting-packs" } },
-  { label: "ABOUT", to: "/about" },
-  { label: "CONTACT", to: "/contact" },
+  { label: "PERFORMANCE", to: "/category/$slug", params: { slug: "performance" } },
+  { label: "12V & MONITORING", to: "/category/$slug", params: { slug: "monitoring" } },
+  { label: "GPS & TRACKING", to: "/category/$slug", params: { slug: "gps-tracking" } },
+  { label: "LIGHTING", to: "/category/$slug", params: { slug: "lighting" } },
+  { label: "AIR COMPRESSORS", to: "/category/$slug", params: { slug: "air-compressors" } },
+  { label: "RECOVERY", to: "/category/$slug", params: { slug: "recovery" } },
+  { label: "TOURING & CAMPING", to: "/category/$slug", params: { slug: "touring" } },
+  { label: "PROTECTION", to: "/category/$slug", params: { slug: "vehicle-protection" } },
+  { label: "MERCH", to: "/category/$slug", params: { slug: "merch" } },
+  { label: "PLANNERS", to: "/category/$slug", params: { slug: "planners" } },
 ];
 
 export function SiteHeader() {
@@ -25,7 +28,7 @@ export function SiteHeader() {
         <Link to="/" className="flex items-center">
           <img src={logo} alt="Roamforge" className="h-12 w-auto" />
         </Link>
-        <nav className="hidden lg:flex items-center gap-7 text-[12px] font-semibold tracking-[0.15em]">
+        <nav className="hidden lg:flex items-center gap-4 xl:gap-5 text-[11px] font-semibold tracking-[0.12em]">
           {nav.map((n) =>
             "href" in n ? (
               <a
