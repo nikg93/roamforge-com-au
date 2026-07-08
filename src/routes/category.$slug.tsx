@@ -428,14 +428,21 @@ function CategoryPage() {
   const parentCfg = cfg.parent ? CATEGORY_MAP[cfg.parent] : undefined;
   const subs = cfg.subcategories ?? parentCfg?.subcategories;
   const activeSlug = slug;
-  // On a parent category with subcategories, we render a section per subcategory
-  // (each fetching its own products) instead of a single flat grid.
-  const groupBySubcategory = !!cfg.subcategories && cfg.subcategories.length > 0;
+  // Parent categories act as landing pages: image cards for each subcategory,
+  // an optional featured strip (max 4), a lifestyle banner and related
+  // collections. Subcategory pages keep the full product grid.
+  const isLandingPage = !!cfg.subcategories && cfg.subcategories.length > 0;
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products", "category", slug],
     queryFn: () => (cfg.query ? fetchProducts(50, cfg.query) : Promise.resolve([])),
-    enabled: !!cfg.query && !groupBySubcategory,
+    enabled: !!cfg.query,
   });
+  const featured = isLandingPage ? products.slice(0, 4) : [];
+  const relatedParents = isLandingPage
+    ? Object.entries(CATEGORY_MAP)
+        .filter(([s, c]) => !c.parent && !!c.subcategories && s !== slug)
+        .slice(0, 4)
+    : [];
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -461,7 +468,7 @@ function CategoryPage() {
           </p>
           <h1 className="mt-2 font-display text-5xl sm:text-6xl tracking-tight">{cfg.title}</h1>
           <p className="mt-3 max-w-xl text-sm text-rf-cream/85">{cfg.description}</p>
-          {subs && subs.length > 0 && (
+          {!isLandingPage && subs && subs.length > 0 && (
             <div className="mt-6 flex flex-wrap gap-2">
               {parentCfg && (
                 <Link
@@ -492,13 +499,87 @@ function CategoryPage() {
       </section>
       <section className="bg-rf-cream py-14 flex-1">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          {groupBySubcategory ? (
-            <div className="space-y-16">
-              {cfg.subcategories!.map((s) => {
-                const subCfg = CATEGORY_MAP[s.slug];
-                if (!subCfg) return null;
-                return <SubcategorySection key={s.slug} slug={s.slug} cfg={subCfg} />;
-              })}
+          {isLandingPage ? (
+            <div className="space-y-20">
+              <div>
+                <div className="flex items-end justify-between gap-4 border-b border-rf-dark/10 pb-3">
+                  <h2 className="font-display text-2xl sm:text-3xl tracking-tight text-rf-dark">
+                    SHOP BY CATEGORY
+                  </h2>
+                  <span className="font-display text-[11px] tracking-widest text-rf-dark/50">
+                    {cfg.subcategories!.length} CATEGORIES
+                  </span>
+                </div>
+                <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                  {cfg.subcategories!.map((s) => {
+                    const subCfg = CATEGORY_MAP[s.slug];
+                    return (
+                      <SubcategoryCard
+                        key={s.slug}
+                        slug={s.slug}
+                        label={s.label}
+                        image={subCfg?.image ?? cfg.image}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              {featured.length > 0 && (
+                <div>
+                  <div className="flex items-end justify-between gap-4 border-b border-rf-dark/10 pb-3">
+                    <h2 className="font-display text-2xl sm:text-3xl tracking-tight text-rf-dark">
+                      FEATURED PRODUCTS
+                    </h2>
+                  </div>
+                  <div className="mt-8 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                    {featured.map((p) => (
+                      <ProductCard key={p.node.id} product={p} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {cfg.image && (
+                <div className="relative overflow-hidden rounded-sm">
+                  <img
+                    src={cfg.image}
+                    alt={cfg.title}
+                    className="h-64 sm:h-80 w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-rf-dark/85 via-rf-dark/50 to-transparent" />
+                  <div className="absolute inset-0 flex items-center px-8 sm:px-12">
+                    <div className="max-w-md text-rf-cream">
+                      <p className="font-display tracking-[0.3em] text-rf-tan text-xs">
+                        BUILT FOR THE TRACKS
+                      </p>
+                      <p className="mt-3 font-display text-2xl sm:text-3xl tracking-tight">
+                        {cfg.title} — engineered for touring 4WDs.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {relatedParents.length > 0 && (
+                <div>
+                  <div className="flex items-end justify-between gap-4 border-b border-rf-dark/10 pb-3">
+                    <h2 className="font-display text-2xl sm:text-3xl tracking-tight text-rf-dark">
+                      RELATED COLLECTIONS
+                    </h2>
+                  </div>
+                  <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    {relatedParents.map(([relSlug, relCfg]) => (
+                      <SubcategoryCard
+                        key={relSlug}
+                        slug={relSlug}
+                        label={relCfg.title}
+                        image={relCfg.image}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ) : (
             <>
@@ -521,35 +602,37 @@ function CategoryPage() {
   );
 }
 
-function SubcategorySection({ slug, cfg }: { slug: string; cfg: CategoryConfig }) {
-  const { data: products = [], isLoading } = useQuery({
-    queryKey: ["products", "category", slug],
-    queryFn: () => (cfg.query ? fetchProducts(50, cfg.query) : Promise.resolve([])),
-    enabled: !!cfg.query,
-  });
+function SubcategoryCard({
+  slug,
+  label,
+  image,
+}: {
+  slug: string;
+  label: string;
+  image?: string;
+}) {
   return (
-    <div>
-      <div className="flex items-end justify-between gap-4 border-b border-rf-dark/10 pb-3">
-        <h2 className="font-display text-2xl sm:text-3xl tracking-tight text-rf-dark">
-          {cfg.title}
-        </h2>
-        <Link
-          to="/category/$slug"
-          params={{ slug }}
-          className="font-display text-[11px] tracking-widest text-rf-tan hover:text-rf-dark"
-        >
-          VIEW ALL →
-        </Link>
+    <Link
+      to="/category/$slug"
+      params={{ slug }}
+      className="group relative block overflow-hidden rounded-sm bg-rf-dark aspect-[4/5]"
+    >
+      {image && (
+        <img
+          src={image}
+          alt={label}
+          className="absolute inset-0 h-full w-full object-cover opacity-70 transition duration-500 group-hover:scale-105 group-hover:opacity-90"
+        />
+      )}
+      <div className="absolute inset-0 bg-gradient-to-t from-rf-dark via-rf-dark/40 to-transparent" />
+      <div className="absolute inset-x-0 bottom-0 p-5">
+        <h3 className="font-display text-lg sm:text-xl tracking-tight text-rf-cream">
+          {label.toUpperCase()}
+        </h3>
+        <span className="mt-1 inline-block font-display text-[11px] tracking-widest text-rf-tan opacity-0 transition group-hover:opacity-100">
+          SHOP NOW →
+        </span>
       </div>
-      <div className="mt-6 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        {isLoading ? (
-          <p className="col-span-full text-sm text-muted-foreground">Loading...</p>
-        ) : products.length === 0 ? (
-          <p className="col-span-full text-sm text-muted-foreground">No products yet.</p>
-        ) : (
-          products.slice(0, 8).map((p) => <ProductCard key={p.node.id} product={p} />)
-        )}
-      </div>
-    </div>
+    </Link>
   );
 }
