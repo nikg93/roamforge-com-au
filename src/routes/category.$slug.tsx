@@ -540,62 +540,6 @@ function CategoryPage() {
                   })}
                 </div>
               </div>
-
-              {featured.length > 0 && (
-                <div>
-                  <div className="flex items-end justify-between gap-4 border-b border-rf-dark/10 pb-3">
-                    <h2 className="font-display text-2xl sm:text-3xl tracking-tight text-rf-dark">
-                      FEATURED PRODUCTS
-                    </h2>
-                  </div>
-                  <div className="mt-8 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                    {featured.map((p) => (
-                      <ProductCard key={p.node.id} product={p} />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {cfg.image && (
-                <div className="relative overflow-hidden rounded-sm">
-                  <img
-                    src={cfg.image}
-                    alt={cfg.title}
-                    className="h-64 sm:h-80 w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-rf-dark/85 via-rf-dark/50 to-transparent" />
-                  <div className="absolute inset-0 flex items-center px-8 sm:px-12">
-                    <div className="max-w-md text-rf-cream">
-                      <p className="font-display tracking-[0.3em] text-rf-tan text-xs">
-                        BUILT FOR THE TRACKS
-                      </p>
-                      <p className="mt-3 font-display text-2xl sm:text-3xl tracking-tight">
-                        {cfg.title} — engineered for touring 4WDs.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {relatedParents.length > 0 && (
-                <div>
-                  <div className="flex items-end justify-between gap-4 border-b border-rf-dark/10 pb-3">
-                    <h2 className="font-display text-2xl sm:text-3xl tracking-tight text-rf-dark">
-                      RELATED COLLECTIONS
-                    </h2>
-                  </div>
-                  <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    {relatedParents.map(([relSlug, relCfg]) => (
-                      <SubcategoryCard
-                        key={relSlug}
-                        slug={relSlug}
-                        label={relCfg.title}
-                        image={relCfg.image}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           ) : (
             <>
