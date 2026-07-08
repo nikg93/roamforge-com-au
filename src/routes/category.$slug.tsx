@@ -457,14 +457,8 @@ function CategoryPage() {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products", "category", slug],
     queryFn: () => (cfg.query ? fetchProducts(50, cfg.query) : Promise.resolve([])),
-    enabled: !!cfg.query,
+    enabled: !!cfg.query && !isLandingPage,
   });
-  const featured = isLandingPage ? products.slice(0, 4) : [];
-  const relatedParents = isLandingPage
-    ? Object.entries(CATEGORY_MAP)
-        .filter(([s, c]) => !c.parent && !!c.subcategories && s !== slug)
-        .slice(0, 4)
-    : [];
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
