@@ -47,6 +47,7 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
         <p className="mt-2 text-sm font-semibold text-rf-dark">
           ${parseFloat(price.amount).toFixed(2)} {price.currencyCode}
         </p>
+        <p className="mt-1 text-xs font-medium text-emerald-700">✓ In Stock</p>
         <Button
           onClick={onAdd}
           disabled={!variant || isLoading}
