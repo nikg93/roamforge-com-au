@@ -36,14 +36,36 @@ const CATEGORY_MAP: Record<string, CategoryConfig> = {
     image: catPerformance,
     subcategories: [
       { slug: "throttle-controllers", label: "Throttle Controllers" },
-      { slug: "evc-classic", label: "EVC Classic" },
-      { slug: "gift-vouchers", label: "Gift Vouchers" },
+      { slug: "intercoolers", label: "Intercoolers" },
+      { slug: "snorkels", label: "Snorkels" },
+      { slug: "airboxes", label: "Airboxes" },
     ],
   },
   "throttle-controllers": {
     title: "THROTTLE CONTROLLERS",
     description: "Plug-and-play throttle controllers that kill factory pedal lag and sharpen response — Ultimate9 EVC and evcX Bluetooth units for every major 4WD.",
-    query: "tag:cat-throttle-controllers OR tag:throttle-controllers OR tag:throttle-controller",
+    query: "tag:cat-throttle-controllers",
+    image: catPerformance,
+    parent: "performance",
+  },
+  intercoolers: {
+    title: "INTERCOOLERS",
+    description: "High-flow intercoolers and upgrades — reduce intake temps and unlock consistent power on long touring runs.",
+    query: "tag:cat-intercoolers",
+    image: catPerformance,
+    parent: "performance",
+  },
+  snorkels: {
+    title: "SNORKELS",
+    description: "Vehicle-specific snorkels — raise your air intake for river crossings, dusty tracks and remote touring.",
+    query: "tag:cat-snorkels",
+    image: catPerformance,
+    parent: "performance",
+  },
+  airboxes: {
+    title: "AIRBOXES",
+    description: "Upgraded airboxes and induction systems — cleaner, cooler airflow for touring 4WDs.",
+    query: "tag:cat-airboxes",
     image: catPerformance,
     parent: "performance",
   },
@@ -435,14 +457,8 @@ function CategoryPage() {
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products", "category", slug],
     queryFn: () => (cfg.query ? fetchProducts(50, cfg.query) : Promise.resolve([])),
-    enabled: !!cfg.query,
+    enabled: !!cfg.query && !isLandingPage,
   });
-  const featured = isLandingPage ? products.slice(0, 4) : [];
-  const relatedParents = isLandingPage
-    ? Object.entries(CATEGORY_MAP)
-        .filter(([s, c]) => !c.parent && !!c.subcategories && s !== slug)
-        .slice(0, 4)
-    : [];
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -524,62 +540,6 @@ function CategoryPage() {
                   })}
                 </div>
               </div>
-
-              {featured.length > 0 && (
-                <div>
-                  <div className="flex items-end justify-between gap-4 border-b border-rf-dark/10 pb-3">
-                    <h2 className="font-display text-2xl sm:text-3xl tracking-tight text-rf-dark">
-                      FEATURED PRODUCTS
-                    </h2>
-                  </div>
-                  <div className="mt-8 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                    {featured.map((p) => (
-                      <ProductCard key={p.node.id} product={p} />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {cfg.image && (
-                <div className="relative overflow-hidden rounded-sm">
-                  <img
-                    src={cfg.image}
-                    alt={cfg.title}
-                    className="h-64 sm:h-80 w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-r from-rf-dark/85 via-rf-dark/50 to-transparent" />
-                  <div className="absolute inset-0 flex items-center px-8 sm:px-12">
-                    <div className="max-w-md text-rf-cream">
-                      <p className="font-display tracking-[0.3em] text-rf-tan text-xs">
-                        BUILT FOR THE TRACKS
-                      </p>
-                      <p className="mt-3 font-display text-2xl sm:text-3xl tracking-tight">
-                        {cfg.title} — engineered for touring 4WDs.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {relatedParents.length > 0 && (
-                <div>
-                  <div className="flex items-end justify-between gap-4 border-b border-rf-dark/10 pb-3">
-                    <h2 className="font-display text-2xl sm:text-3xl tracking-tight text-rf-dark">
-                      RELATED COLLECTIONS
-                    </h2>
-                  </div>
-                  <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    {relatedParents.map(([relSlug, relCfg]) => (
-                      <SubcategoryCard
-                        key={relSlug}
-                        slug={relSlug}
-                        label={relCfg.title}
-                        image={relCfg.image}
-                      />
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           ) : (
             <>
