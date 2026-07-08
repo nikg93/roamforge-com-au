@@ -82,8 +82,8 @@ export const PRODUCT_BY_HANDLE_QUERY = `
 `;
 
 export async function fetchProducts(first = 20, query?: string): Promise<ShopifyProduct[]> {
-  const inventoryQuery = "inventory_total:>=100";
-  const combinedQuery = query ? `(${query}) AND ${inventoryQuery}` : inventoryQuery;
+  const availabilityQuery = "available_for_sale:true";
+  const combinedQuery = query ? `(${query}) AND ${availabilityQuery}` : availabilityQuery;
   const data = await storefrontApiRequest(PRODUCTS_QUERY, { first, query: combinedQuery });
   return data?.data?.products?.edges ?? [];
 }
