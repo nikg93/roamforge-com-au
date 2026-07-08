@@ -72,6 +72,7 @@ function ProductPage() {
                     </p>
                   );
                 })()}
+                <p className="mt-3 text-sm font-medium text-emerald-700">✓ In Stock</p>
                 <p className="mt-6 text-sm leading-relaxed text-muted-foreground whitespace-pre-line">
                   {data.node.description}
                 </p>
