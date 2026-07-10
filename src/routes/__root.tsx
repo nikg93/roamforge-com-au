@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import favicon from "../assets/logo.png?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
+import { Integrations } from "@/components/Integrations";
 
 function NotFoundComponent() {
   return (
@@ -130,6 +131,7 @@ function RootComponent() {
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
       <Toaster position="top-right" />
+      <Integrations />
     </QueryClientProvider>
   );
 }
