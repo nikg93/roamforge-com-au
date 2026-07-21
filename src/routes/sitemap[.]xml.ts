@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
-import { fetchProducts } from "@/lib/shopify";
+import { fetchAllProductHandles } from "@/lib/shopify";
 import { CATEGORIES } from "@/lib/categories";
+import { SITE } from "@/lib/site";
 
-const BASE_URL = "https://roamforge.com.au";
+const BASE_URL = SITE.url;
 
 interface SitemapEntry {
   path: string;
@@ -28,26 +29,47 @@ const staticEntries: SitemapEntry[] = [
   { path: "/privacy", changefreq: "yearly", priority: "0.3" },
 ];
 
+function xmlEscape(s: string): string {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
 export const Route = createFileRoute("/sitemap.xml")({
   server: {
     handlers: {
       GET: async () => {
         let productEntries: SitemapEntry[] = [];
         try {
-          const products = await fetchProducts(100);
-          productEntries = products.map((p) => ({
-            path: `/product/${p.node.handle}`,
+          // Paginate every live handle. Falls back to static entries only if
+          // Shopify fails — the sitemap still validates and remains useful.
+          const handles = await fetchAllProductHandles(100);
+          productEntries = handles.map((h) => ({
+            path: `/product/${h}`,
             changefreq: "weekly" as const,
             priority: "0.8",
           }));
-        } catch {
-          // fall back to static entries only
+        } catch (err) {
+          console.error("[sitemap] product handle fetch failed", err);
         }
-        const urls = [...staticEntries, ...productEntries]
+
+        // De-duplicate by path so accidental duplicates never emit twice.
+        const seen = new Set<string>();
+        const entries: SitemapEntry[] = [];
+        for (const e of [...staticEntries, ...productEntries]) {
+          if (seen.has(e.path)) continue;
+          seen.add(e.path);
+          entries.push(e);
+        }
+
+        const urls = entries
           .map((e) =>
             [
               `  <url>`,
-              `    <loc>${BASE_URL}${e.path}</loc>`,
+              `    <loc>${xmlEscape(`${BASE_URL}${e.path}`)}</loc>`,
               e.changefreq ? `    <changefreq>${e.changefreq}</changefreq>` : null,
               e.priority ? `    <priority>${e.priority}</priority>` : null,
               `  </url>`,
@@ -61,8 +83,10 @@ export const Route = createFileRoute("/sitemap.xml")({
 
         return new Response(xml, {
           headers: {
-            "Content-Type": "application/xml",
-            "Cache-Control": "public, max-age=3600",
+            "Content-Type": "application/xml; charset=utf-8",
+            // 1h edge cache, allow stale for a day so a Shopify blip doesn't
+            // wipe the sitemap for crawlers.
+            "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
           },
         });
       },
