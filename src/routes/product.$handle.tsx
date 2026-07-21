@@ -5,10 +5,11 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useCartStore } from "@/stores/cartStore";
 import { Button } from "@/components/ui/button";
-import { Loader2, ShieldCheck, Truck, Undo2 } from "lucide-react";
-import { useState } from "react";
+import { Loader2, ShieldCheck, Truck, Undo2, Mail, Lock } from "lucide-react";
+import { useMemo, useState } from "react";
 import { sanitizeProductHtml, textFromHtml } from "@/lib/sanitize";
-import { canonicalFor, SITE_URL } from "@/lib/seo";
+import { canonicalFor } from "@/lib/seo";
+import { SITE } from "@/lib/site";
 
 const productQuery = (handle: string) =>
   queryOptions({
@@ -21,6 +22,10 @@ const productQuery = (handle: string) =>
     staleTime: 60_000,
   });
 
+function firstAvailableVariant(p: ShopifyProduct["node"]) {
+  return p.variants.edges.find((v) => v.node.availableForSale)?.node ?? null;
+}
+
 export const Route = createFileRoute("/product/$handle")({
   loader: ({ params, context }) =>
     context.queryClient.ensureQueryData(productQuery(params.handle)),
@@ -29,17 +34,50 @@ export const Route = createFileRoute("/product/$handle")({
     if (!loaderData) {
       return {
         meta: [
-          { title: "Product — Roamforge" },
+          { title: "Product not found — Roamforge" },
           { name: "robots", content: "noindex, follow" },
         ],
       };
     }
     const p = (loaderData as ShopifyProduct).node;
-    const title = `${p.title} | Roamforge`;
-    const description =
-      textFromHtml(p.description, 160) || `Shop ${p.title} at Roamforge — Australian 4WD gear.`;
-    const image = p.images.edges[0]?.node?.url;
-    const price = p.priceRange.minVariantPrice;
+
+    const rawTitle = p.seo?.title || p.title;
+    const title = /roamforge/i.test(rawTitle) ? rawTitle : `${rawTitle} | Roamforge`;
+    const rawDescription =
+      p.seo?.description ||
+      textFromHtml(p.descriptionHtml || p.description, 160) ||
+      `${p.title} — available at Roamforge.`;
+    const description = rawDescription.slice(0, 300);
+    const image = p.featuredImage?.url ?? p.images.edges[0]?.node?.url;
+
+    const available = firstAvailableVariant(p);
+    const anyAvailable = p.variants.edges.some((v) => v.node.availableForSale);
+    const price = available?.price ?? p.priceRange.minVariantPrice;
+
+    const sku = available?.sku && available.sku.trim() ? available.sku.trim() : undefined;
+
+    const productSchema: Record<string, unknown> = {
+      "@context": "https://schema.org",
+      "@type": "Product",
+      name: p.title,
+      description: textFromHtml(p.descriptionHtml || p.description, 300) || p.title,
+      image: p.images.edges.map((e) => e.node.url).slice(0, 5),
+      url,
+      brand: p.vendor
+        ? { "@type": "Brand", name: p.vendor }
+        : { "@type": "Brand", name: "Roamforge" },
+      offers: {
+        "@type": "Offer",
+        url,
+        priceCurrency: price.currencyCode,
+        price: price.amount,
+        availability: anyAvailable
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      },
+    };
+    if (sku) productSchema.sku = sku;
+
     return {
       meta: [
         { title },
@@ -50,6 +88,10 @@ export const Route = createFileRoute("/product/$handle")({
         { property: "og:type", content: "product" },
         { property: "product:price:amount", content: price.amount },
         { property: "product:price:currency", content: price.currencyCode },
+        {
+          property: "product:availability",
+          content: anyAvailable ? "in stock" : "out of stock",
+        },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
         ...(image
@@ -61,32 +103,14 @@ export const Route = createFileRoute("/product/$handle")({
       ],
       links: [{ rel: "canonical", href: url }],
       scripts: [
-        {
-          type: "application/ld+json",
-          children: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Product",
-            name: p.title,
-            description: textFromHtml(p.description, 300),
-            image: p.images.edges.map((e) => e.node.url).slice(0, 5),
-            brand: { "@type": "Brand", name: "Roamforge" },
-            sku: p.variants.edges[0]?.node.id,
-            offers: {
-              "@type": "Offer",
-              url,
-              priceCurrency: price.currencyCode,
-              price: price.amount,
-              availability: "https://schema.org/InStock",
-            },
-          }),
-        },
+        { type: "application/ld+json", children: JSON.stringify(productSchema) },
         {
           type: "application/ld+json",
           children: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "BreadcrumbList",
             itemListElement: [
-              { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
+              { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
               { "@type": "ListItem", position: 2, name: p.title, item: url },
             ],
           }),
@@ -101,11 +125,9 @@ export const Route = createFileRoute("/product/$handle")({
       <main className="mx-auto max-w-7xl flex-1 px-4 py-20 lg:px-8 text-center">
         <h1 className="font-display text-3xl tracking-widest text-rf-dark">SOMETHING WENT WRONG</h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          This product couldn't load. Try refreshing, or head back to the shop.
+          This product couldn&apos;t load. Try refreshing, or head back to the shop.
         </p>
-        <Link to="/" className="mt-6 inline-block text-rf-tan underline">
-          Back to shop
-        </Link>
+        <Link to="/" className="mt-6 inline-block text-rf-tan underline">Back to shop</Link>
       </main>
       <SiteFooter />
     </div>
@@ -118,9 +140,7 @@ export const Route = createFileRoute("/product/$handle")({
         <p className="mt-3 text-sm text-muted-foreground">
           This product may have been removed or renamed.
         </p>
-        <Link to="/" className="mt-6 inline-block text-rf-tan underline">
-          Back to shop
-        </Link>
+        <Link to="/" className="mt-6 inline-block text-rf-tan underline">Back to shop</Link>
       </main>
       <SiteFooter />
     </div>
@@ -132,10 +152,20 @@ function ProductPage() {
   const { data } = useSuspenseQuery(productQuery(handle));
   const addItem = useCartStore((s) => s.addItem);
   const adding = useCartStore((s) => s.isLoading);
-  const [variantIdx, setVariantIdx] = useState(0);
   const p = data.node;
-  // Prefer Shopify's rich descriptionHtml; fall back to plaintext description.
+
   const descriptionHtml = sanitizeProductHtml(p.descriptionHtml || p.description);
+
+  const initialIdx = useMemo(() => {
+    const idx = p.variants.edges.findIndex((v) => v.node.availableForSale);
+    return idx >= 0 ? idx : 0;
+  }, [p.variants.edges]);
+  const [variantIdx, setVariantIdx] = useState(initialIdx);
+
+  const selectedVariant = p.variants.edges[variantIdx]?.node;
+  const canAdd = !!selectedVariant?.availableForSale;
+  const displayPrice = selectedVariant?.price ?? p.priceRange.minVariantPrice;
+  const image = p.featuredImage ?? p.images.edges[0]?.node;
 
   return (
     <div className="min-h-dvh flex flex-col">
@@ -143,18 +173,16 @@ function ProductPage() {
       <main className="flex-1 bg-background">
         <div className="mx-auto max-w-6xl px-4 py-12 lg:px-8">
           <nav aria-label="Breadcrumb" className="mb-6 text-xs text-muted-foreground">
-            <Link to="/" className="hover:text-rf-dark">
-              Home
-            </Link>
-            <span className="mx-2">/</span>
+            <Link to="/" className="hover:text-rf-dark">Home</Link>
+            <span className="mx-2" aria-hidden>/</span>
             <span className="text-rf-dark">{p.title}</span>
           </nav>
           <div className="grid gap-12 lg:grid-cols-2">
             <div className="aspect-square bg-secondary border border-border overflow-hidden">
-              {p.images.edges[0] && (
+              {image && (
                 <img
-                  src={p.images.edges[0].node.url}
-                  alt={p.images.edges[0].node.altText ?? p.title}
+                  src={image.url}
+                  alt={image.altText ?? p.title}
                   width={800}
                   height={800}
                   fetchPriority="high"
@@ -164,79 +192,104 @@ function ProductPage() {
             </div>
             <div>
               <h1 className="font-display text-4xl tracking-wide text-rf-dark">{p.title}</h1>
-              {(() => {
-                const v = p.variants.edges[variantIdx]?.node;
-                const price = v?.price ?? p.priceRange.minVariantPrice;
-                return (
-                  <p className="mt-4 text-2xl font-semibold text-rf-dark">
-                    ${parseFloat(price.amount).toFixed(2)} {price.currencyCode}
-                  </p>
-                );
-              })()}
-              <p className="mt-3 text-sm font-medium text-emerald-700">✓ In Stock</p>
+              {p.vendor ? (
+                <p className="mt-1 text-xs font-semibold tracking-widest text-rf-tan uppercase">
+                  {p.vendor}
+                </p>
+              ) : null}
+              <p className="mt-4 text-2xl font-semibold text-rf-dark">
+                ${parseFloat(displayPrice.amount).toFixed(2)} {displayPrice.currencyCode}
+              </p>
+              <p
+                className={`mt-3 text-sm font-medium ${
+                  canAdd ? "text-emerald-700" : "text-muted-foreground"
+                }`}
+                aria-live="polite"
+              >
+                {canAdd ? "\u2713 In Stock" : "Sold out"}
+              </p>
               {descriptionHtml ? (
                 <div
                   className="mt-6 text-sm leading-relaxed text-muted-foreground prose prose-sm max-w-none prose-p:my-2"
-                  // eslint-disable-next-line react/no-danger
                   dangerouslySetInnerHTML={{ __html: descriptionHtml }}
                 />
               ) : null}
               {p.variants.edges.length > 1 && (
-                <div className="mt-6 flex flex-wrap gap-2">
-                  {p.variants.edges.map((v, i) => (
-                    <button
-                      key={v.node.id}
-                      type="button"
-                      onClick={() => setVariantIdx(i)}
-                      aria-pressed={i === variantIdx}
-                      className={`min-h-11 border px-3 py-1.5 text-sm ${
-                        i === variantIdx
-                          ? "border-rf-dark bg-rf-dark text-rf-cream"
-                          : "border-border text-rf-dark hover:border-rf-dark"
-                      }`}
-                    >
-                      {v.node.title}
-                    </button>
-                  ))}
-                </div>
+                <fieldset className="mt-6">
+                  <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-rf-dark">
+                    Options
+                  </legend>
+                  <div className="flex flex-wrap gap-2">
+                    {p.variants.edges.map((v, i) => {
+                      const disabled = !v.node.availableForSale;
+                      const selected = i === variantIdx;
+                      return (
+                        <button
+                          key={v.node.id}
+                          type="button"
+                          disabled={disabled}
+                          onClick={() => setVariantIdx(i)}
+                          aria-pressed={selected}
+                          className={`min-h-11 border px-3 py-1.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2 ${
+                            selected
+                              ? "border-rf-dark bg-rf-dark text-rf-cream"
+                              : disabled
+                                ? "border-border text-muted-foreground line-through cursor-not-allowed opacity-60"
+                                : "border-border text-rf-dark hover:border-rf-dark"
+                          }`}
+                        >
+                          {v.node.title}
+                          {disabled ? <span className="sr-only"> (sold out)</span> : null}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </fieldset>
               )}
               <Button
                 size="lg"
-                disabled={adding}
+                disabled={adding || !canAdd}
                 onClick={() => {
-                  const v = p.variants.edges[variantIdx]?.node;
-                  if (!v) return;
+                  if (!selectedVariant || !selectedVariant.availableForSale) return;
                   addItem({
                     product: data,
-                    variantId: v.id,
-                    variantTitle: v.title,
-                    price: v.price,
+                    variantId: selectedVariant.id,
+                    variantTitle: selectedVariant.title,
+                    price: selectedVariant.price,
                     quantity: 1,
-                    selectedOptions: v.selectedOptions ?? [],
+                    selectedOptions: selectedVariant.selectedOptions ?? [],
                   });
                 }}
                 className="mt-8 w-full bg-rf-dark text-rf-cream hover:bg-rf-dark-2 rounded-none"
               >
-                {adding ? <Loader2 className="w-4 h-4 animate-spin" /> : "ADD TO CART"}
+                {adding ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : canAdd ? (
+                  "ADD TO CART"
+                ) : (
+                  "SOLD OUT"
+                )}
               </Button>
-              <ul className="mt-6 grid gap-2 text-xs text-muted-foreground sm:grid-cols-3">
+              <p className="mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                <Lock className="h-3.5 w-3.5 text-rf-tan" aria-hidden />
+                Secure checkout powered by Shopify
+              </p>
+              <ul className="mt-6 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2 lg:grid-cols-4">
                 <li className="flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 text-rf-tan" aria-hidden />
-                  <Link to="/warranty" className="hover:text-rf-dark">
-                    Warranty info
-                  </Link>
+                  <Link to="/warranty" className="hover:text-rf-dark">Warranty info</Link>
                 </li>
                 <li className="flex items-center gap-2">
                   <Truck className="h-4 w-4 text-rf-tan" aria-hidden />
-                  <Link to="/shipping" className="hover:text-rf-dark">
-                    Shipping details
-                  </Link>
+                  <Link to="/shipping" className="hover:text-rf-dark">Shipping details</Link>
                 </li>
                 <li className="flex items-center gap-2">
                   <Undo2 className="h-4 w-4 text-rf-tan" aria-hidden />
-                  <Link to="/returns" className="hover:text-rf-dark">
-                    Returns policy
-                  </Link>
+                  <Link to="/returns" className="hover:text-rf-dark">Returns policy</Link>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-rf-tan" aria-hidden />
+                  <Link to="/contact" className="hover:text-rf-dark">Contact us</Link>
                 </li>
               </ul>
             </div>
