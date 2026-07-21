@@ -124,7 +124,7 @@ function CategoryPage() {
       </section>
       <section className="bg-rf-cream py-14 flex-1">
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <SectionHeading as="h2">{cfg.label}</SectionHeading>
+          <SectionHeading>{cfg.label}</SectionHeading>
           <div className="mt-10 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {products.length === 0 ? (
               <EmptyProducts />
