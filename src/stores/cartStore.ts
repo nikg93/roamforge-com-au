@@ -87,12 +87,18 @@ async function addLine(cartId: string, item: CartItem) {
   if (isCartNotFound(errs)) return { success: false, cartNotFound: true } as const;
   if (errs.length) return { success: false } as const;
   const lines = data?.data?.cartLinesAdd?.cart?.lines?.edges ?? [];
-  const line = lines.find((l: { node: { merchandise: { id: string }; id: string } }) => l.node.merchandise.id === item.variantId);
+  const line = lines.find(
+    (l: { node: { merchandise: { id: string }; id: string } }) =>
+      l.node.merchandise.id === item.variantId,
+  );
   return { success: true as const, lineId: line?.node?.id as string | undefined };
 }
 
 async function updateLine(cartId: string, lineId: string, quantity: number) {
-  const data = await storefrontApiRequest(CART_LINES_UPDATE, { cartId, lines: [{ id: lineId, quantity }] });
+  const data = await storefrontApiRequest(CART_LINES_UPDATE, {
+    cartId,
+    lines: [{ id: lineId, quantity }],
+  });
   const errs = data?.data?.cartLinesUpdate?.userErrors ?? [];
   if (isCartNotFound(errs)) return { success: false, cartNotFound: true } as const;
   if (errs.length) return { success: false } as const;
@@ -136,7 +142,11 @@ export const useCartStore = create<CartStore>()(
             const result = await updateLine(cartId, existing.lineId, newQty);
             if (result.success) {
               const cur = get().items;
-              set({ items: cur.map((i) => (i.variantId === item.variantId ? { ...i, quantity: newQty } : i)) });
+              set({
+                items: cur.map((i) =>
+                  i.variantId === item.variantId ? { ...i, quantity: newQty } : i,
+                ),
+              });
             } else if ("cartNotFound" in result && result.cartNotFound) clearCart();
           } else {
             const result = await addLine(cartId, { ...item, lineId: null });

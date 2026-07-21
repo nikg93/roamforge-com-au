@@ -51,7 +51,9 @@ export function CartDrawer() {
         <SheetHeader className="flex-shrink-0">
           <SheetTitle className="font-display tracking-wide">YOUR CART</SheetTitle>
           <SheetDescription>
-            {totalItems === 0 ? "Your cart is empty" : `${totalItems} item${totalItems !== 1 ? "s" : ""}`}
+            {totalItems === 0
+              ? "Your cart is empty"
+              : `${totalItems} item${totalItems !== 1 ? "s" : ""}`}
           </SheetDescription>
         </SheetHeader>
         <div className="flex flex-col flex-1 pt-6 min-h-0">

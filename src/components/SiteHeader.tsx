@@ -57,17 +57,32 @@ export function SiteHeader() {
                   ))}
                   <li className="mt-2 border-t border-rf-cream/10 pt-2">
                     <SheetClose asChild>
-                      <Link to="/about" className="flex min-h-11 items-center px-3 py-3 text-sm font-semibold tracking-[0.14em] text-rf-cream/90 hover:bg-rf-dark-2 hover:text-rf-tan focus:outline-none">ABOUT</Link>
+                      <Link
+                        to="/about"
+                        className="flex min-h-11 items-center px-3 py-3 text-sm font-semibold tracking-[0.14em] text-rf-cream/90 hover:bg-rf-dark-2 hover:text-rf-tan focus:outline-none"
+                      >
+                        ABOUT
+                      </Link>
                     </SheetClose>
                   </li>
                   <li>
                     <SheetClose asChild>
-                      <Link to="/contact" className="flex min-h-11 items-center px-3 py-3 text-sm font-semibold tracking-[0.14em] text-rf-cream/90 hover:bg-rf-dark-2 hover:text-rf-tan focus:outline-none">CONTACT</Link>
+                      <Link
+                        to="/contact"
+                        className="flex min-h-11 items-center px-3 py-3 text-sm font-semibold tracking-[0.14em] text-rf-cream/90 hover:bg-rf-dark-2 hover:text-rf-tan focus:outline-none"
+                      >
+                        CONTACT
+                      </Link>
                     </SheetClose>
                   </li>
                   <li>
                     <SheetClose asChild>
-                      <Link to="/faq" className="flex min-h-11 items-center px-3 py-3 text-sm font-semibold tracking-[0.14em] text-rf-cream/90 hover:bg-rf-dark-2 hover:text-rf-tan focus:outline-none">FAQ</Link>
+                      <Link
+                        to="/faq"
+                        className="flex min-h-11 items-center px-3 py-3 text-sm font-semibold tracking-[0.14em] text-rf-cream/90 hover:bg-rf-dark-2 hover:text-rf-tan focus:outline-none"
+                      >
+                        FAQ
+                      </Link>
                     </SheetClose>
                   </li>
                 </ul>
@@ -86,7 +101,10 @@ export function SiteHeader() {
                 </div>
               </nav>
               <SheetClose asChild>
-                <button aria-label="Close menu" className="absolute right-3 top-3 grid h-11 w-11 place-items-center text-rf-cream/80 hover:text-rf-tan">
+                <button
+                  aria-label="Close menu"
+                  className="absolute right-3 top-3 grid h-11 w-11 place-items-center text-rf-cream/80 hover:text-rf-tan"
+                >
                   <X className="h-5 w-5" />
                 </button>
               </SheetClose>
@@ -98,7 +116,10 @@ export function SiteHeader() {
           </Link>
         </div>
 
-        <nav aria-label="Primary" className="hidden lg:flex items-center gap-4 xl:gap-5 text-[11px] font-semibold tracking-[0.12em]">
+        <nav
+          aria-label="Primary"
+          className="hidden lg:flex items-center gap-4 xl:gap-5 text-[11px] font-semibold tracking-[0.12em]"
+        >
           {CATEGORIES.map((c) => (
             <Link
               key={c.slug}

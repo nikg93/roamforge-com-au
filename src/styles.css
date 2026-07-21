@@ -69,19 +69,19 @@
 :root {
   --radius: 0.25rem;
   /* Roamforge palette */
-  --background: oklch(0.965 0.012 85);          /* warm cream paper */
-  --foreground: oklch(0.18 0.01 60);            /* near-black */
+  --background: oklch(0.965 0.012 85); /* warm cream paper */
+  --foreground: oklch(0.18 0.01 60); /* near-black */
   --card: oklch(0.99 0.008 85);
   --card-foreground: oklch(0.18 0.01 60);
   --popover: oklch(0.99 0.008 85);
   --popover-foreground: oklch(0.18 0.01 60);
-  --primary: oklch(0.16 0.008 60);              /* dark surface (header/footer) */
+  --primary: oklch(0.16 0.008 60); /* dark surface (header/footer) */
   --primary-foreground: oklch(0.96 0.012 85);
   --secondary: oklch(0.92 0.018 80);
   --secondary-foreground: oklch(0.18 0.01 60);
   --muted: oklch(0.92 0.018 80);
   --muted-foreground: oklch(0.45 0.012 70);
-  --accent: oklch(0.74 0.07 75);                /* sand / tan brand accent */
+  --accent: oklch(0.74 0.07 75); /* sand / tan brand accent */
   --accent-foreground: oklch(0.16 0.008 60);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.984 0.003 247.858);
@@ -155,7 +155,11 @@
     font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
   }
 
-  h1, h2, h3, h4, .font-display {
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
     font-family: "Oswald", "Inter", sans-serif;
     letter-spacing: 0.01em;
   }

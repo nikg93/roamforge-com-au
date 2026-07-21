@@ -1,5 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Map as MapIcon, ShieldCheck, Gauge, Lightbulb, BatteryCharging, Satellite, Wind, LifeBuoy, Tent, ClipboardList, Shield, Shirt, Award, Truck, Compass } from "lucide-react";
+import {
+  Map as MapIcon,
+  ShieldCheck,
+  Gauge,
+  Lightbulb,
+  BatteryCharging,
+  Satellite,
+  Wind,
+  LifeBuoy,
+  Tent,
+  ClipboardList,
+  Shield,
+  Shirt,
+  Award,
+  Truck,
+  Compass,
+} from "lucide-react";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SectionHeading } from "@/components/SectionHeading";
@@ -48,7 +64,11 @@ const WHY = [
   { Icon: Award, title: "TRUSTED BRANDS", desc: "Only gear from proven Australian manufacturers." },
   { Icon: ShieldCheck, title: "SECURE CHECKOUT", desc: "Encrypted payments, buy with confidence." },
   { Icon: Truck, title: "FAST SHIPPING", desc: "Quick dispatch Australia-wide." },
-  { Icon: Compass, title: "ADVENTURE READY", desc: "Tested and ready for real touring conditions." },
+  {
+    Icon: Compass,
+    title: "ADVENTURE READY",
+    desc: "Tested and ready for real touring conditions.",
+  },
 ];
 
 function Index() {
@@ -108,33 +128,33 @@ function Index() {
             {CATEGORIES.map((c) => {
               const Icon = CATEGORY_ICONS[c.slug];
               return (
-              <Link
-                key={c.slug}
-                to="/category/$slug"
-                params={{ slug: c.slug }}
-                className="group relative block aspect-[4/5] overflow-hidden bg-rf-dark"
-              >
-                <img
-                  src={c.image}
-                  alt={c.label}
-                  loading="lazy"
-                  className="h-full w-full object-cover opacity-75 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-rf-dark via-rf-dark/40 to-transparent transition-opacity duration-500 group-hover:from-rf-dark/95" />
-                <div className="absolute top-4 right-4">
-                  <div className="grid h-10 w-10 place-items-center rounded-full border border-rf-cream/60 bg-rf-dark/40 backdrop-blur-sm">
-                    <Icon className="h-4 w-4 text-rf-cream" />
+                <Link
+                  key={c.slug}
+                  to="/category/$slug"
+                  params={{ slug: c.slug }}
+                  className="group relative block aspect-[4/5] overflow-hidden bg-rf-dark"
+                >
+                  <img
+                    src={c.image}
+                    alt={c.label}
+                    loading="lazy"
+                    className="h-full w-full object-cover opacity-75 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-rf-dark via-rf-dark/40 to-transparent transition-opacity duration-500 group-hover:from-rf-dark/95" />
+                  <div className="absolute top-4 right-4">
+                    <div className="grid h-10 w-10 place-items-center rounded-full border border-rf-cream/60 bg-rf-dark/40 backdrop-blur-sm">
+                      <Icon className="h-4 w-4 text-rf-cream" />
+                    </div>
                   </div>
-                </div>
-                <div className="absolute bottom-0 left-0 right-0 p-5">
-                  <span className="block font-display tracking-[0.18em] text-rf-cream text-sm leading-tight">
-                    {c.label}
-                  </span>
-                  <span className="mt-1 inline-block text-[10px] font-semibold tracking-[0.25em] text-rf-tan opacity-0 -translate-y-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
-                    SHOP →
-                  </span>
-                </div>
-              </Link>
+                  <div className="absolute bottom-0 left-0 right-0 p-5">
+                    <span className="block font-display tracking-[0.18em] text-rf-cream text-sm leading-tight">
+                      {c.label}
+                    </span>
+                    <span className="mt-1 inline-block text-[10px] font-semibold tracking-[0.25em] text-rf-tan opacity-0 -translate-y-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
+                      SHOP →
+                    </span>
+                  </div>
+                </Link>
               );
             })}
           </div>
@@ -151,7 +171,10 @@ function Index() {
           <SectionHeading dark>WHY ROAMFORGE?</SectionHeading>
           <div className="mt-8 grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
             {WHY.map(({ Icon, title, desc }) => (
-              <div key={title} className="flex flex-col items-center text-center px-3 py-4 border border-rf-cream/10 bg-rf-dark-2/40">
+              <div
+                key={title}
+                className="flex flex-col items-center text-center px-3 py-4 border border-rf-cream/10 bg-rf-dark-2/40"
+              >
                 <Icon className="h-9 w-9 text-rf-tan" strokeWidth={1.4} />
                 <h3 className="mt-3 font-display text-rf-tan text-xs tracking-[0.2em]">{title}</h3>
                 <p className="mt-1 text-xs text-rf-cream/75 leading-relaxed">{desc}</p>

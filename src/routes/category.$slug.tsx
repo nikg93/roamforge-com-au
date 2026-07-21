@@ -32,7 +32,9 @@ export const Route = createFileRoute("/category/$slug")({
       <SiteHeader />
       <main className="mx-auto max-w-7xl flex-1 px-4 py-20 lg:px-8">
         <h1 className="font-display text-3xl tracking-widest text-rf-dark">CATEGORY NOT FOUND</h1>
-        <p className="mt-4 text-sm text-muted-foreground">The category you're looking for doesn't exist. Browse all categories from the homepage.</p>
+        <p className="mt-4 text-sm text-muted-foreground">
+          The category you're looking for doesn't exist. Browse all categories from the homepage.
+        </p>
       </main>
       <SiteFooter />
     </div>

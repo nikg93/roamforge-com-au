@@ -1,4 +1,10 @@
-export function SectionHeading({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
+export function SectionHeading({
+  children,
+  dark = false,
+}: {
+  children: React.ReactNode;
+  dark?: boolean;
+}) {
   const line = dark ? "bg-rf-tan/60" : "bg-rf-dark/40";
   const text = dark ? "text-rf-cream" : "text-rf-dark";
   return (

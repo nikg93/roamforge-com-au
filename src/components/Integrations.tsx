@@ -45,7 +45,7 @@ export function Integrations() {
     if (klaviyo) {
       inject(
         "klaviyo-loader",
-        `https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=${klaviyo}`
+        `https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=${klaviyo}`,
       );
     }
 

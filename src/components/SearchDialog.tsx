@@ -133,18 +133,10 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                       className="flex items-center gap-4 px-4 py-3 hover:bg-rf-dark/5 focus:bg-rf-dark/5 focus:outline-none"
                     >
                       <div className="h-14 w-14 flex-shrink-0 overflow-hidden bg-secondary">
-                        {img && (
-                          <img
-                            src={img.url}
-                            alt=""
-                            className="h-full w-full object-cover"
-                          />
-                        )}
+                        {img && <img src={img.url} alt="" className="h-full w-full object-cover" />}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-rf-dark">
-                          {p.node.title}
-                        </p>
+                        <p className="truncate text-sm font-medium text-rf-dark">{p.node.title}</p>
                         <p className="mt-0.5 text-xs text-rf-dark/60">
                           ${parseFloat(price.amount).toFixed(2)} {price.currencyCode}
                         </p>

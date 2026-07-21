@@ -20,7 +20,8 @@ export function SiteFooter() {
         <div className="lg:col-span-2 space-y-4">
           <img src={logo} alt="Roamforge" className="h-14 w-auto" />
           <p className="max-w-xs text-sm text-rf-cream/70">
-            Premium 4WD, camping and adventure gear designed for touring, exploring and life off the beaten track.
+            Premium 4WD, camping and adventure gear designed for touring, exploring and life off the
+            beaten track.
           </p>
         </div>
 
@@ -44,20 +45,54 @@ export function SiteFooter() {
         <div>
           <h4 className="font-display text-sm tracking-[0.2em] text-rf-cream mb-4">INFORMATION</h4>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/about" className="text-rf-cream/70 hover:text-rf-tan transition-colors">About Us</Link></li>
-            <li><Link to="/shipping" className="text-rf-cream/70 hover:text-rf-tan transition-colors">Shipping</Link></li>
-            <li><Link to="/returns" className="text-rf-cream/70 hover:text-rf-tan transition-colors">Returns &amp; Refunds</Link></li>
-            <li><Link to="/terms" className="text-rf-cream/70 hover:text-rf-tan transition-colors">Terms &amp; Conditions</Link></li>
-            <li><Link to="/privacy" className="text-rf-cream/70 hover:text-rf-tan transition-colors">Privacy Policy</Link></li>
+            <li>
+              <Link to="/about" className="text-rf-cream/70 hover:text-rf-tan transition-colors">
+                About Us
+              </Link>
+            </li>
+            <li>
+              <Link to="/shipping" className="text-rf-cream/70 hover:text-rf-tan transition-colors">
+                Shipping
+              </Link>
+            </li>
+            <li>
+              <Link to="/returns" className="text-rf-cream/70 hover:text-rf-tan transition-colors">
+                Returns &amp; Refunds
+              </Link>
+            </li>
+            <li>
+              <Link to="/terms" className="text-rf-cream/70 hover:text-rf-tan transition-colors">
+                Terms &amp; Conditions
+              </Link>
+            </li>
+            <li>
+              <Link to="/privacy" className="text-rf-cream/70 hover:text-rf-tan transition-colors">
+                Privacy Policy
+              </Link>
+            </li>
           </ul>
         </div>
 
         <div>
-          <h4 className="font-display text-sm tracking-[0.2em] text-rf-cream mb-4">CUSTOMER CARE</h4>
+          <h4 className="font-display text-sm tracking-[0.2em] text-rf-cream mb-4">
+            CUSTOMER CARE
+          </h4>
           <ul className="space-y-2 text-sm">
-            <li><Link to="/contact" className="text-rf-cream/70 hover:text-rf-tan transition-colors">Contact Us</Link></li>
-            <li><Link to="/faq" className="text-rf-cream/70 hover:text-rf-tan transition-colors">FAQ</Link></li>
-            <li><Link to="/warranty" className="text-rf-cream/70 hover:text-rf-tan transition-colors">Warranty</Link></li>
+            <li>
+              <Link to="/contact" className="text-rf-cream/70 hover:text-rf-tan transition-colors">
+                Contact Us
+              </Link>
+            </li>
+            <li>
+              <Link to="/faq" className="text-rf-cream/70 hover:text-rf-tan transition-colors">
+                FAQ
+              </Link>
+            </li>
+            <li>
+              <Link to="/warranty" className="text-rf-cream/70 hover:text-rf-tan transition-colors">
+                Warranty
+              </Link>
+            </li>
           </ul>
           <div className="mt-6">
             <p className="text-xs text-rf-cream/60 leading-relaxed">
