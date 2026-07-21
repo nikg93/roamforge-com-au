@@ -148,7 +148,7 @@ export const PRODUCT_BY_HANDLE_QUERY = `
 // Handle-only pagination query for the sitemap. Kept tiny to minimise cost.
 const PRODUCT_HANDLES_QUERY = `
   query ProductHandles($first: Int!, $after: String) {
-    products(first: $first, after: $after, query: "available_for_sale:true") {
+    products(first: $first, after: $after) {
       edges { cursor node { handle } }
       pageInfo { hasNextPage endCursor }
     }
