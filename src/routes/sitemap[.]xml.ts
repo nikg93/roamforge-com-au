@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import type {} from "@tanstack/react-start";
 import { fetchProducts } from "@/lib/shopify";
+import { CATEGORIES } from "@/lib/categories";
 
 const BASE_URL = "https://roamforge.com.au";
 
@@ -12,14 +13,11 @@ interface SitemapEntry {
 
 const staticEntries: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
-  { path: "/category/performance", changefreq: "weekly", priority: "0.9" },
-  { path: "/category/monitoring", changefreq: "weekly", priority: "0.9" },
-  { path: "/category/gps-tracking", changefreq: "weekly", priority: "0.9" },
-  { path: "/category/lighting", changefreq: "weekly", priority: "0.9" },
-  { path: "/category/air-compressors", changefreq: "weekly", priority: "0.9" },
-  { path: "/category/recovery", changefreq: "weekly", priority: "0.9" },
-  { path: "/category/touring", changefreq: "weekly", priority: "0.9" },
-  { path: "/category/planners", changefreq: "weekly", priority: "0.9" },
+  ...CATEGORIES.map((c) => ({
+    path: `/category/${c.slug}`,
+    changefreq: "weekly" as const,
+    priority: "0.9",
+  })),
   { path: "/about", changefreq: "monthly", priority: "0.6" },
   { path: "/contact", changefreq: "monthly", priority: "0.6" },
   { path: "/faq", changefreq: "monthly", priority: "0.5" },
