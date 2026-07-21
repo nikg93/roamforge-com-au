@@ -121,7 +121,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
               "@id": `${SITE_URL}/#org`,
               name: "Roamforge",
               url: SITE_URL,
-              logo: `${SITE_URL}/favicon.ico`,
+              logo: `${SITE_URL}/roamforge-logo.png`,
               areaServed: "AU",
               sameAs: ["https://instagram.com/roam_forge"],
             },

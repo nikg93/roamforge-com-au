@@ -25,32 +25,16 @@ import logo from "@/assets/logo.png";
 import heroPatrolAsset from "@/assets/troll3n-real.jpg.asset.json";
 const heroPatrol = heroPatrolAsset.url;
 import { CATEGORIES, type CategorySlug } from "@/lib/categories";
-import { canonicalFor, SITE_URL } from "@/lib/seo";
+import { routeMeta } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Roamforge — Forged for Adventure | 4WD, Camping & Touring Gear" },
-      {
-        name: "description",
-        content:
-          "Premium 4WD, camping and touring gear tested for Australian conditions. Recovery, electrical, camping and Roamforge merch.",
-      },
-      { property: "og:title", content: "Roamforge — Forged for Adventure" },
-      {
-        property: "og:description",
-        content: "Premium 4WD, camping and touring gear tested for Australian conditions.",
-      },
-      { property: "og:url", content: SITE_URL },
-      { property: "og:type", content: "website" },
-      { name: "twitter:title", content: "Roamforge — Forged for Adventure" },
-      {
-        name: "twitter:description",
-        content: "Premium 4WD, camping and touring gear tested for Australian conditions.",
-      },
-    ],
-    links: [{ rel: "canonical", href: canonicalFor("/") }],
-  }),
+  head: () =>
+    routeMeta({
+      path: "/",
+      title: "Roamforge — Forged for Adventure | 4WD, Camping & Touring Gear",
+      description:
+        "Premium 4WD, camping and touring gear tested for Australian conditions. Recovery, electrical, camping and Roamforge merch.",
+    }),
   component: Index,
 });
 
@@ -69,14 +53,10 @@ const CATEGORY_ICONS: Record<CategorySlug, React.ComponentType<{ className?: str
 
 const WHY = [
   { Icon: MapIcon, title: "AUSTRALIAN OWNED", desc: "WA based adventure brand supporting local." },
-  { Icon: Award, title: "TRUSTED BRANDS", desc: "Only gear from proven Australian manufacturers." },
-  { Icon: ShieldCheck, title: "SECURE CHECKOUT", desc: "Encrypted payments, buy with confidence." },
-  { Icon: Truck, title: "FAST SHIPPING", desc: "Quick dispatch Australia-wide." },
-  {
-    Icon: Compass,
-    title: "ADVENTURE READY",
-    desc: "Tested and ready for real touring conditions.",
-  },
+  { Icon: Award, title: "TRUSTED BRANDS", desc: "Curated gear from established Australian brands." },
+  { Icon: ShieldCheck, title: "SECURE CHECKOUT", desc: "Encrypted payments via Shopify." },
+  { Icon: Truck, title: "AUSTRALIA-WIDE DELIVERY", desc: "Shipping right across Australia." },
+  { Icon: Compass, title: "BUILT FOR TOURING", desc: "Selected for real Australian touring." },
 ];
 
 function Index() {

@@ -1,19 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { canonicalFor } from "@/lib/seo";
+import { routeMeta } from "@/lib/seo";
 import { PageShell, H2, P } from "@/components/PageShell";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      { title: "Contact Us | Roamforge" },
-      {
-        name: "description",
-        content:
-          "Contact Roamforge for product, order or adventure enquiries. Based in Western Australia.",
-      },
-    ],
-    links: [{ rel: "canonical", href: canonicalFor("/contact") }],
-  }),
+  head: () =>
+    routeMeta({
+      path: "/contact",
+      title: "Contact Roamforge | Get in Touch",
+      description: "Get in touch with the Roamforge team for product enquiries, warranty support and general questions.",
+    }),
   component: ContactPage,
 });
 
