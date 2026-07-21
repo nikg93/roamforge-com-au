@@ -25,10 +25,11 @@ export function CartDrawer() {
 
   const handleCheckout = () => {
     const url = getCheckoutUrl();
-    if (url) {
-      window.open(url, "_blank");
-      setIsOpen(false);
-    }
+    if (!url) return;
+    setIsOpen(false);
+    // Synchronous navigation inside the click handler avoids Safari/iOS popup blockers
+    // that reject window.open called from async callbacks.
+    window.location.assign(url);
   };
 
   return (

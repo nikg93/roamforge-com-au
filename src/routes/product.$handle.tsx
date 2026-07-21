@@ -17,9 +17,27 @@ export const Route = createFileRoute("/product/$handle")({
   }),
   component: ProductPage,
   errorComponent: () => (
-    <div className="p-12 text-center">Something went wrong loading this product.</div>
+    <div className="min-h-screen flex flex-col bg-background">
+      <SiteHeader />
+      <main className="mx-auto max-w-7xl flex-1 px-4 py-20 lg:px-8 text-center">
+        <h1 className="font-display text-3xl tracking-widest text-rf-dark">SOMETHING WENT WRONG</h1>
+        <p className="mt-3 text-sm text-muted-foreground">This product couldn't load. Try refreshing, or head back to the shop.</p>
+        <Link to="/" className="mt-6 inline-block text-rf-tan underline">Back to shop</Link>
+      </main>
+      <SiteFooter />
+    </div>
   ),
-  notFoundComponent: () => <div className="p-12 text-center">Product not found.</div>,
+  notFoundComponent: () => (
+    <div className="min-h-screen flex flex-col bg-background">
+      <SiteHeader />
+      <main className="mx-auto max-w-7xl flex-1 px-4 py-20 lg:px-8 text-center">
+        <h1 className="font-display text-3xl tracking-widest text-rf-dark">PRODUCT NOT FOUND</h1>
+        <p className="mt-3 text-sm text-muted-foreground">This product may have been removed or renamed.</p>
+        <Link to="/" className="mt-6 inline-block text-rf-tan underline">Back to shop</Link>
+      </main>
+      <SiteFooter />
+    </div>
+  ),
 });
 
 function ProductPage() {

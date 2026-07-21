@@ -188,14 +188,18 @@ export const useCartStore = create<CartStore>()(
       getCheckoutUrl: () => get().checkoutUrl,
 
       syncCart: async () => {
-        const { cartId, isSyncing, clearCart } = get();
-        if (!cartId || isSyncing) return;
+        const { cartId, isSyncing, isLoading, clearCart } = get();
+        // Never sync while a mutation is in flight — the local cart may hold an
+        // item that hasn't reached Shopify yet, and clearing it would drop it.
+        if (!cartId || isSyncing || isLoading) return;
         set({ isSyncing: true });
         try {
           const data = await storefrontApiRequest(CART_QUERY, { id: cartId });
           if (!data) return;
           const cart = data?.data?.cart;
-          if (!cart || cart.totalQuantity === 0) clearCart();
+          // Re-check isLoading after the network round-trip; if the user added
+          // an item mid-sync, keep the local state.
+          if ((!cart || cart.totalQuantity === 0) && !get().isLoading) clearCart();
         } finally {
           set({ isSyncing: false });
         }
