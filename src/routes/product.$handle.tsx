@@ -206,7 +206,7 @@ function ProductPage() {
                 }`}
                 aria-live="polite"
               >
-                {canAdd ? "\u2713 In Stock" : "Sold out"}
+                {canAdd ? "✓ In Stock" : "Sold out"}
               </p>
               {descriptionHtml ? (
                 <div
