@@ -1,4 +1,3 @@
-import { toast } from "sonner";
 import { SHOPIFY, SHOPIFY_STOREFRONT_URL } from "./site";
 
 // Re-exported for backwards compatibility with existing imports.
@@ -6,6 +5,25 @@ export const SHOPIFY_API_VERSION = SHOPIFY.apiVersion;
 export const SHOPIFY_STORE_PERMANENT_DOMAIN = SHOPIFY.storeDomain;
 export { SHOPIFY_STOREFRONT_URL };
 export const SHOPIFY_STOREFRONT_TOKEN = SHOPIFY.storefrontToken;
+
+/** Thrown by storefrontApiRequest when Shopify billing is not active (HTTP 402). */
+export class ShopifyBillingError extends Error {
+  status = 402 as const;
+  constructor() {
+    super(
+      "Shopify Storefront API returned 402 Payment Required. The store needs an active Shopify billing plan.",
+    );
+    this.name = "ShopifyBillingError";
+  }
+}
+
+/** Thrown by storefrontApiRequest for GraphQL / HTTP failures. */
+export class ShopifyRequestError extends Error {
+  constructor(message: string, public status?: number) {
+    super(message);
+    this.name = "ShopifyRequestError";
+  }
+}
 
 export interface ShopifyProduct {
   node: {
@@ -40,7 +58,25 @@ export interface ShopifyProduct {
   };
 }
 
+function assertShopifyConfig() {
+  if (!SHOPIFY.storeDomain || !SHOPIFY.storefrontToken) {
+    throw new ShopifyRequestError(
+      "Shopify Storefront is not configured. Set VITE_SHOPIFY_STORE_DOMAIN and VITE_SHOPIFY_STOREFRONT_TOKEN.",
+    );
+  }
+}
+
+/**
+ * Runs a Storefront GraphQL request.
+ *
+ * NOTE: this module is imported by SSR route loaders and the sitemap handler,
+ * so it MUST stay free of browser-only side effects (no `toast`, no window
+ * access). Callers are responsible for surfacing failures via route error
+ * boundaries or their own UI.
+ */
 export async function storefrontApiRequest(query: string, variables: Record<string, unknown> = {}) {
+  assertShopifyConfig();
+
   const response = await fetch(SHOPIFY_STOREFRONT_URL, {
     method: "POST",
     headers: {
@@ -50,21 +86,17 @@ export async function storefrontApiRequest(query: string, variables: Record<stri
     body: JSON.stringify({ query, variables }),
   });
 
-  if (response.status === 402) {
-    toast.error("Shopify: Payment required", {
-      description:
-        "Shopify API access requires an active billing plan. Visit https://admin.shopify.com to upgrade.",
-    });
-    return;
+  if (response.status === 402) throw new ShopifyBillingError();
+  if (!response.ok) {
+    throw new ShopifyRequestError(`Shopify HTTP ${response.status}`, response.status);
   }
 
-  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
   const data = await response.json();
-  if (data.errors)
-    throw new Error(
+  if (data.errors) {
+    throw new ShopifyRequestError(
       `Shopify: ${data.errors.map((e: { message: string }) => e.message).join(", ")}`,
     );
+  }
   return data;
 }
 
@@ -113,12 +145,21 @@ export const PRODUCT_BY_HANDLE_QUERY = `
   }
 `;
 
+// Handle-only pagination query for the sitemap. Kept tiny to minimise cost.
+const PRODUCT_HANDLES_QUERY = `
+  query ProductHandles($first: Int!, $after: String) {
+    products(first: $first, after: $after, query: "available_for_sale:true") {
+      edges { cursor node { handle } }
+      pageInfo { hasNextPage endCursor }
+    }
+  }
+`;
+
 export async function fetchProducts(first = 20, query?: string): Promise<ShopifyProduct[]> {
   const availabilityQuery = "available_for_sale:true";
   const combinedQuery = query ? `(${query}) AND ${availabilityQuery}` : availabilityQuery;
   const data = await storefrontApiRequest(PRODUCTS_QUERY, { first, query: combinedQuery });
   const edges = data?.data?.products?.edges ?? [];
-  // Normalize the light card shape onto the ShopifyProduct type so cards render safely.
   return edges.map((e: { node: ShopifyProduct["node"] }) => {
     const img = e.node.featuredImage;
     const withImages: ShopifyProduct["node"] = {
@@ -136,4 +177,27 @@ export async function fetchProductByHandle(handle: string) {
   const product = data?.data?.product;
   if (!product) return null;
   return { node: product } as ShopifyProduct;
+}
+
+/**
+ * Paginate every published product handle. Used by the sitemap; kept as its
+ * own tiny query so we don't ship the full product payload just to build URLs.
+ * Bounded by `maxPages` as a safety fuse for huge stores.
+ */
+export async function fetchAllProductHandles(
+  pageSize = 100,
+  maxPages = 50,
+): Promise<string[]> {
+  const handles: string[] = [];
+  let after: string | null = null;
+  for (let i = 0; i < maxPages; i++) {
+    const data: { data?: { products?: { edges: Array<{ node: { handle: string } }>; pageInfo: { hasNextPage: boolean; endCursor: string | null } } } } =
+      await storefrontApiRequest(PRODUCT_HANDLES_QUERY, { first: pageSize, after });
+    const page = data?.data?.products;
+    if (!page) break;
+    for (const e of page.edges) handles.push(e.node.handle);
+    if (!page.pageInfo.hasNextPage) break;
+    after = page.pageInfo.endCursor;
+  }
+  return handles;
 }
