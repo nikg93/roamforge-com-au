@@ -119,16 +119,15 @@ export async function fetchProducts(first = 20, query?: string): Promise<Shopify
   const data = await storefrontApiRequest(PRODUCTS_QUERY, { first, query: combinedQuery });
   const edges = data?.data?.products?.edges ?? [];
   // Normalize the light card shape onto the ShopifyProduct type so cards render safely.
-  return edges.map((e: { node: Record<string, unknown> & { featuredImage?: { url: string; altText: string | null } | null } }) => {
+  return edges.map((e: { node: ShopifyProduct["node"] }) => {
     const img = e.node.featuredImage;
-    return {
-      node: {
-        ...e.node,
-        description: "",
-        images: img ? { edges: [{ node: img }] } : { edges: [] },
-        options: [],
-      },
-    } as ShopifyProduct;
+    const withImages: ShopifyProduct["node"] = {
+      ...e.node,
+      description: e.node.description ?? "",
+      images: img ? { edges: [{ node: img }] } : { edges: [] },
+      options: e.node.options ?? [],
+    };
+    return { node: withImages };
   });
 }
 
