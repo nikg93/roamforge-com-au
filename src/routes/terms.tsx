@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { canonicalFor } from "@/lib/seo";
 import { PageShell, H2, P } from "@/components/PageShell";
 
 export const Route = createFileRoute("/terms")({
@@ -7,6 +8,7 @@ export const Route = createFileRoute("/terms")({
       { title: "Terms & Conditions | Roamforge" },
       { name: "description", content: "Terms and conditions governing purchases from Roamforge." },
     ],
+    links: [{ rel: "canonical", href: canonicalFor("/terms") }],
   }),
   component: TermsPage,
 });

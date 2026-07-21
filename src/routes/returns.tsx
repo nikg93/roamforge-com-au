@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { canonicalFor } from "@/lib/seo";
 import { PageShell, H2, P, UL } from "@/components/PageShell";
 
 export const Route = createFileRoute("/returns")({
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/returns")({
           "Roamforge change-of-mind, faulty and damaged product returns under Australian Consumer Law.",
       },
     ],
+    links: [{ rel: "canonical", href: canonicalFor("/returns") }],
   }),
   component: ReturnsPage,
 });

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { canonicalFor } from "@/lib/seo";
 import { PageShell, H2, P, UL } from "@/components/PageShell";
 
 export const Route = createFileRoute("/warranty")({
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/warranty")({
         content: "Warranty coverage, claim process and exclusions for Roamforge products.",
       },
     ],
+    links: [{ rel: "canonical", href: canonicalFor("/warranty") }],
   }),
   component: WarrantyPage,
 });
