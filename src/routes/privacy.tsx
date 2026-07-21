@@ -1,18 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { canonicalFor } from "@/lib/seo";
+import { routeMeta } from "@/lib/seo";
 import { PageShell, H2, P, UL } from "@/components/PageShell";
 
 export const Route = createFileRoute("/privacy")({
-  head: () => ({
-    meta: [
-      { title: "Privacy Policy | Roamforge" },
-      {
-        name: "description",
-        content: "How Roamforge collects, uses and protects your personal information.",
-      },
-    ],
-    links: [{ rel: "canonical", href: canonicalFor("/privacy") }],
-  }),
+  head: () =>
+    routeMeta({
+      path: "/privacy",
+      title: "Privacy Policy | Roamforge",
+      description: "How Roamforge collects, uses and protects your personal information.",
+    }),
   component: PrivacyPage,
 });
 

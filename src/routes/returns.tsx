@@ -1,19 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { canonicalFor } from "@/lib/seo";
+import { routeMeta } from "@/lib/seo";
 import { PageShell, H2, P, UL } from "@/components/PageShell";
 
 export const Route = createFileRoute("/returns")({
-  head: () => ({
-    meta: [
-      { title: "Returns & Refunds | Roamforge" },
-      {
-        name: "description",
-        content:
-          "Roamforge change-of-mind, faulty and damaged product returns under Australian Consumer Law.",
-      },
-    ],
-    links: [{ rel: "canonical", href: canonicalFor("/returns") }],
-  }),
+  head: () =>
+    routeMeta({
+      path: "/returns",
+      title: "Returns & Refunds | Roamforge",
+      description: "Roamforge returns and refunds policy — how to request a return and eligibility.",
+    }),
   component: ReturnsPage,
 });
 

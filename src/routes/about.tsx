@@ -1,19 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { canonicalFor } from "@/lib/seo";
+import { routeMeta } from "@/lib/seo";
 import { PageShell, H2, P } from "@/components/PageShell";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "About Us | Roamforge" },
-      {
-        name: "description",
-        content:
-          "Founded in Western Australia, Roamforge supplies premium 4WD, camping and touring gear built for the toughest Australian conditions.",
-      },
-    ],
-    links: [{ rel: "canonical", href: canonicalFor("/about") }],
-  }),
+  head: () =>
+    routeMeta({
+      path: "/about",
+      title: "About Roamforge | Australian 4WD & Touring Gear",
+      description: "Founded in Western Australia, Roamforge supplies premium 4WD, camping and touring gear built for real Australian conditions.",
+    }),
   component: AboutPage,
 });
 

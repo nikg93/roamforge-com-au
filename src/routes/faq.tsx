@@ -1,19 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { canonicalFor } from "@/lib/seo";
+import { routeMeta } from "@/lib/seo";
 import { PageShell, H3, P } from "@/components/PageShell";
 
 export const Route = createFileRoute("/faq")({
-  head: () => ({
-    meta: [
-      { title: "FAQ | Roamforge" },
-      {
-        name: "description",
-        content:
-          "Frequently asked questions about Roamforge shipping, returns, payments and warranty.",
-      },
-    ],
-    links: [{ rel: "canonical", href: canonicalFor("/faq") }],
-  }),
+  head: () =>
+    routeMeta({
+      path: "/faq",
+      title: "Roamforge FAQ | Shipping, Returns & Warranty",
+      description: "Answers to common Roamforge questions on shipping, returns, warranty and product support.",
+    }),
   component: FAQPage,
 });
 

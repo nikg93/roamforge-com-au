@@ -1,15 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { canonicalFor } from "@/lib/seo";
+import { routeMeta } from "@/lib/seo";
 import { PageShell, H2, P } from "@/components/PageShell";
 
 export const Route = createFileRoute("/terms")({
-  head: () => ({
-    meta: [
-      { title: "Terms & Conditions | Roamforge" },
-      { name: "description", content: "Terms and conditions governing purchases from Roamforge." },
-    ],
-    links: [{ rel: "canonical", href: canonicalFor("/terms") }],
-  }),
+  head: () =>
+    routeMeta({
+      path: "/terms",
+      title: "Terms & Conditions | Roamforge",
+      description: "Terms and conditions governing purchases from Roamforge.",
+    }),
   component: TermsPage,
 });
 
