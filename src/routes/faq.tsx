@@ -7,7 +7,8 @@ export const Route = createFileRoute("/faq")({
     routeMeta({
       path: "/faq",
       title: "Roamforge FAQ | Shipping, Returns & Warranty",
-      description: "Answers to common Roamforge questions on shipping, returns, warranty and product support.",
+      description:
+        "Answers to common Roamforge questions on shipping, returns, warranty and product support.",
     }),
   component: FAQPage,
 });

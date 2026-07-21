@@ -7,7 +7,8 @@ export const Route = createFileRoute("/contact")({
     routeMeta({
       path: "/contact",
       title: "Contact Roamforge | Get in Touch",
-      description: "Get in touch with the Roamforge team for product enquiries, warranty support and general questions.",
+      description:
+        "Get in touch with the Roamforge team for product enquiries, warranty support and general questions.",
     }),
   component: ContactPage,
 });

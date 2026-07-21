@@ -7,7 +7,8 @@ export const Route = createFileRoute("/returns")({
     routeMeta({
       path: "/returns",
       title: "Returns & Refunds | Roamforge",
-      description: "Roamforge returns and refunds policy — how to request a return and eligibility.",
+      description:
+        "Roamforge returns and refunds policy — how to request a return and eligibility.",
     }),
   component: ReturnsPage,
 });
