@@ -12,9 +12,15 @@ import { useEffect } from "react";
  */
 export function Integrations() {
   useEffect(() => {
-    const ga4 = import.meta.env.VITE_GA4_MEASUREMENT_ID as string | undefined;
-    const klaviyo = import.meta.env.VITE_KLAVIYO_COMPANY_ID as string | undefined;
-    const tidio = import.meta.env.VITE_TIDIO_PUBLIC_KEY as string | undefined;
+    // Only accept real-looking IDs so a stray placeholder in .env doesn't
+    // inject broken scripts at runtime. Never fabricate defaults.
+    const raw = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+    const ga4Raw = raw(import.meta.env.VITE_GA4_MEASUREMENT_ID);
+    const klaviyoRaw = raw(import.meta.env.VITE_KLAVIYO_COMPANY_ID);
+    const tidioRaw = raw(import.meta.env.VITE_TIDIO_PUBLIC_KEY);
+    const ga4 = /^G-[A-Z0-9]{4,}$/i.test(ga4Raw) ? ga4Raw : "";
+    const klaviyo = /^[A-Z0-9]{4,}$/i.test(klaviyoRaw) ? klaviyoRaw : "";
+    const tidio = /^[A-Za-z0-9]{6,}$/.test(tidioRaw) ? tidioRaw : "";
 
     const loaded = new Set<string>();
     const injected: HTMLScriptElement[] = [];
@@ -56,6 +62,7 @@ export function Integrations() {
 
     return () => {
       injected.forEach((s) => s.parentNode?.removeChild(s));
+      loaded.clear();
     };
   }, []);
 
