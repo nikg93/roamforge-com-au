@@ -26,7 +26,7 @@ function firstAvailableVariant(p: ShopifyProduct["node"]) {
   return p.variants.edges.find((v) => v.node.availableForSale)?.node ?? null;
 }
 
-export const Route = createFileRoute("/product/$handle")({
+export const Route = createFileRoute("/product/")({
   loader: ({ params, context }) =>
     context.queryClient.ensureQueryData(productQuery(params.handle)),
   head: ({ params, loaderData }) => {
