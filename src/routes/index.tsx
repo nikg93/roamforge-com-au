@@ -9,16 +9,7 @@ import { useCartSync } from "@/hooks/useCartSync";
 import logo from "@/assets/logo.png";
 import heroPatrolAsset from "@/assets/troll3n-real.jpg.asset.json";
 const heroPatrol = heroPatrolAsset.url;
-import catLighting from "@/assets/cat-lighting.jpg";
-import catMonitoring from "@/assets/cat-monitoring.jpg";
-import catPerformance from "@/assets/cat-performance-new.jpg";
-import catTouring from "@/assets/cat-touring.jpg";
-import catGps from "@/assets/cat-gps.jpg";
-import catCompressors from "@/assets/cat-compressors.jpg";
-import catRecovery from "@/assets/cat-recovery-new.jpg";
-import catPlanners from "@/assets/cat-planners.jpg";
-import catVehicleProtection from "@/assets/cat-vehicle-protection.jpg";
-import catMerch from "@/assets/cat-merch.jpg";
+import { CATEGORIES, type CategorySlug } from "@/lib/categories";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -39,18 +30,18 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const CATEGORIES = [
-  { label: "PERFORMANCE", slug: "performance", img: catPerformance, Icon: Gauge },
-  { label: "12V & VEHICLE MONITORING", slug: "monitoring", img: catMonitoring, Icon: BatteryCharging },
-  { label: "GPS & TRACKING", slug: "gps-tracking", img: catGps, Icon: Satellite },
-  { label: "LIGHTING", slug: "lighting", img: catLighting, Icon: Lightbulb },
-  { label: "AIR COMPRESSORS", slug: "air-compressors", img: catCompressors, Icon: Wind },
-  { label: "RECOVERY GEAR", slug: "recovery", img: catRecovery, Icon: LifeBuoy },
-  { label: "TOURING & CAMPING", slug: "touring", img: catTouring, Icon: Tent },
-  { label: "VEHICLE PROTECTION", slug: "vehicle-protection", img: catVehicleProtection, Icon: Shield },
-  { label: "ROAMFORGE MERCH", slug: "merch", img: catMerch, Icon: Shirt },
-  { label: "PLANNERS", slug: "planners", img: catPlanners, Icon: ClipboardList },
-];
+const CATEGORY_ICONS: Record<CategorySlug, React.ComponentType<{ className?: string }>> = {
+  performance: Gauge,
+  monitoring: BatteryCharging,
+  "gps-tracking": Satellite,
+  lighting: Lightbulb,
+  "air-compressors": Wind,
+  recovery: LifeBuoy,
+  touring: Tent,
+  "vehicle-protection": Shield,
+  merch: Shirt,
+  planners: ClipboardList,
+};
 
 const WHY = [
   { Icon: MapIcon, title: "AUSTRALIAN OWNED", desc: "WA based adventure brand supporting local." },
@@ -114,16 +105,18 @@ function Index() {
         <div className="mx-auto max-w-7xl px-4 lg:px-8">
           <SectionHeading>SHOP BY CATEGORY</SectionHeading>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-            {CATEGORIES.map(({ label, slug, img, Icon }) => (
+            {CATEGORIES.map((c) => {
+              const Icon = CATEGORY_ICONS[c.slug];
+              return (
               <Link
-                key={label}
+                key={c.slug}
                 to="/category/$slug"
-                params={{ slug }}
+                params={{ slug: c.slug }}
                 className="group relative block aspect-[4/5] overflow-hidden bg-rf-dark"
               >
                 <img
-                  src={img}
-                  alt={label}
+                  src={c.image}
+                  alt={c.label}
                   loading="lazy"
                   className="h-full w-full object-cover opacity-75 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:scale-110"
                 />
@@ -135,14 +128,15 @@ function Index() {
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-5">
                   <span className="block font-display tracking-[0.18em] text-rf-cream text-sm leading-tight">
-                    {label}
+                    {c.label}
                   </span>
                   <span className="mt-1 inline-block text-[10px] font-semibold tracking-[0.25em] text-rf-tan opacity-0 -translate-y-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
                     SHOP →
                   </span>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
