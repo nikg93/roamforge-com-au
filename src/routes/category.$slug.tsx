@@ -55,11 +55,12 @@ function CategoryPage() {
   useCartSync();
   const { slug } = Route.useParams();
   const cfg = isCategorySlug(slug) ? CATEGORY_MAP[slug] : undefined;
-  if (!cfg) return null;
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products", "category", slug],
-    queryFn: () => fetchProducts(50, cfg.query),
+    queryFn: () => fetchProducts(50, cfg!.query),
+    enabled: !!cfg,
   });
+  if (!cfg) return null;
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
