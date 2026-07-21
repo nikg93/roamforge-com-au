@@ -37,7 +37,7 @@ export function CartDrawer() {
       <SheetTrigger asChild>
         <button
           aria-label="Open cart"
-          className="relative grid h-9 w-9 place-items-center rounded-full text-rf-cream/90 hover:text-rf-tan transition-colors"
+          className="relative grid h-11 w-11 place-items-center rounded-full text-rf-cream/90 hover:text-rf-tan transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
         >
           <ShoppingCart className="h-5 w-5" />
           {totalItems > 0 && (
@@ -92,21 +92,21 @@ export function CartDrawer() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-9 w-9"
+                          className="h-11 w-11"
                           aria-label={`Remove ${item.product.node.title} from cart`}
                           onClick={() => removeItem(item.variantId)}
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                         <div className="flex items-center gap-1">
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-9 w-9"
+                            className="h-11 w-11"
                             aria-label={`Decrease quantity of ${item.product.node.title}`}
                             onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
                           >
-                            <Minus className="h-3 w-3" />
+                            <Minus className="h-4 w-4" />
                           </Button>
                           <span aria-live="polite" className="w-8 text-center text-sm">
                             {item.quantity}
@@ -114,11 +114,11 @@ export function CartDrawer() {
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-9 w-9"
+                            className="h-11 w-11"
                             aria-label={`Increase quantity of ${item.product.node.title}`}
                             onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
                           >
-                            <Plus className="h-3 w-3" />
+                            <Plus className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
