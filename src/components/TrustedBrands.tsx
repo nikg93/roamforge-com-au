@@ -3,9 +3,10 @@ import { SectionHeading } from "./SectionHeading";
 import ultimate9 from "@/assets/brands/ultimate9.png";
 import airOnBoard from "@/assets/brands/air-on-board.png";
 import jmFab from "@/assets/brands/jm-fab.png";
+import type { CategorySlug } from "@/lib/categories";
 
-const BRANDS = [
-  { name: "Ultimate9", logo: ultimate9, slug: "throttle-controllers" },
+const BRANDS: Array<{ name: string; logo: string; slug: CategorySlug }> = [
+  { name: "Ultimate9", logo: ultimate9, slug: "performance" },
   { name: "Air On Board", logo: airOnBoard, slug: "air-compressors" },
   { name: "JM Fab", logo: jmFab, slug: "vehicle-protection" },
 ];

@@ -5,7 +5,11 @@ export const Route = createFileRoute("/returns")({
   head: () => ({
     meta: [
       { title: "Returns & Refunds | Roamforge" },
-      { name: "description", content: "Roamforge change-of-mind, faulty and damaged product returns under Australian Consumer Law." },
+      {
+        name: "description",
+        content:
+          "Roamforge change-of-mind, faulty and damaged product returns under Australian Consumer Law.",
+      },
     ],
   }),
   component: ReturnsPage,
@@ -22,9 +26,14 @@ function ReturnsPage() {
         <li>The item is in original packaging</li>
         <li>The item is in resalable condition</li>
       </UL>
-      <P>Return shipping costs for change-of-mind returns are the responsibility of the customer.</P>
+      <P>
+        Return shipping costs for change-of-mind returns are the responsibility of the customer.
+      </P>
       <H2>Faulty or Damaged Products</H2>
-      <P>If your item arrives damaged, faulty, or incorrect, please contact us within 7 days of receiving your order.</P>
+      <P>
+        If your item arrives damaged, faulty, or incorrect, please contact us within 7 days of
+        receiving your order.
+      </P>
       <P>Where applicable, we will:</P>
       <UL>
         <li>Replace the item</li>

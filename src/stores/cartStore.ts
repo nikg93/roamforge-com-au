@@ -87,12 +87,18 @@ async function addLine(cartId: string, item: CartItem) {
   if (isCartNotFound(errs)) return { success: false, cartNotFound: true } as const;
   if (errs.length) return { success: false } as const;
   const lines = data?.data?.cartLinesAdd?.cart?.lines?.edges ?? [];
-  const line = lines.find((l: { node: { merchandise: { id: string }; id: string } }) => l.node.merchandise.id === item.variantId);
+  const line = lines.find(
+    (l: { node: { merchandise: { id: string }; id: string } }) =>
+      l.node.merchandise.id === item.variantId,
+  );
   return { success: true as const, lineId: line?.node?.id as string | undefined };
 }
 
 async function updateLine(cartId: string, lineId: string, quantity: number) {
-  const data = await storefrontApiRequest(CART_LINES_UPDATE, { cartId, lines: [{ id: lineId, quantity }] });
+  const data = await storefrontApiRequest(CART_LINES_UPDATE, {
+    cartId,
+    lines: [{ id: lineId, quantity }],
+  });
   const errs = data?.data?.cartLinesUpdate?.userErrors ?? [];
   if (isCartNotFound(errs)) return { success: false, cartNotFound: true } as const;
   if (errs.length) return { success: false } as const;
@@ -136,7 +142,11 @@ export const useCartStore = create<CartStore>()(
             const result = await updateLine(cartId, existing.lineId, newQty);
             if (result.success) {
               const cur = get().items;
-              set({ items: cur.map((i) => (i.variantId === item.variantId ? { ...i, quantity: newQty } : i)) });
+              set({
+                items: cur.map((i) =>
+                  i.variantId === item.variantId ? { ...i, quantity: newQty } : i,
+                ),
+              });
             } else if ("cartNotFound" in result && result.cartNotFound) clearCart();
           } else {
             const result = await addLine(cartId, { ...item, lineId: null });
@@ -177,7 +187,8 @@ export const useCartStore = create<CartStore>()(
           if (r.success) {
             const cur = get().items;
             const next = cur.filter((i) => i.variantId !== variantId);
-            next.length === 0 ? clearCart() : set({ items: next });
+            if (next.length === 0) clearCart();
+            else set({ items: next });
           } else if ("cartNotFound" in r && r.cartNotFound) clearCart();
         } finally {
           set({ isLoading: false });
@@ -188,14 +199,18 @@ export const useCartStore = create<CartStore>()(
       getCheckoutUrl: () => get().checkoutUrl,
 
       syncCart: async () => {
-        const { cartId, isSyncing, clearCart } = get();
-        if (!cartId || isSyncing) return;
+        const { cartId, isSyncing, isLoading, clearCart } = get();
+        // Never sync while a mutation is in flight — the local cart may hold an
+        // item that hasn't reached Shopify yet, and clearing it would drop it.
+        if (!cartId || isSyncing || isLoading) return;
         set({ isSyncing: true });
         try {
           const data = await storefrontApiRequest(CART_QUERY, { id: cartId });
           if (!data) return;
           const cart = data?.data?.cart;
-          if (!cart || cart.totalQuantity === 0) clearCart();
+          // Re-check isLoading after the network round-trip; if the user added
+          // an item mid-sync, keep the local state.
+          if ((!cart || cart.totalQuantity === 0) && !get().isLoading) clearCart();
         } finally {
           set({ isSyncing: false });
         }

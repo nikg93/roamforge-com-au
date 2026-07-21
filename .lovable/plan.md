@@ -1,4 +1,3 @@
-
 # Roamforge — Technical Audit (Read-Only)
 
 Scope: source review only. Rankings — **P0** blocker, **P1** high, **P2** medium, **P3** low. "Confirmed" = visible in code; "Risk" = likely but not verified at runtime.

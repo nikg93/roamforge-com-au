@@ -5,7 +5,10 @@ export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
       { title: "Privacy Policy | Roamforge" },
-      { name: "description", content: "How Roamforge collects, uses and protects your personal information." },
+      {
+        name: "description",
+        content: "How Roamforge collects, uses and protects your personal information.",
+      },
     ],
   }),
   component: PrivacyPage,
@@ -35,11 +38,22 @@ function PrivacyPage() {
         <li>Send promotional communications (where consent has been provided)</li>
       </UL>
       <H2>Data Security</H2>
-      <P>We take reasonable steps to protect your personal information from unauthorised access, disclosure, or misuse.</P>
+      <P>
+        We take reasonable steps to protect your personal information from unauthorised access,
+        disclosure, or misuse.
+      </P>
       <H2>Third-Party Services</H2>
-      <P>We may use trusted third-party providers including payment processors and shipping carriers to fulfil orders.</P>
+      <P>
+        We may use trusted third-party providers including payment processors and shipping carriers
+        to fulfil orders.
+      </P>
       <H2>Contact</H2>
-      <P>For privacy-related enquiries, contact: <a className="text-rf-tan underline" href="mailto:privacy@roamforge.com.au">privacy@roamforge.com.au</a></P>
+      <P>
+        For privacy-related enquiries, contact:{" "}
+        <a className="text-rf-tan underline" href="mailto:privacy@roamforge.com.au">
+          privacy@roamforge.com.au
+        </a>
+      </P>
     </PageShell>
   );
 }

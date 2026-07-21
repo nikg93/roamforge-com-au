@@ -25,10 +25,11 @@ export function CartDrawer() {
 
   const handleCheckout = () => {
     const url = getCheckoutUrl();
-    if (url) {
-      window.open(url, "_blank");
-      setIsOpen(false);
-    }
+    if (!url) return;
+    setIsOpen(false);
+    // Synchronous navigation inside the click handler avoids Safari/iOS popup blockers
+    // that reject window.open called from async callbacks.
+    window.location.assign(url);
   };
 
   return (
@@ -50,7 +51,9 @@ export function CartDrawer() {
         <SheetHeader className="flex-shrink-0">
           <SheetTitle className="font-display tracking-wide">YOUR CART</SheetTitle>
           <SheetDescription>
-            {totalItems === 0 ? "Your cart is empty" : `${totalItems} item${totalItems !== 1 ? "s" : ""}`}
+            {totalItems === 0
+              ? "Your cart is empty"
+              : `${totalItems} item${totalItems !== 1 ? "s" : ""}`}
           </SheetDescription>
         </SheetHeader>
         <div className="flex flex-col flex-1 pt-6 min-h-0">

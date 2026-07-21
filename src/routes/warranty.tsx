@@ -5,7 +5,10 @@ export const Route = createFileRoute("/warranty")({
   head: () => ({
     meta: [
       { title: "Warranty Information | Roamforge" },
-      { name: "description", content: "Warranty coverage, claim process and exclusions for Roamforge products." },
+      {
+        name: "description",
+        content: "Warranty coverage, claim process and exclusions for Roamforge products.",
+      },
     ],
   }),
   component: WarrantyPage,
@@ -14,7 +17,10 @@ export const Route = createFileRoute("/warranty")({
 function WarrantyPage() {
   return (
     <PageShell eyebrow="WARRANTY" title="Warranty Information">
-      <P>Roamforge partners with reputable suppliers and manufacturers to provide quality products backed by warranty coverage.</P>
+      <P>
+        Roamforge partners with reputable suppliers and manufacturers to provide quality products
+        backed by warranty coverage.
+      </P>
       <H2>Manufacturer Warranty</H2>
       <P>Many products sold by Roamforge are covered by the original manufacturer's warranty.</P>
       <P>Warranty periods vary between brands and products.</P>
@@ -25,7 +31,12 @@ function WarrantyPage() {
         <li>Description of the issue</li>
         <li>Photos or videos showing the fault (if applicable)</li>
       </UL>
-      <P>Claims can be submitted via: <a className="text-rf-tan underline" href="mailto:warranty@roamforge.com.au">warranty@roamforge.com.au</a></P>
+      <P>
+        Claims can be submitted via:{" "}
+        <a className="text-rf-tan underline" href="mailto:warranty@roamforge.com.au">
+          warranty@roamforge.com.au
+        </a>
+      </P>
       <H2>Exclusions</H2>
       <P>Warranty coverage generally does not apply to:</P>
       <UL>
