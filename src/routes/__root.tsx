@@ -14,10 +14,12 @@ import favicon from "../assets/logo.png?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { Integrations } from "@/components/Integrations";
+import { useCartSync } from "@/hooks/useCartSync";
+import { SITE_URL } from "@/lib/seo";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <p className="text-7xl font-bold text-foreground">404</p>
         <h1 className="mt-4 text-xl font-semibold text-foreground">Page not found</h1>
@@ -45,7 +47,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="text-xl font-semibold tracking-tight text-foreground">
           This page didn't load
@@ -80,19 +82,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Roamforge" },
-      {
-        name: "description",
-        content: "Premium 4WD, camping and touring gear tested for Australian conditions.",
-      },
       { name: "author", content: "Roamforge" },
       { name: "google-site-verification", content: "mu2c75c6izPtXaUYCdNONswlHXEdBPLNSKjSY_nLPGQ" },
-      { property: "og:title", content: "Roamforge — Forged for Adventure" },
-      {
-        property: "og:description",
-        content: "Premium 4WD, camping and touring gear tested for Australian conditions.",
-      },
-      { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "Roamforge" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
@@ -108,6 +100,33 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap",
       },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": `${SITE_URL}/#org`,
+              name: "Roamforge",
+              url: SITE_URL,
+              logo: `${SITE_URL}/favicon.ico`,
+              areaServed: "AU",
+              sameAs: ["https://instagram.com/roam_forge"],
+            },
+            {
+              "@type": "WebSite",
+              "@id": `${SITE_URL}/#website`,
+              url: SITE_URL,
+              name: "Roamforge",
+              inLanguage: "en-AU",
+              publisher: { "@id": `${SITE_URL}/#org` },
+            },
+          ],
+        }),
+      },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
@@ -117,7 +136,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en-AU">
       <head>
         <HeadContent />
       </head>
@@ -131,6 +150,7 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useCartSync();
 
   return (
     <QueryClientProvider client={queryClient}>
