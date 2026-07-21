@@ -127,23 +127,25 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             </p>
           )}
           {results.length > 0 && (
-            <ul className="divide-y divide-rf-dark/10" role="listbox" aria-label="Search results">
+            <ul className="divide-y divide-rf-dark/10" aria-label="Search results">
               {results.map((p) => {
                 const img = p.node.images.edges[0]?.node ?? p.node.featuredImage;
                 const price = p.node.priceRange.minVariantPrice;
                 return (
-                  <li key={p.node.id} role="option" aria-selected="false">
+                  <li key={p.node.id}>
                     <Link
                       to="/product/$handle"
                       params={{ handle: p.node.handle }}
                       onClick={() => onOpenChange(false)}
-                      className="flex items-center gap-4 px-4 py-3 hover:bg-rf-dark/5 focus:bg-rf-dark/5 focus:outline-none"
+                      className="flex items-center gap-4 px-4 py-3 hover:bg-rf-dark/5 focus-visible:bg-rf-dark/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rf-tan"
                     >
                       <div className="h-14 w-14 flex-shrink-0 overflow-hidden bg-secondary">
                         {img && (
                           <img
                             src={img.url}
                             alt=""
+                            width={56}
+                            height={56}
                             className="h-full w-full object-cover"
                             loading="lazy"
                           />
