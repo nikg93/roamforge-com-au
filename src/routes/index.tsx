@@ -33,7 +33,7 @@ export const Route = createFileRoute("/")({
       path: "/",
       title: "Roamforge — Forged for Adventure | 4WD, Camping & Touring Gear",
       description:
-        "Premium 4WD, camping and touring gear tested for Australian conditions. Recovery, electrical, camping and Roamforge merch.",
+        "Premium 4WD, camping and touring gear selected for Australian adventures. Recovery, electrical, camping and Roamforge merch.",
     }),
   component: Index,
 });
@@ -85,7 +85,7 @@ function Index() {
                   <span className="text-rf-tan">FOR ADVENTURE</span>
                 </h1>
                 <p className="mt-5 text-base sm:text-lg text-rf-cream/85 max-w-md">
-                  Premium 4WD, camping and touring gear tested for Australian conditions.
+                  Premium 4WD, camping and touring gear selected for Australian adventures.
                 </p>
                 <div className="mt-7 flex flex-wrap gap-3">
                   <Link
