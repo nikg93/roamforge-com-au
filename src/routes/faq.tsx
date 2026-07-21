@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { canonicalFor } from "@/lib/seo";
 import { PageShell, H3, P } from "@/components/PageShell";
 
 export const Route = createFileRoute("/faq")({
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/faq")({
           "Frequently asked questions about Roamforge shipping, returns, payments and warranty.",
       },
     ],
+    links: [{ rel: "canonical", href: canonicalFor("/faq") }],
   }),
   component: FAQPage,
 });

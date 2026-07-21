@@ -21,11 +21,11 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SectionHeading } from "@/components/SectionHeading";
 import { TrustedBrands } from "@/components/TrustedBrands";
 import { LifestyleSection } from "@/components/LifestyleSection";
-import { useCartSync } from "@/hooks/useCartSync";
 import logo from "@/assets/logo.png";
 import heroPatrolAsset from "@/assets/troll3n-real.jpg.asset.json";
 const heroPatrol = heroPatrolAsset.url;
 import { CATEGORIES, type CategorySlug } from "@/lib/categories";
+import { canonicalFor, SITE_URL } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -41,7 +41,15 @@ export const Route = createFileRoute("/")({
         property: "og:description",
         content: "Premium 4WD, camping and touring gear tested for Australian conditions.",
       },
+      { property: "og:url", content: SITE_URL },
+      { property: "og:type", content: "website" },
+      { name: "twitter:title", content: "Roamforge — Forged for Adventure" },
+      {
+        name: "twitter:description",
+        content: "Premium 4WD, camping and touring gear tested for Australian conditions.",
+      },
     ],
+    links: [{ rel: "canonical", href: canonicalFor("/") }],
   }),
   component: Index,
 });
@@ -72,10 +80,8 @@ const WHY = [
 ];
 
 function Index() {
-  useCartSync();
-
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="min-h-dvh flex flex-col bg-background">
       <SiteHeader />
 
       {/* HERO */}
@@ -84,6 +90,9 @@ function Index() {
           <img
             src={heroPatrol}
             alt="Roamforge TROLL3N Nissan Patrol"
+            width={1920}
+            height={620}
+            fetchPriority="high"
             className="h-[420px] w-full object-cover object-center sm:h-[520px] lg:h-[620px]"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-rf-dark/85 via-rf-dark/55 to-rf-dark/10" />

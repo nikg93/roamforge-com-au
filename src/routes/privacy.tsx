@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { canonicalFor } from "@/lib/seo";
 import { PageShell, H2, P, UL } from "@/components/PageShell";
 
 export const Route = createFileRoute("/privacy")({
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/privacy")({
         content: "How Roamforge collects, uses and protects your personal information.",
       },
     ],
+    links: [{ rel: "canonical", href: canonicalFor("/privacy") }],
   }),
   component: PrivacyPage,
 });

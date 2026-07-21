@@ -92,7 +92,8 @@ export function CartDrawer() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-6 w-6"
+                          className="h-9 w-9"
+                          aria-label={`Remove ${item.product.node.title} from cart`}
                           onClick={() => removeItem(item.variantId)}
                         >
                           <Trash2 className="h-3 w-3" />
@@ -101,16 +102,20 @@ export function CartDrawer() {
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-6 w-6"
+                            className="h-9 w-9"
+                            aria-label={`Decrease quantity of ${item.product.node.title}`}
                             onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
-                          <span className="w-8 text-center text-sm">{item.quantity}</span>
+                          <span aria-live="polite" className="w-8 text-center text-sm">
+                            {item.quantity}
+                          </span>
                           <Button
                             variant="outline"
                             size="icon"
-                            className="h-6 w-6"
+                            className="h-9 w-9"
+                            aria-label={`Increase quantity of ${item.product.node.title}`}
                             onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
                           >
                             <Plus className="h-3 w-3" />

@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { canonicalFor } from "@/lib/seo";
 import { PageShell, H2, P } from "@/components/PageShell";
 
 export const Route = createFileRoute("/contact")({
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/contact")({
           "Contact Roamforge for product, order or adventure enquiries. Based in Western Australia.",
       },
     ],
+    links: [{ rel: "canonical", href: canonicalFor("/contact") }],
   }),
   component: ContactPage,
 });

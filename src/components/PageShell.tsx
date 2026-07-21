@@ -12,7 +12,7 @@ export function PageShell({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-rf-cream text-rf-dark">
+    <div className="min-h-dvh bg-rf-cream text-rf-dark">
       <SiteHeader />
       <section className="bg-rf-dark text-rf-cream">
         <div className="mx-auto max-w-4xl px-4 py-16 lg:px-8 lg:py-20">
