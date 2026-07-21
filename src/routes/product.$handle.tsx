@@ -134,7 +134,8 @@ function ProductPage() {
   const adding = useCartStore((s) => s.isLoading);
   const [variantIdx, setVariantIdx] = useState(0);
   const p = data.node;
-  const descriptionHtml = sanitizeProductHtml(p.description);
+  // Prefer Shopify's rich descriptionHtml; fall back to plaintext description.
+  const descriptionHtml = sanitizeProductHtml(p.descriptionHtml || p.description);
 
   return (
     <div className="min-h-dvh flex flex-col">

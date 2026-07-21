@@ -1,7 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Search as SearchIcon, X, Loader2 } from "lucide-react";
+import { Search as SearchIcon, Loader2 } from "lucide-react";
 import { fetchProducts, type ShopifyProduct } from "@/lib/shopify";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface SearchDialogProps {
   open: boolean;
@@ -22,15 +29,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
   const debounced = useDebouncedValue(query.trim(), 300);
   const [results, setResults] = useState<ShopifyProduct[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "done">("idle");
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onOpenChange(false);
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, onOpenChange]);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) {
@@ -49,7 +48,6 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
     }
     let cancelled = false;
     setStatus("loading");
-    // Shopify search: title or vendor match
     const q = debounced.replace(/"/g, "").trim();
     const shopifyQuery = `title:*${q}* OR vendor:*${q}* OR tag:*${q}*`;
     fetchProducts(12, shopifyQuery)
@@ -67,23 +65,37 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
     };
   }, [debounced, open]);
 
-  if (!open) return null;
+  const liveMessage =
+    status === "loading"
+      ? "Searching…"
+      : status === "error"
+        ? "Search failed."
+        : status === "done"
+          ? results.length === 0
+            ? `No results for ${debounced}`
+            : `${results.length} result${results.length === 1 ? "" : "s"} for ${debounced}`
+          : "";
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label="Search products"
-      className="fixed inset-0 z-[60] flex items-start justify-center bg-rf-dark/80 px-4 pt-16 sm:pt-24"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onOpenChange(false);
-      }}
-    >
-      <div className="w-full max-w-2xl bg-rf-cream text-rf-dark shadow-2xl">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        className="max-w-2xl gap-0 overflow-hidden p-0"
+        onOpenAutoFocus={(e) => {
+          // Focus the input instead of the close button.
+          e.preventDefault();
+          inputRef.current?.focus();
+        }}
+      >
+        <DialogHeader className="sr-only">
+          <DialogTitle>Search products</DialogTitle>
+          <DialogDescription>
+            Search Roamforge by product name, brand or category tag.
+          </DialogDescription>
+        </DialogHeader>
         <div className="flex items-center gap-3 border-b border-rf-dark/10 px-4 py-3">
           <SearchIcon className="h-5 w-5 text-rf-dark/60" aria-hidden />
           <input
-            autoFocus
+            ref={inputRef}
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -94,16 +106,11 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
           {status === "loading" && (
             <Loader2 className="h-4 w-4 animate-spin text-rf-dark/60" aria-hidden />
           )}
-          <button
-            type="button"
-            onClick={() => onOpenChange(false)}
-            aria-label="Close search"
-            className="grid h-11 w-11 place-items-center text-rf-dark/70 hover:text-rf-dark"
-          >
-            <X className="h-5 w-5" />
-          </button>
         </div>
         <div className="max-h-[60vh] overflow-y-auto">
+          <div aria-live="polite" role="status" className="sr-only">
+            {liveMessage}
+          </div>
           {status === "idle" && (
             <p className="px-4 py-8 text-center text-sm text-rf-dark/60">
               Search by product, brand or category tag.
@@ -116,16 +123,16 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
           )}
           {status === "done" && results.length === 0 && (
             <p className="px-4 py-8 text-center text-sm text-rf-dark/60">
-              No products match "{debounced}".
+              No products match &ldquo;{debounced}&rdquo;.
             </p>
           )}
           {results.length > 0 && (
-            <ul className="divide-y divide-rf-dark/10">
+            <ul className="divide-y divide-rf-dark/10" role="listbox" aria-label="Search results">
               {results.map((p) => {
-                const img = p.node.images.edges[0]?.node;
+                const img = p.node.images.edges[0]?.node ?? p.node.featuredImage;
                 const price = p.node.priceRange.minVariantPrice;
                 return (
-                  <li key={p.node.id}>
+                  <li key={p.node.id} role="option" aria-selected="false">
                     <Link
                       to="/product/$handle"
                       params={{ handle: p.node.handle }}
@@ -133,7 +140,14 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
                       className="flex items-center gap-4 px-4 py-3 hover:bg-rf-dark/5 focus:bg-rf-dark/5 focus:outline-none"
                     >
                       <div className="h-14 w-14 flex-shrink-0 overflow-hidden bg-secondary">
-                        {img && <img src={img.url} alt="" className="h-full w-full object-cover" />}
+                        {img && (
+                          <img
+                            src={img.url}
+                            alt=""
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                          />
+                        )}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-medium text-rf-dark">{p.node.title}</p>
@@ -148,7 +162,7 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
             </ul>
           )}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
