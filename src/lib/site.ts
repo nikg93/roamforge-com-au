@@ -4,8 +4,7 @@
 
 export const SITE = {
   name: "Roamforge",
-  description:
-    "Premium 4WD, camping and touring gear selected for Australian adventures.",
+  description: "Premium 4WD, camping and touring gear selected for Australian adventures.",
   url: "https://roamforge.com.au",
   locale: "en-AU",
   currency: "AUD",

@@ -53,7 +53,11 @@ const CATEGORY_ICONS: Record<CategorySlug, React.ComponentType<{ className?: str
 
 const WHY = [
   { Icon: MapIcon, title: "AUSTRALIAN OWNED", desc: "WA based adventure brand supporting local." },
-  { Icon: Award, title: "TRUSTED BRANDS", desc: "Curated gear from established Australian brands." },
+  {
+    Icon: Award,
+    title: "TRUSTED BRANDS",
+    desc: "Curated gear from established Australian brands.",
+  },
   { Icon: ShieldCheck, title: "SECURE CHECKOUT", desc: "Encrypted payments via Shopify." },
   { Icon: Truck, title: "AUSTRALIA-WIDE DELIVERY", desc: "Shipping right across Australia." },
   { Icon: Compass, title: "BUILT FOR TOURING", desc: "Selected for real Australian touring." },

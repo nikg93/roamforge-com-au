@@ -7,7 +7,8 @@ export const Route = createFileRoute("/about")({
     routeMeta({
       path: "/about",
       title: "About Roamforge | Australian 4WD & Touring Gear",
-      description: "Founded in Western Australia, Roamforge supplies premium 4WD, camping and touring gear for Australian adventures.",
+      description:
+        "Founded in Western Australia, Roamforge supplies premium 4WD, camping and touring gear for Australian adventures.",
     }),
   component: AboutPage,
 });
