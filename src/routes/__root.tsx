@@ -16,25 +16,30 @@ import { Toaster } from "@/components/ui/sonner";
 import { Integrations } from "@/components/Integrations";
 import { useCartSync } from "@/hooks/useCartSync";
 import { SITE_URL } from "@/lib/seo";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <p className="text-7xl font-bold text-foreground">404</p>
-        <h1 className="mt-4 text-xl font-semibold text-foreground">Page not found</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+    <div className="flex min-h-dvh flex-col bg-background">
+      <SiteHeader />
+      <main
+        role="main"
+        className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center px-4 py-20 text-center"
+      >
+        <p className="font-display text-7xl tracking-widest text-rf-dark">404</p>
+        <h1 className="mt-4 font-display text-2xl tracking-widest text-rf-dark">PAGE NOT FOUND</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
-      </div>
+        <Link
+          to="/"
+          className="mt-6 inline-flex items-center justify-center bg-rf-dark px-5 py-3 text-sm font-medium tracking-widest text-rf-cream hover:bg-rf-dark-2"
+        >
+          GO HOME
+        </Link>
+      </main>
+      <SiteFooter />
     </div>
   );
 }
@@ -47,32 +52,37 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+    <div className="flex min-h-dvh flex-col bg-background">
+      <SiteHeader />
+      <main
+        role="main"
+        className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center px-4 py-20 text-center"
+      >
+        <h1 className="font-display text-2xl tracking-widest text-rf-dark">
+          THIS PAGE DIDN&apos;T LOAD
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-3 text-sm text-muted-foreground">
           Something went wrong on our end. You can try refreshing or head back home.
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center bg-rf-dark px-5 py-3 text-sm font-medium tracking-widest text-rf-cream hover:bg-rf-dark-2"
           >
-            Try again
+            TRY AGAIN
           </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center border border-rf-dark px-5 py-3 text-sm font-medium tracking-widest text-rf-dark hover:bg-rf-dark hover:text-rf-cream"
           >
-            Go home
-          </a>
+            GO HOME
+          </Link>
         </div>
-      </div>
+      </main>
+      <SiteFooter />
     </div>
   );
 }
