@@ -147,11 +147,7 @@ export function SiteHeader() {
           <CartDrawer />
         </div>
       </div>
-      <SearchDialog
-        open={searchOpen}
-        onOpenChange={setSearchOpen}
-        triggerRef={searchTriggerRef}
-      />
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} triggerRef={searchTriggerRef} />
     </header>
   );
 }
