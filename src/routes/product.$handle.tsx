@@ -323,9 +323,7 @@ function ProductPageInner() {
                     <button
                       type="button"
                       onClick={() =>
-                        setImageIdx(
-                          (i) => (i - 1 + galleryImages.length) % galleryImages.length,
-                        )
+                        setImageIdx((i) => (i - 1 + galleryImages.length) % galleryImages.length)
                       }
                       aria-label="Previous image"
                       className="absolute left-2 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-rf-cream/90 text-rf-dark shadow-sm hover:bg-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
@@ -334,9 +332,7 @@ function ProductPageInner() {
                     </button>
                     <button
                       type="button"
-                      onClick={() =>
-                        setImageIdx((i) => (i + 1) % galleryImages.length)
-                      }
+                      onClick={() => setImageIdx((i) => (i + 1) % galleryImages.length)}
                       aria-label="Next image"
                       className="absolute right-2 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-rf-cream/90 text-rf-dark shadow-sm hover:bg-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
                     >
@@ -397,7 +393,9 @@ function ProductPageInner() {
                   Variant:{" "}
                   <span className="text-rf-dark">
                     {selectedVariant.selectedOptions?.length
-                      ? selectedVariant.selectedOptions.map((o) => `${o.name}: ${o.value}`).join(" · ")
+                      ? selectedVariant.selectedOptions
+                          .map((o) => `${o.name}: ${o.value}`)
+                          .join(" · ")
                       : selectedVariant.title}
                   </span>
                 </p>
@@ -561,9 +559,7 @@ function ProductPageInner() {
             <p className="text-sm font-semibold text-rf-dark">
               ${priceNum.toFixed(2)} {displayPrice.currencyCode}
             </p>
-            <p
-              className={`text-[11px] ${canAdd ? "text-emerald-700" : "text-destructive"}`}
-            >
+            <p className={`text-[11px] ${canAdd ? "text-emerald-700" : "text-destructive"}`}>
               {canAdd ? "In stock" : "Sold out"}
             </p>
           </div>

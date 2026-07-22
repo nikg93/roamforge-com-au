@@ -11,10 +11,7 @@ export const SHOPIFY_STOREFRONT_TOKEN = SHOPIFY.storefrontToken;
  * honours a `width` query param and reformats the source, so we can request
  * multiple sizes for the browser to pick from.
  */
-export function shopifySrcSet(
-  url: string,
-  widths: number[] = [400, 600, 900, 1200, 1600],
-): string {
+export function shopifySrcSet(url: string, widths: number[] = [400, 600, 900, 1200, 1600]): string {
   try {
     return widths
       .map((w) => {

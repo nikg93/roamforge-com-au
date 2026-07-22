@@ -12,9 +12,10 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
   // Prefer Shopify's own resolution of which variant to surface — survives
   // beyond the `variants(first:)` grid limit and matches Shopify storefronts.
   const chosen = product.node.selectedOrFirstAvailableVariant;
-  const fallback = product.node.variants?.edges?.find((e) => e.node.availableForSale)?.node
-    ?? product.node.variants?.edges?.[0]?.node
-    ?? null;
+  const fallback =
+    product.node.variants?.edges?.find((e) => e.node.availableForSale)?.node ??
+    product.node.variants?.edges?.[0]?.node ??
+    null;
   const variant = chosen ?? fallback;
   const productAvailable = product.node.availableForSale;
   const inStock =
