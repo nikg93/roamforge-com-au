@@ -6,6 +6,11 @@ import { SITE } from "./site";
 // Re-export for callers that historically imported SITE_URL from here.
 export const SITE_URL = SITE.url;
 
+// Branded default social preview served from our own domain. Used whenever
+// a route doesn't provide a page-specific hero image, so shared links show
+// Roamforge branding instead of an auto-generated preview screenshot.
+export const DEFAULT_OG_IMAGE = `${SITE.url}/og-default.jpg`;
+
 export function canonicalFor(path: string): string {
   const clean = path.startsWith("/") ? path : `/${path}`;
   // Strip trailing slash except for root, and drop any query string.
@@ -36,13 +41,13 @@ export function routeMeta(input: RouteMetaInput) {
     { name: "twitter:title", content: input.title },
     { name: "twitter:description", content: input.description },
   ];
-  // og:image is only added when the caller can supply an absolute URL. A
-  // Vite-hashed asset path would resolve differently across preview / prod
-  // and can 404 for social crawlers, so we intentionally skip in that case.
-  if (input.image && /^https?:\/\//i.test(input.image)) {
-    meta.push({ property: "og:image", content: input.image });
-    meta.push({ name: "twitter:image", content: input.image });
-  }
+  // Prefer a page-specific absolute image; otherwise fall back to a
+  // branded default hosted on our own domain so shared links never rely on
+  // an auto-generated preview screenshot.
+  const image =
+    input.image && /^https?:\/\//i.test(input.image) ? input.image : DEFAULT_OG_IMAGE;
+  meta.push({ property: "og:image", content: image });
+  meta.push({ name: "twitter:image", content: image });
   if (input.noindex) meta.push({ name: "robots", content: "noindex, follow" });
   return {
     meta,
