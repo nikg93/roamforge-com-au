@@ -200,6 +200,10 @@ export const useCartStore = create<CartStore>()(
       isLoading: false,
       isSyncing: false,
       activeVariantIds: [],
+      isDrawerOpen: false,
+      openDrawer: () => set({ isDrawerOpen: true }),
+      closeDrawer: () => set({ isDrawerOpen: false }),
+      setDrawerOpen: (open) => set({ isDrawerOpen: open }),
 
       addItem: async (item) => {
         if (item.availableForSale === false) {
@@ -368,7 +372,10 @@ export const useCartStore = create<CartStore>()(
       },
 
       clearCart: () => set({ items: [], cartId: null, checkoutUrl: null }),
-      getCheckoutUrl: () => get().checkoutUrl,
+      getCheckoutUrl: () => {
+        const url = get().checkoutUrl;
+        return isValidCheckoutUrl(url) ? url : null;
+      },
 
       syncCart: async () => {
         const { cartId, isSyncing, isLoading, clearCart } = get();
