@@ -368,6 +368,8 @@ function ProductPageInner() {
                       >
                         <img
                           src={img.url}
+                          srcSet={shopifySrcSet(img.url, [120, 180, 240])}
+                          sizes="120px"
                           alt=""
                           width={120}
                           height={120}
@@ -497,7 +499,11 @@ function ProductPageInner() {
                   </h2>
                   <p className="mt-2 text-xs text-muted-foreground">
                     Compatible with: <span className="text-rf-dark">{fitment.join(", ")}</span>.
-                    Confirm the exact model and year with the manufacturer before ordering.
+                    Confirm compatibility before ordering —{" "}
+                    <Link to="/contact" className="underline hover:text-rf-dark">
+                      contact us
+                    </Link>{" "}
+                    if you&apos;re unsure about your vehicle.
                   </p>
                 </section>
               )}

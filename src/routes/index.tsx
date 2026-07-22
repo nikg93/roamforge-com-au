@@ -26,26 +26,22 @@ import logo from "@/assets/logo.png";
 import heroGear from "@/assets/lifestyle-journey.jpg";
 import { CATEGORIES, type CategorySlug } from "@/lib/categories";
 import { routeMeta } from "@/lib/seo";
-import { fetchFeaturedProducts } from "@/lib/shopify";
-import { queryOptions, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
-
-// Bounded featured-gear query. Rejection becomes an empty list so a Shopify
-// hiccup can't take down the homepage — the section just hides cleanly.
-const featuredQuery = queryOptions({
-  queryKey: ["featured-products", 4],
-  queryFn: async () => {
-    try {
-      return await fetchFeaturedProducts(4);
-    } catch {
-      return [];
-    }
-  },
-  staleTime: 5 * 60_000,
-  retry: 1,
-});
+import { fetchFeaturedProducts, type ShopifyProduct } from "@/lib/shopify";
 
 export const Route = createFileRoute("/")({
+  // Server-render featured products. The loader is bounded: any Shopify
+  // failure resolves to an empty list so the homepage renders cleanly and
+  // the Featured Gear section hides itself. Router SSR serialises the
+  // result and hydrates it on the client — no client refetch, no
+  // hydration mismatch.
+  loader: async () => {
+    try {
+      const featured = await fetchFeaturedProducts(4);
+      return { featured };
+    } catch {
+      return { featured: [] as ShopifyProduct[] };
+    }
+  },
   head: () =>
     routeMeta({
       path: "/",
@@ -252,12 +248,13 @@ function Index() {
 }
 
 function FeaturedGear() {
-  // Defer to post-hydration so SSR and initial client render both emit null
-  // (no hydration mismatch). Query kicks off once mounted.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  const { data } = useQuery({ ...featuredQuery, enabled: mounted });
-  if (!mounted || !data || data.length === 0) return null;
+  // Data is provided by the route loader (see Route.loader above). It is
+  // serialised on the server and hydrated on the client, so this section
+  // is fully server-rendered without any hydration mismatch or refetch.
+  // The loader swallows Shopify failures into an empty list, so a bad
+  // Storefront response just hides the section cleanly.
+  const { featured } = Route.useLoaderData();
+  if (!featured || featured.length === 0) return null;
   return (
     <section aria-labelledby="featured-heading" className="bg-background py-14">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
@@ -271,7 +268,7 @@ function FeaturedGear() {
           </Link>
         </div>
         <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-4">
-          {data.slice(0, 4).map((p) => (
+          {featured.slice(0, 4).map((p: ShopifyProduct) => (
             <ProductCard key={p.node.id} product={p} />
           ))}
         </div>
