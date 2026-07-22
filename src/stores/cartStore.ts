@@ -197,6 +197,9 @@ export const useCartStore = create<CartStore>()(
               toast.error(`Couldn't add to cart. ${result.errorMessage}`);
             }
           }
+        } catch (err) {
+          console.error("[cart] addItem failed", err);
+          toast.error("Couldn't add to cart. Please check your connection and try again.");
         } finally {
           set({ isLoading: false });
         }
@@ -219,6 +222,9 @@ export const useCartStore = create<CartStore>()(
           } else {
             toast.error(`Couldn't update quantity. ${r.errorMessage}`);
           }
+        } catch (err) {
+          console.error("[cart] updateQuantity failed", err);
+          toast.error("Couldn't update quantity. Please try again.");
         } finally {
           set({ isLoading: false });
         }
@@ -241,6 +247,9 @@ export const useCartStore = create<CartStore>()(
           } else {
             toast.error(`Couldn't remove item. ${r.errorMessage}`);
           }
+        } catch (err) {
+          console.error("[cart] removeItem failed", err);
+          toast.error("Couldn't remove item. Please try again.");
         } finally {
           set({ isLoading: false });
         }
@@ -262,6 +271,10 @@ export const useCartStore = create<CartStore>()(
           // Re-check isLoading after the network round-trip; if the user added
           // an item mid-sync, keep the local state.
           if ((!cart || cart.totalQuantity === 0) && !get().isLoading) clearCart();
+        } catch (err) {
+          // Transient failure — keep the local cart intact so a slow/offline
+          // network never destroys the user's selections.
+          console.error("[cart] syncCart failed", err);
         } finally {
           set({ isSyncing: false });
         }
