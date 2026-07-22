@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { storefrontApiRequest, type ShopifyProduct } from "@/lib/shopify";
+import { toast } from "sonner";
 
 export interface CartItem {
   lineId: string | null;
@@ -10,6 +11,7 @@ export interface CartItem {
   price: { amount: string; currencyCode: string };
   quantity: number;
   selectedOptions: Array<{ name: string; value: string }>;
+  availableForSale?: boolean;
 }
 
 interface CartStore {
@@ -63,15 +65,30 @@ function isCartNotFound(errs: Array<{ message: string }>) {
   });
 }
 
+type OpResult<T = unknown> =
+  | ({ success: true } & T)
+  | { success: false; cartNotFound?: boolean; errorMessage: string };
+
+function summarizeUserErrors(errs: Array<{ message: string }>): string {
+  const first = errs.find((e) => e.message)?.message;
+  return first ?? "Shopify rejected the request.";
+}
+
 async function createCart(item: CartItem) {
   const data = await storefrontApiRequest(CART_CREATE, {
     input: { lines: [{ quantity: item.quantity, merchandiseId: item.variantId }] },
   });
   const errs = data?.data?.cartCreate?.userErrors ?? [];
-  if (errs.length) return null;
+  if (errs.length) {
+    console.error("[cart] cartCreate userErrors", errs);
+    return { success: false as const, errorMessage: summarizeUserErrors(errs) };
+  }
   const cart = data?.data?.cartCreate?.cart;
-  if (!cart?.checkoutUrl) return null;
+  if (!cart?.checkoutUrl) {
+    return { success: false as const, errorMessage: "Could not create cart." };
+  }
   return {
+    success: true as const,
     cartId: cart.id as string,
     checkoutUrl: formatCheckoutUrl(cart.checkoutUrl),
     lineId: cart.lines.edges[0]?.node?.id as string,
@@ -84,8 +101,12 @@ async function addLine(cartId: string, item: CartItem) {
     lines: [{ quantity: item.quantity, merchandiseId: item.variantId }],
   });
   const errs = data?.data?.cartLinesAdd?.userErrors ?? [];
-  if (isCartNotFound(errs)) return { success: false, cartNotFound: true } as const;
-  if (errs.length) return { success: false } as const;
+  if (isCartNotFound(errs))
+    return { success: false as const, cartNotFound: true, errorMessage: "Cart expired." };
+  if (errs.length) {
+    console.error("[cart] cartLinesAdd userErrors", errs);
+    return { success: false as const, errorMessage: summarizeUserErrors(errs) };
+  }
   const lines = data?.data?.cartLinesAdd?.cart?.lines?.edges ?? [];
   const line = lines.find(
     (l: { node: { merchandise: { id: string }; id: string } }) =>
@@ -100,18 +121,29 @@ async function updateLine(cartId: string, lineId: string, quantity: number) {
     lines: [{ id: lineId, quantity }],
   });
   const errs = data?.data?.cartLinesUpdate?.userErrors ?? [];
-  if (isCartNotFound(errs)) return { success: false, cartNotFound: true } as const;
-  if (errs.length) return { success: false } as const;
+  if (isCartNotFound(errs))
+    return { success: false as const, cartNotFound: true, errorMessage: "Cart expired." };
+  if (errs.length) {
+    console.error("[cart] cartLinesUpdate userErrors", errs);
+    return { success: false as const, errorMessage: summarizeUserErrors(errs) };
+  }
   return { success: true as const };
 }
 
 async function removeLine(cartId: string, lineId: string) {
   const data = await storefrontApiRequest(CART_LINES_REMOVE, { cartId, lineIds: [lineId] });
   const errs = data?.data?.cartLinesRemove?.userErrors ?? [];
-  if (isCartNotFound(errs)) return { success: false, cartNotFound: true } as const;
-  if (errs.length) return { success: false } as const;
+  if (isCartNotFound(errs))
+    return { success: false as const, cartNotFound: true, errorMessage: "Cart expired." };
+  if (errs.length) {
+    console.error("[cart] cartLinesRemove userErrors", errs);
+    return { success: false as const, errorMessage: summarizeUserErrors(errs) };
+  }
   return { success: true as const };
 }
+
+// Ensure a caller-facing OpResult is unused var acceptable
+void 0 as unknown as OpResult;
 
 export const useCartStore = create<CartStore>()(
   persist(
@@ -124,17 +156,24 @@ export const useCartStore = create<CartStore>()(
 
       addItem: async (item) => {
         const { items, cartId, clearCart } = get();
+        // Guard: never send an unavailable variant to Shopify.
+        if (item.availableForSale === false) {
+          toast.error("This item is currently sold out.");
+          return;
+        }
         const existing = items.find((i) => i.variantId === item.variantId);
         set({ isLoading: true });
         try {
           if (!cartId) {
             const result = await createCart({ ...item, lineId: null });
-            if (result) {
+            if (result.success) {
               set({
                 cartId: result.cartId,
                 checkoutUrl: result.checkoutUrl,
                 items: [{ ...item, lineId: result.lineId }],
               });
+            } else {
+              toast.error(`Couldn't add to cart. ${result.errorMessage}`);
             }
           } else if (existing) {
             const newQty = existing.quantity + item.quantity;
@@ -147,13 +186,23 @@ export const useCartStore = create<CartStore>()(
                   i.variantId === item.variantId ? { ...i, quantity: newQty } : i,
                 ),
               });
-            } else if ("cartNotFound" in result && result.cartNotFound) clearCart();
+            } else if (result.cartNotFound) {
+              clearCart();
+              toast.error("Your cart expired. Please add the item again.");
+            } else {
+              toast.error(`Couldn't update cart. ${result.errorMessage}`);
+            }
           } else {
             const result = await addLine(cartId, { ...item, lineId: null });
             if (result.success) {
               const cur = get().items;
               set({ items: [...cur, { ...item, lineId: result.lineId ?? null }] });
-            } else if ("cartNotFound" in result && result.cartNotFound) clearCart();
+            } else if (result.cartNotFound) {
+              clearCart();
+              toast.error("Your cart expired. Please add the item again.");
+            } else {
+              toast.error(`Couldn't add to cart. ${result.errorMessage}`);
+            }
           }
         } finally {
           set({ isLoading: false });
@@ -171,7 +220,12 @@ export const useCartStore = create<CartStore>()(
           if (r.success) {
             const cur = get().items;
             set({ items: cur.map((i) => (i.variantId === variantId ? { ...i, quantity } : i)) });
-          } else if ("cartNotFound" in r && r.cartNotFound) clearCart();
+          } else if (r.cartNotFound) {
+            clearCart();
+            toast.error("Your cart expired.");
+          } else {
+            toast.error(`Couldn't update quantity. ${r.errorMessage}`);
+          }
         } finally {
           set({ isLoading: false });
         }
@@ -189,7 +243,11 @@ export const useCartStore = create<CartStore>()(
             const next = cur.filter((i) => i.variantId !== variantId);
             if (next.length === 0) clearCart();
             else set({ items: next });
-          } else if ("cartNotFound" in r && r.cartNotFound) clearCart();
+          } else if (r.cartNotFound) {
+            clearCart();
+          } else {
+            toast.error(`Couldn't remove item. ${r.errorMessage}`);
+          }
         } finally {
           set({ isLoading: false });
         }
