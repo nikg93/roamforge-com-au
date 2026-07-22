@@ -108,7 +108,11 @@ for (const f of routeFiles) {
   const hasMain = /<main[\s>]/.test(body) || /PageShell/.test(body);
   if (!hasMain) missingMain.push(f);
 }
-check("every content route provides a <main> landmark", missingMain.length === 0, missingMain.join(", "));
+check(
+  "every content route provides a <main> landmark",
+  missingMain.length === 0,
+  missingMain.join(", "),
+);
 
 console.log(
   `\n[qa:checks] ${failures.length === 0 ? "PASS" : `FAIL — ${failures.length} issue(s)`}`,
