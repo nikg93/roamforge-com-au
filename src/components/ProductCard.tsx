@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import type { ShopifyProduct } from "@/lib/shopify";
+import { shopifySrcSet, type ShopifyProduct } from "@/lib/shopify";
 import { useCartStore } from "@/stores/cartStore";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -63,6 +63,7 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
           {img && (
             <img
               src={img.url}
+              srcSet={shopifySrcSet(img.url, [300, 450, 600, 900])}
               alt={img.altText ?? product.node.title}
               width={600}
               height={600}
