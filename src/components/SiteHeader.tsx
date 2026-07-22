@@ -123,7 +123,7 @@ export function SiteHeader() {
           </Sheet>
 
           <Link to="/" className="flex items-center" aria-label="Roamforge home">
-            <img src={logo} alt="" className="h-12 w-auto" />
+            <img src={logo} alt="Roamforge" className="h-12 w-auto" />
           </Link>
         </div>
 
