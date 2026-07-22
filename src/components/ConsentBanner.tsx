@@ -102,8 +102,10 @@ export function ConsentBanner() {
           aria-label="Privacy preferences"
           // Mobile: pin to TOP so it never overlaps the PDP sticky Add-to-Cart,
           // cart drawer controls, or hero CTAs at the bottom of the viewport.
-          // Desktop (sm+): tuck into the bottom-left corner as a compact card.
-          className="fixed inset-x-0 top-0 z-40 sm:inset-x-auto sm:top-auto sm:bottom-4 sm:left-4 sm:max-w-sm"
+          // Mobile: pinned bottom, positioned above the sticky PDP Add-to-Cart
+          // bar (~72px + safe-area) so it can't cover it or the header.
+          // Desktop (sm+): compact card tucked into the bottom-left corner.
+          className="fixed inset-x-3 bottom-[calc(96px+env(safe-area-inset-bottom))] z-40 sm:inset-x-auto sm:bottom-4 sm:left-4 sm:max-w-sm"
           style={{ paddingTop: "env(safe-area-inset-top)" }}
         >
           <div className="border-b border-rf-dark bg-rf-cream text-rf-dark shadow-lg sm:rounded sm:border">
