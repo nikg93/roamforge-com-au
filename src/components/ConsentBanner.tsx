@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   CONSENT_OPEN_EVENT,
@@ -18,6 +18,8 @@ export function ConsentBanner() {
   const [showPanel, setShowPanel] = useState(false);
   const [analytics, setAnalytics] = useState(false);
   const [marketing, setMarketing] = useState(false);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
 
   // Hydrate from localStorage once the component mounts on the client.
   useEffect(() => {
@@ -57,6 +59,41 @@ export function ConsentBanner() {
   };
 
   const bannerVisible = !prefs.decided && !showPanel;
+
+  // Focus management + ESC to close the preferences dialog.
+  // Keeps focus inside the modal and returns it to the opener on close.
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    if (!showPanel) return;
+    previouslyFocused.current = (document.activeElement as HTMLElement) ?? null;
+    const node = dialogRef.current;
+    const focusables = node?.querySelectorAll<HTMLElement>(
+      'button, [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+    focusables?.[0]?.focus();
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.stopPropagation();
+        setShowPanel(false);
+      } else if (e.key === "Tab" && focusables && focusables.length > 0) {
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      previouslyFocused.current?.focus?.();
+    };
+  }, [showPanel]);
 
   return (
     <>
@@ -112,14 +149,21 @@ export function ConsentBanner() {
           role="dialog"
           aria-modal="true"
           aria-labelledby="consent-title"
+          aria-describedby="consent-desc"
           className="fixed inset-0 z-50 flex items-end justify-center bg-rf-dark/60 p-3 sm:items-center"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setShowPanel(false);
+          }}
         >
-          <div className="w-full max-w-lg rounded border border-rf-dark bg-rf-cream text-rf-dark shadow-xl">
+          <div
+            ref={dialogRef}
+            className="w-full max-w-lg rounded border border-rf-dark bg-rf-cream text-rf-dark shadow-xl"
+          >
             <div className="border-b border-rf-dark/10 p-5">
               <h2 id="consent-title" className="font-display text-xl tracking-widest">
                 PRIVACY PREFERENCES
               </h2>
-              <p className="mt-1 text-sm text-rf-dark/70">
+              <p id="consent-desc" className="mt-1 text-sm text-rf-dark/70">
                 Choose which tools we can load in your browser.
               </p>
             </div>
