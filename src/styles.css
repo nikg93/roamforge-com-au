@@ -1,6 +1,13 @@
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/oswald/500.css";
+@import "@fontsource/oswald/600.css";
+@import "@fontsource/oswald/700.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -162,5 +169,38 @@
   .font-display {
     font-family: "Oswald", "Inter", sans-serif;
     letter-spacing: 0.01em;
+  }
+
+  /* Skip link — visible only when focused via keyboard */
+  .skip-link {
+    position: absolute;
+    left: 0.5rem;
+    top: -3rem;
+    z-index: 100;
+    background: var(--rf-dark);
+    color: var(--rf-cream);
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    transition: top 0.15s ease;
+  }
+  .skip-link:focus {
+    top: 0.5rem;
+    outline: 2px solid var(--rf-tan);
+    outline-offset: 2px;
+  }
+
+  /* Respect prefers-reduced-motion: kill non-essential animation/transitions */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 }

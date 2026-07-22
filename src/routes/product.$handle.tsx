@@ -64,9 +64,6 @@ export const Route = createFileRoute("/product/$handle")({
       description: textFromHtml(p.descriptionHtml || p.description, 300) || p.title,
       image: p.images.edges.map((e) => e.node.url).slice(0, 5),
       url,
-      brand: p.vendor
-        ? { "@type": "Brand", name: p.vendor }
-        : { "@type": "Brand", name: "Roamforge" },
       offers: {
         "@type": "Offer",
         url,
@@ -75,6 +72,11 @@ export const Route = createFileRoute("/product/$handle")({
         availability: anyAvailable ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       },
     };
+    // Only advertise a brand when Shopify has a real vendor. Defaulting to
+    // Roamforge on unknown vendors would be misleading structured data.
+    if (p.vendor && p.vendor.trim()) {
+      productSchema.brand = { "@type": "Brand", name: p.vendor.trim() };
+    }
     if (sku) productSchema.sku = sku;
 
     return {

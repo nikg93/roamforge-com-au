@@ -9,7 +9,12 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsgo --noEmit",
+    "qa:static": "bun run format:check && bun run lint && bun run typecheck",
+    "qa:unit": "echo 'no unit tests configured'",
+    "qa": "bun run qa:static && bun run qa:unit"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",

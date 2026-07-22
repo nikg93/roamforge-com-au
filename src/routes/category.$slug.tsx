@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, notFound, Link, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -165,6 +165,14 @@ function CategoryPage() {
   const [hasNext, setHasNext] = useState<boolean>(!!initial?.pageInfo.hasNextPage);
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
+  // Reset pagination state whenever the slug changes so switching categories
+  // never leaks products from a previous category into the grid.
+  useEffect(() => {
+    setExtra([]);
+    setCursor(initial?.pageInfo.endCursor ?? null);
+    setHasNext(!!initial?.pageInfo.hasNextPage);
+    setLoadMoreError(null);
+  }, [slug, initial]);
   if (!cfg) return null;
 
   const seen = new Set<string>();
