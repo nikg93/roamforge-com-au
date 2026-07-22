@@ -11,9 +11,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsgo --noEmit",
+    "typecheck": "tsc --noEmit",
     "qa:static": "bun run format:check && bun run lint && bun run typecheck",
-    "qa:unit": "echo 'no unit tests configured'",
+    "qa:unit": "bun scripts/qa-unit.mjs",
     "qa": "bun run qa:static && bun run qa:unit"
   },
   "dependencies": {
