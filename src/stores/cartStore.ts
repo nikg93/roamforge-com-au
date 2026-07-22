@@ -224,6 +224,7 @@ export const useCartStore = create<CartStore>()(
               activeVariantIds: s.activeVariantIds.filter((v) => v !== item.variantId),
             }));
           beginBusy();
+          let added = false;
           try {
             const { items, cartId } = get();
             const existing = items.find((i) => i.variantId === item.variantId);
@@ -235,6 +236,7 @@ export const useCartStore = create<CartStore>()(
                   checkoutUrl: r.checkoutUrl,
                   items: [{ ...item, lineId: r.lineId }],
                 });
+                added = true;
               } else {
                 toast.error(`Couldn't add to cart. ${r.errorMessage}`);
               }
@@ -250,6 +252,7 @@ export const useCartStore = create<CartStore>()(
                     i.variantId === item.variantId ? { ...i, quantity: newQty } : i,
                   ),
                 });
+                added = true;
               } else if (r.cartNotFound) {
                 // Safe expired-cart recovery: recreate cart with only the
                 // item the user just tried to add (no duplicate quantities
@@ -262,6 +265,7 @@ export const useCartStore = create<CartStore>()(
                     items: [{ ...item, lineId: created.lineId }],
                   });
                   toast.message("Your previous cart expired — item added to a fresh cart.");
+                  added = true;
                 } else {
                   set({ items: [], cartId: null, checkoutUrl: null });
                   toast.error("Your cart expired. Please add the item again.");
@@ -276,6 +280,7 @@ export const useCartStore = create<CartStore>()(
               set({
                 items: [...get().items, { ...item, lineId: r.lineId ?? null }],
               });
+              added = true;
             } else if (r.cartNotFound) {
               const created = await createCart({ ...item, lineId: null });
               if (created.success) {
@@ -285,6 +290,7 @@ export const useCartStore = create<CartStore>()(
                   items: [{ ...item, lineId: created.lineId }],
                 });
                 toast.message("Your previous cart expired — item added to a fresh cart.");
+                added = true;
               } else {
                 set({ items: [], cartId: null, checkoutUrl: null });
                 toast.error("Your cart expired. Please add the item again.");
@@ -297,6 +303,7 @@ export const useCartStore = create<CartStore>()(
             toast.error("Couldn't add to cart. Please check your connection and try again.");
           } finally {
             endBusy();
+            if (added) set({ isDrawerOpen: true });
           }
         });
       },
@@ -356,6 +363,7 @@ export const useCartStore = create<CartStore>()(
               else set({ items: next });
             } else if (r.cartNotFound) {
               clearCart();
+              toast.error("Your cart expired.");
             } else {
               toast.error(`Couldn't remove item. ${r.errorMessage}`);
             }
