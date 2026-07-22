@@ -142,8 +142,6 @@ async function removeLine(cartId: string, lineId: string) {
   return { success: true as const };
 }
 
-// Ensure a caller-facing OpResult is unused var acceptable
-void 0 as unknown as OpResult;
 
 export const useCartStore = create<CartStore>()(
   persist(
