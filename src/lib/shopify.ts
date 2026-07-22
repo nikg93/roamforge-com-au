@@ -114,6 +114,8 @@ export async function storefrontApiRequest(query: string, variables: Record<stri
     throw new ShopifyRequestError(`Shopify HTTP ${response.status}`, response.status);
   }
 
+  // GraphQL responses vary per operation; callers narrow.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let data: any;
   try {
     data = await response.json();
