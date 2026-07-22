@@ -213,6 +213,8 @@ function Index() {
 
         <TrustedBrands />
 
+        <FeaturedGear />
+
         <LifestyleSection />
 
         {/* WHY */}
@@ -238,5 +240,30 @@ function Index() {
       </main>
       <SiteFooter />
     </div>
+  );
+}
+
+function FeaturedGear() {
+  const { data } = useSuspenseQuery(featuredQuery);
+  if (!data || data.length === 0) return null;
+  return (
+    <section aria-labelledby="featured-heading" className="bg-background py-14">
+      <div className="mx-auto max-w-7xl px-4 lg:px-8">
+        <div className="flex items-end justify-between gap-4">
+          <SectionHeading>POPULAR GEAR</SectionHeading>
+          <Link
+            to="/shop"
+            className="hidden text-xs font-semibold tracking-[0.15em] text-rf-dark hover:text-rf-tan sm:inline"
+          >
+            SHOP ALL →
+          </Link>
+        </div>
+        <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+          {data.slice(0, 8).map((p) => (
+            <ProductCard key={p.node.id} product={p} />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
