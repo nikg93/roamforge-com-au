@@ -22,7 +22,7 @@ const ENV_TOKEN =
   typeof import.meta !== "undefined" ? import.meta.env?.VITE_SHOPIFY_STOREFRONT_TOKEN : undefined;
 
 export const SHOPIFY = {
-  apiVersion: "2025-07",
+  apiVersion: "2026-07",
   // Fallbacks are the current published Storefront credentials; they keep
   // production working until the deploy env sets the VITE_ vars.
   storeDomain: (ENV_DOMAIN as string) || "xmszfz-pj.myshopify.com",
