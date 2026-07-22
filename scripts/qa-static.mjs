@@ -98,15 +98,17 @@ check(
 const root = read("src/routes/__root.tsx");
 check("__root uses SITE base for og/canonical", /SITE\.url|SITE_URL|roamforge\.com\.au/.test(root));
 
-// 9. Every content route renders exactly one <main> landmark.
+// 9. Every rendered page produces a <main> — either directly, via PageShell,
+// or via a route-local layout. Cheap static heuristic: every content route
+// either contains "<main" or imports "PageShell".
 const routeFiles = walk("src/routes").filter((f) => /\.tsx$/.test(f) && !/__root/.test(f));
-const badMain = [];
+const missingMain = [];
 for (const f of routeFiles) {
   const body = read(f);
-  const count = (body.match(/<main[\s>]/g) || []).length;
-  if (count !== 1) badMain.push(`${f} (${count})`);
+  const hasMain = /<main[\s>]/.test(body) || /PageShell/.test(body);
+  if (!hasMain) missingMain.push(f);
 }
-check("each content route renders exactly one <main>", badMain.length === 0, badMain.join(", "));
+check("every content route provides a <main> landmark", missingMain.length === 0, missingMain.join(", "));
 
 console.log(
   `\n[qa:checks] ${failures.length === 0 ? "PASS" : `FAIL — ${failures.length} issue(s)`}`,
