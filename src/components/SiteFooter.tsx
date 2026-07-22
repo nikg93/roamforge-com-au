@@ -29,10 +29,7 @@ export function SiteFooter() {
           <h4 className="font-display text-sm tracking-[0.2em] text-rf-cream mb-4">SHOP</h4>
           <ul className="space-y-2 text-sm">
             <li>
-              <Link
-                to="/shop"
-                className="text-rf-tan hover:text-rf-tan-bright transition-colors"
-              >
+              <Link to="/shop" className="text-rf-tan hover:text-rf-tan-bright transition-colors">
                 Shop All
               </Link>
             </li>

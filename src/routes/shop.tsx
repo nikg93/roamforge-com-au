@@ -111,7 +111,9 @@ function ShopPage() {
         <section className="bg-rf-dark py-16 text-rf-cream">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <p className="font-display tracking-[0.3em] text-rf-tan text-xs">SHOP ALL</p>
-            <h1 className="mt-2 font-display text-5xl sm:text-6xl tracking-tight">THE FULL RANGE</h1>
+            <h1 className="mt-2 font-display text-5xl sm:text-6xl tracking-tight">
+              THE FULL RANGE
+            </h1>
             <p className="mt-3 max-w-xl text-sm text-rf-cream/85">
               Every product currently available at Roamforge.
             </p>
