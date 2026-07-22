@@ -54,9 +54,7 @@ function PrivacyPage() {
         </a>
       </P>
       <H2>Your Choices</H2>
-      <P>
-        You can review or change your analytics and marketing preferences at any time.
-      </P>
+      <P>You can review or change your analytics and marketing preferences at any time.</P>
       <p className="mt-2">
         <button
           type="button"
