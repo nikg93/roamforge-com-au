@@ -251,6 +251,7 @@ function ProductPage() {
                     price: selectedVariant.price,
                     quantity: 1,
                     selectedOptions: selectedVariant.selectedOptions ?? [],
+                    availableForSale: selectedVariant.availableForSale,
                   });
                 }}
                 className="mt-8 w-full bg-rf-dark text-rf-cream hover:bg-rf-dark-2 rounded-none"
