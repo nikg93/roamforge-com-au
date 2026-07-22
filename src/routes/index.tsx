@@ -252,9 +252,12 @@ function Index() {
 }
 
 function FeaturedGear() {
-  // Cache is primed in the route loader (SSR); useQuery just subscribes.
-  const { data } = useQuery(featuredQuery);
-  if (!data || data.length === 0) return null;
+  // Defer to post-hydration so SSR and initial client render both emit null
+  // (no hydration mismatch). Query kicks off once mounted.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const { data } = useQuery({ ...featuredQuery, enabled: mounted });
+  if (!mounted || !data || data.length === 0) return null;
   return (
     <section aria-labelledby="featured-heading" className="bg-background py-14">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
