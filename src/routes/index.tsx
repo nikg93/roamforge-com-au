@@ -248,12 +248,13 @@ function Index() {
 }
 
 function FeaturedGear() {
-  // Defer to post-hydration so SSR and initial client render both emit null
-  // (no hydration mismatch). Query kicks off once mounted.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  const { data } = useQuery({ ...featuredQuery, enabled: mounted });
-  if (!mounted || !data || data.length === 0) return null;
+  // Data is provided by the route loader (see Route.loader above). It is
+  // serialised on the server and hydrated on the client, so this section
+  // is fully server-rendered without any hydration mismatch or refetch.
+  // The loader swallows Shopify failures into an empty list, so a bad
+  // Storefront response just hides the section cleanly.
+  const { featured } = Route.useLoaderData();
+  if (!featured || featured.length === 0) return null;
   return (
     <section aria-labelledby="featured-heading" className="bg-background py-14">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
@@ -267,7 +268,7 @@ function FeaturedGear() {
           </Link>
         </div>
         <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-4">
-          {data.slice(0, 4).map((p) => (
+          {featured.slice(0, 4).map((p) => (
             <ProductCard key={p.node.id} product={p} />
           ))}
         </div>
