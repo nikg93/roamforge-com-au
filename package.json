@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "qa:static": "bun run format:check && bun run lint && bun run typecheck",
     "qa:unit": "bun scripts/qa-unit.mjs",
-    "qa": "bun run qa:static && bun run qa:unit"
+    "qa:checks": "bun scripts/qa-static.mjs",
+    "qa": "bun run qa:static && bun run qa:unit && bun run qa:checks && bun run build"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
