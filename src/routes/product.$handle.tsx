@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useParams, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams, notFound, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { fetchProductByHandle, type ShopifyProduct } from "@/lib/shopify";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -20,6 +20,8 @@ const productQuery = (handle: string) =>
       return p;
     },
     staleTime: 60_000,
+    retry: 1,
+    retryDelay: 500,
   });
 
 function firstAvailableVariant(p: ShopifyProduct["node"]) {
@@ -116,21 +118,7 @@ export const Route = createFileRoute("/product/$handle")({
     };
   },
   component: ProductPage,
-  errorComponent: () => (
-    <div className="min-h-dvh flex flex-col bg-background">
-      <SiteHeader />
-      <main className="mx-auto max-w-7xl flex-1 px-4 py-20 lg:px-8 text-center">
-        <h1 className="font-display text-3xl tracking-widest text-rf-dark">SOMETHING WENT WRONG</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          This product couldn&apos;t load. Try refreshing, or head back to the shop.
-        </p>
-        <Link to="/" className="mt-6 inline-block text-rf-tan underline">
-          Back to shop
-        </Link>
-      </main>
-      <SiteFooter />
-    </div>
-  ),
+  errorComponent: ({ reset }) => <ProductErrorFallback reset={reset} />,
   notFoundComponent: () => (
     <div className="min-h-dvh flex flex-col bg-background">
       <SiteHeader />
