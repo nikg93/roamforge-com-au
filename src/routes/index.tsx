@@ -83,10 +83,15 @@ function Index() {
           <div className="absolute inset-0">
             <div className="mx-auto h-full max-w-7xl px-4 lg:px-8 flex items-center">
               <div className="max-w-xl text-rf-cream">
-                <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight">
-                  <span>FORGED</span>
-                  <br />
-                  <span className="text-rf-tan">FOR ADVENTURE</span>
+                <h1
+                  aria-label="Forged for adventure"
+                  className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight"
+                >
+                  <span aria-hidden="true">FORGED</span>
+                  <br aria-hidden="true" />
+                  <span aria-hidden="true" className="text-rf-tan">
+                    FOR ADVENTURE
+                  </span>
                 </h1>
                 <p className="mt-5 text-base sm:text-lg text-rf-cream/85 max-w-md">
                   Premium 4WD, camping and touring gear selected for Australian adventures.
