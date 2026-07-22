@@ -113,14 +113,14 @@ export function CartDrawer() {
                           size="icon"
                           className="h-11 w-11"
                           aria-label={`Remove ${item.product.node.title} from cart`}
-                            onClick={() => removeItem(item.variantId)}
-                            disabled={isBusy(item.variantId)}
+                          onClick={() => removeItem(item.variantId)}
+                          disabled={isBusy(item.variantId)}
                         >
-                            {isBusy(item.variantId) ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-4 w-4" />
-                            )}
+                          {isBusy(item.variantId) ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                         </Button>
                         <div className="flex items-center gap-1">
                           <Button
@@ -128,8 +128,8 @@ export function CartDrawer() {
                             size="icon"
                             className="h-11 w-11"
                             aria-label={`Decrease quantity of ${item.product.node.title}`}
-                              onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
-                              disabled={isBusy(item.variantId)}
+                            onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                            disabled={isBusy(item.variantId)}
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
@@ -141,8 +141,8 @@ export function CartDrawer() {
                             size="icon"
                             className="h-11 w-11"
                             aria-label={`Increase quantity of ${item.product.node.title}`}
-                              onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                              disabled={isBusy(item.variantId)}
+                            onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                            disabled={isBusy(item.variantId)}
                           >
                             <Plus className="h-4 w-4" />
                           </Button>

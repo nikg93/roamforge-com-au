@@ -415,7 +415,10 @@ function ProductPageInner() {
                 Secure checkout powered by Shopify
               </p>
               {fitment && (
-                <section aria-labelledby="fitment-heading" className="mt-8 border-t border-border pt-6">
+                <section
+                  aria-labelledby="fitment-heading"
+                  className="mt-8 border-t border-border pt-6"
+                >
                   <h2
                     id="fitment-heading"
                     className="font-display text-sm tracking-[0.2em] text-rf-dark"
@@ -423,9 +426,8 @@ function ProductPageInner() {
                     FITMENT
                   </h2>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    Compatible with:{" "}
-                    <span className="text-rf-dark">{fitment.join(", ")}</span>. Confirm the exact
-                    model and year with the manufacturer before ordering.
+                    Compatible with: <span className="text-rf-dark">{fitment.join(", ")}</span>.
+                    Confirm the exact model and year with the manufacturer before ordering.
                   </p>
                 </section>
               )}

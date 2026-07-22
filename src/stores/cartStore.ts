@@ -283,9 +283,7 @@ export const useCartStore = create<CartStore>()(
             const r = await updateLine(cartId, item.lineId, quantity);
             if (r.success) {
               set({
-                items: get().items.map((i) =>
-                  i.variantId === variantId ? { ...i, quantity } : i,
-                ),
+                items: get().items.map((i) => (i.variantId === variantId ? { ...i, quantity } : i)),
               });
             } else if (r.cartNotFound) {
               clearCart();
