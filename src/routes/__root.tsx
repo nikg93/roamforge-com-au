@@ -23,6 +23,12 @@ import { SiteFooter } from "@/components/SiteFooter";
 function NotFoundComponent() {
   return (
     <div className="flex min-h-dvh flex-col bg-background">
+      <title>Page not found — Roamforge</title>
+      <meta name="robots" content="noindex, follow" />
+      <meta
+        name="description"
+        content="The page you're looking for doesn't exist or has been moved."
+      />
       <SiteHeader />
       <main
         role="main"
