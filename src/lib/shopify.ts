@@ -80,22 +80,51 @@ function assertShopifyConfig() {
 export async function storefrontApiRequest(query: string, variables: Record<string, unknown> = {}) {
   assertShopifyConfig();
 
-  const response = await fetch(SHOPIFY_STOREFRONT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
-    },
-    body: JSON.stringify({ query, variables }),
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 11_000);
+  // Extract the GraphQL operation name for diagnostic logs — no token/PII.
+  const opName = /(?:query|mutation)\s+(\w+)/.exec(query)?.[1] ?? "anonymous";
+
+  let response: Response;
+  try {
+    response = await fetch(SHOPIFY_STOREFRONT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": SHOPIFY_STOREFRONT_TOKEN,
+      },
+      body: JSON.stringify({ query, variables }),
+      signal: controller.signal,
+    });
+  } catch (err) {
+    const aborted = (err as { name?: string })?.name === "AbortError";
+    console.error("[shopify] network failure", { op: opName, aborted });
+    throw new ShopifyRequestError(
+      aborted
+        ? `Shopify request timed out (${opName}).`
+        : `Shopify request failed to reach the network (${opName}).`,
+    );
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   if (response.status === 402) throw new ShopifyBillingError();
   if (!response.ok) {
+    console.error("[shopify] http error", { op: opName, status: response.status });
     throw new ShopifyRequestError(`Shopify HTTP ${response.status}`, response.status);
   }
 
-  const data = await response.json();
+  // GraphQL responses vary per operation; callers narrow.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let data: any;
+  try {
+    data = await response.json();
+  } catch (err) {
+    console.error("[shopify] invalid JSON", { op: opName, err });
+    throw new ShopifyRequestError(`Shopify returned invalid JSON (${opName}).`);
+  }
   if (data.errors) {
+    console.error("[shopify] graphql errors", { op: opName, errors: data.errors });
     throw new ShopifyRequestError(
       `Shopify: ${data.errors.map((e: { message: string }) => e.message).join(", ")}`,
     );

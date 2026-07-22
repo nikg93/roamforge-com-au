@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useParams, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link, useParams, notFound, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { fetchProductByHandle, type ShopifyProduct } from "@/lib/shopify";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -20,6 +20,8 @@ const productQuery = (handle: string) =>
       return p;
     },
     staleTime: 60_000,
+    retry: 1,
+    retryDelay: 500,
   });
 
 function firstAvailableVariant(p: ShopifyProduct["node"]) {
@@ -116,21 +118,7 @@ export const Route = createFileRoute("/product/$handle")({
     };
   },
   component: ProductPage,
-  errorComponent: () => (
-    <div className="min-h-dvh flex flex-col bg-background">
-      <SiteHeader />
-      <main className="mx-auto max-w-7xl flex-1 px-4 py-20 lg:px-8 text-center">
-        <h1 className="font-display text-3xl tracking-widest text-rf-dark">SOMETHING WENT WRONG</h1>
-        <p className="mt-3 text-sm text-muted-foreground">
-          This product couldn&apos;t load. Try refreshing, or head back to the shop.
-        </p>
-        <Link to="/" className="mt-6 inline-block text-rf-tan underline">
-          Back to shop
-        </Link>
-      </main>
-      <SiteFooter />
-    </div>
-  ),
+  errorComponent: ({ reset }) => <ProductErrorFallback reset={reset} />,
   notFoundComponent: () => (
     <div className="min-h-dvh flex flex-col bg-background">
       <SiteHeader />
@@ -149,6 +137,44 @@ export const Route = createFileRoute("/product/$handle")({
 });
 
 function ProductPage() {
+  return <ProductPageInner />;
+}
+
+function ProductErrorFallback({ reset }: { reset: () => void }) {
+  const router = useRouter();
+  return (
+    <div className="min-h-dvh flex flex-col bg-background">
+      <SiteHeader />
+      <main className="mx-auto max-w-7xl flex-1 px-4 py-20 lg:px-8 text-center">
+        <h1 className="font-display text-3xl tracking-widest text-rf-dark">SOMETHING WENT WRONG</h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          This product couldn&apos;t load. Please check your connection and try again.
+        </p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              reset();
+              router.invalidate();
+            }}
+            className="min-h-11 inline-flex items-center justify-center bg-rf-dark px-5 py-3 text-sm font-medium tracking-widest text-rf-cream hover:bg-rf-dark-2"
+          >
+            RETRY
+          </button>
+          <Link
+            to="/"
+            className="min-h-11 inline-flex items-center justify-center border border-rf-dark px-5 py-3 text-sm font-medium tracking-widest text-rf-dark hover:bg-rf-dark hover:text-rf-cream"
+          >
+            BACK TO SHOP
+          </Link>
+        </div>
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
+
+function ProductPageInner() {
   const { handle } = useParams({ from: "/product/$handle" });
   const { data } = useSuspenseQuery(productQuery(handle));
   const addItem = useCartStore((s) => s.addItem);
@@ -263,6 +289,7 @@ function ProductPage() {
                     price: selectedVariant.price,
                     quantity: 1,
                     selectedOptions: selectedVariant.selectedOptions ?? [],
+                    availableForSale: selectedVariant.availableForSale,
                   });
                 }}
                 className="mt-8 w-full bg-rf-dark text-rf-cream hover:bg-rf-dark-2 rounded-none"
