@@ -326,7 +326,7 @@ function ProductPageInner() {
                         setImageIdx((i) => (i - 1 + galleryImages.length) % galleryImages.length)
                       }
                       aria-label="Previous image"
-                      className="absolute left-2 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-rf-cream/90 text-rf-dark shadow-sm hover:bg-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 grid h-11 w-11 place-items-center rounded-full bg-rf-cream/90 text-rf-dark shadow-sm hover:bg-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
                     >
                       <span aria-hidden>‹</span>
                     </button>
@@ -334,7 +334,7 @@ function ProductPageInner() {
                       type="button"
                       onClick={() => setImageIdx((i) => (i + 1) % galleryImages.length)}
                       aria-label="Next image"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-rf-cream/90 text-rf-dark shadow-sm hover:bg-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 grid h-11 w-11 place-items-center rounded-full bg-rf-cream/90 text-rf-dark shadow-sm hover:bg-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
                     >
                       <span aria-hidden>›</span>
                     </button>
