@@ -1,6 +1,11 @@
 import { createFileRoute, Link, useParams, notFound, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery, useQuery, queryOptions } from "@tanstack/react-query";
-import { fetchProductByHandle, fetchRelatedProducts, type ShopifyProduct } from "@/lib/shopify";
+import {
+  fetchProductByHandle,
+  fetchRelatedProducts,
+  shopifySrcSet,
+  type ShopifyProduct,
+} from "@/lib/shopify";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useCartStore } from "@/stores/cartStore";
@@ -241,6 +246,7 @@ function ProductPageInner() {
     queryKey: ["related-products", handle],
     queryFn: () =>
       fetchRelatedProducts(handle, {
+        productId: p.id,
         vendor: p.vendor,
         productType: p.productType,
         tags: p.tags,
@@ -265,6 +271,23 @@ function ProductPageInner() {
     selectedVariant ? s.activeVariantIds.includes(selectedVariant.id) : false,
   );
 
+  // Gallery keyboard navigation — ArrowLeft / ArrowRight walk the images.
+  useEffect(() => {
+    if (galleryImages.length < 2) return;
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t && ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName)) return;
+      if (t?.isContentEditable) return;
+      if (e.key === "ArrowLeft") {
+        setImageIdx((i) => (i - 1 + galleryImages.length) % galleryImages.length);
+      } else if (e.key === "ArrowRight") {
+        setImageIdx((i) => (i + 1) % galleryImages.length);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [galleryImages.length]);
+
   return (
     <div className="min-h-dvh flex flex-col pb-24 lg:pb-0">
       <SiteHeader />
@@ -281,11 +304,13 @@ function ProductPageInner() {
           </nav>
           <div className="grid gap-12 lg:grid-cols-2">
             <div>
-              <div className="aspect-square bg-secondary border border-border overflow-hidden">
+              <div className="relative aspect-square bg-secondary border border-border overflow-hidden">
                 {activeImage && (
                   <img
                     key={activeImage.url}
                     src={activeImage.url}
+                    srcSet={shopifySrcSet(activeImage.url)}
+                    sizes="(max-width: 1024px) 100vw, 600px"
                     alt={activeImage.altText ?? p.title}
                     width={800}
                     height={800}
@@ -293,15 +318,47 @@ function ProductPageInner() {
                     className="h-full w-full object-cover"
                   />
                 )}
+                {galleryImages.length > 1 && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setImageIdx(
+                          (i) => (i - 1 + galleryImages.length) % galleryImages.length,
+                        )
+                      }
+                      aria-label="Previous image"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-rf-cream/90 text-rf-dark shadow-sm hover:bg-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
+                    >
+                      <span aria-hidden>‹</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setImageIdx((i) => (i + 1) % galleryImages.length)
+                      }
+                      aria-label="Next image"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-rf-cream/90 text-rf-dark shadow-sm hover:bg-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
+                    >
+                      <span aria-hidden>›</span>
+                    </button>
+                    <div
+                      aria-live="polite"
+                      className="absolute bottom-2 right-2 rounded-full bg-rf-dark/80 px-2 py-0.5 text-[11px] font-semibold tracking-widest text-rf-cream"
+                    >
+                      {imageIdx + 1} / {galleryImages.length}
+                    </div>
+                  </>
+                )}
               </div>
               {galleryImages.length > 1 && (
                 <ul
                   role="list"
                   aria-label="Product image thumbnails"
-                  className="mt-3 grid grid-cols-5 gap-2 sm:grid-cols-6"
+                  className="mt-3 flex gap-2 overflow-x-auto pb-1 sm:grid sm:grid-cols-6 sm:overflow-visible"
                 >
                   {galleryImages.map((img, i) => (
-                    <li key={img.url}>
+                    <li key={img.url} className="flex-none w-20 sm:w-auto">
                       <button
                         type="button"
                         onClick={() => setImageIdx(i)}
@@ -335,6 +392,21 @@ function ProductPageInner() {
                   {p.vendor}
                 </p>
               ) : null}
+              {selectedVariant && p.variants.edges.length > 1 && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Variant:{" "}
+                  <span className="text-rf-dark">
+                    {selectedVariant.selectedOptions?.length
+                      ? selectedVariant.selectedOptions.map((o) => `${o.name}: ${o.value}`).join(" · ")
+                      : selectedVariant.title}
+                  </span>
+                </p>
+              )}
+              {selectedVariant?.sku && selectedVariant.sku.trim() && (
+                <p className="mt-0.5 text-[11px] uppercase tracking-widest text-muted-foreground">
+                  SKU: {selectedVariant.sku.trim()}
+                </p>
+              )}
               <div className="mt-4 flex flex-wrap items-baseline gap-3">
                 <p className="text-2xl font-semibold text-rf-dark">
                   ${priceNum.toFixed(2)} {displayPrice.currencyCode}
