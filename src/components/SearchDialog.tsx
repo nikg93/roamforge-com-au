@@ -30,6 +30,7 @@ export function SearchDialog({ open, onOpenChange, triggerRef }: SearchDialogPro
   const debounced = useDebouncedValue(query.trim(), 300);
   const [results, setResults] = useState<ShopifyProduct[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "done">("idle");
+  const [retryTick, setRetryTick] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -50,20 +51,27 @@ export function SearchDialog({ open, onOpenChange, triggerRef }: SearchDialogPro
     let cancelled = false;
     setStatus("loading");
     const q = debounced.replace(/"/g, "").trim();
+    const timeoutId = setTimeout(() => {
+      if (!cancelled) setStatus("error");
+    }, 12_000);
     predictiveSearchProducts(q, 12)
       .then((rows) => {
         if (cancelled) return;
+        clearTimeout(timeoutId);
         setResults(rows);
         setStatus("done");
       })
-      .catch(() => {
+      .catch((err) => {
         if (cancelled) return;
+        clearTimeout(timeoutId);
+        console.error("[search] predictive search failed", err);
         setStatus("error");
       });
     return () => {
       cancelled = true;
+      clearTimeout(timeoutId);
     };
-  }, [debounced, open]);
+  }, [debounced, open, retryTick]);
 
   const liveMessage =
     status === "loading"
@@ -124,9 +132,16 @@ export function SearchDialog({ open, onOpenChange, triggerRef }: SearchDialogPro
             </p>
           )}
           {status === "error" && (
-            <p className="px-4 py-8 text-center text-sm text-red-700">
-              Search couldn't load right now. Try again in a moment.
-            </p>
+            <div className="px-4 py-8 text-center">
+              <p className="text-sm text-red-700">Search couldn't load right now.</p>
+              <button
+                type="button"
+                onClick={() => setRetryTick((t) => t + 1)}
+                className="mt-3 min-h-11 inline-flex items-center justify-center border border-rf-dark px-4 py-2 text-sm font-medium tracking-widest text-rf-dark hover:bg-rf-dark hover:text-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2"
+              >
+                RETRY
+              </button>
+            </div>
           )}
           {status === "done" && results.length === 0 && (
             <p className="px-4 py-8 text-center text-sm text-rf-dark/60">
