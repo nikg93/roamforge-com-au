@@ -27,9 +27,28 @@ import heroGear from "@/assets/lifestyle-journey.jpg";
 import { CATEGORIES, type CategorySlug } from "@/lib/categories";
 import { routeMeta } from "@/lib/seo";
 import { fetchFeaturedProducts } from "@/lib/shopify";
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
+
+// Bounded featured-gear query. Rejection becomes an empty list so a Shopify
+// hiccup can't take down the homepage — the section just hides cleanly.
+const featuredQuery = queryOptions({
+  queryKey: ["featured-products", 4],
+  queryFn: async () => {
+    try {
+      return await fetchFeaturedProducts(4);
+    } catch {
+      return [];
+    }
+  },
+  staleTime: 5 * 60_000,
+  retry: 1,
+});
 
 export const Route = createFileRoute("/")({
+  // Server-render the featured grid: prime the cache during SSR. Errors are
+  // already swallowed inside the query fn, so a Shopify failure won't crash
+  // the homepage — the section renders empty and hides.
+  loader: ({ context }) => context.queryClient.ensureQueryData(featuredQuery),
   head: () =>
     routeMeta({
       path: "/",
@@ -236,14 +255,9 @@ function Index() {
 }
 
 function FeaturedGear() {
-  // Client-fetched so a Shopify hiccup can't take down the homepage.
-  const { data, isError } = useQuery({
-    queryKey: ["featured-products", 4],
-    queryFn: () => fetchFeaturedProducts(4),
-    staleTime: 5 * 60_000,
-    retry: 1,
-  });
-  if (isError || !data || data.length === 0) return null;
+  // Cache is primed in the route loader (SSR); useQuery just subscribes.
+  const { data } = useQuery(featuredQuery);
+  if (!data || data.length === 0) return null;
   return (
     <section aria-labelledby="featured-heading" className="bg-background py-14">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
