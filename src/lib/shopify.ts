@@ -287,6 +287,7 @@ export async function fetchProducts(first = 20, query?: string): Promise<Shopify
       ...e.node,
       description: e.node.description ?? "",
       images: img ? { edges: [{ node: img }] } : { edges: [] },
+      variants: e.node.variants ?? { edges: [] },
       options: e.node.options ?? [],
     };
     return { node: withImages };
@@ -323,6 +324,7 @@ export async function fetchProductsPage(
         ...e.node,
         description: e.node.description ?? "",
         images: img ? { edges: [{ node: img }] } : { edges: [] },
+        variants: e.node.variants ?? { edges: [] },
         options: e.node.options ?? [],
       },
     };
@@ -379,6 +381,7 @@ export async function fetchFeaturedProducts(first = 8): Promise<ShopifyProduct[]
         ...e.node,
         description: e.node.description ?? "",
         images: img ? { edges: [{ node: img }] } : { edges: [] },
+        variants: e.node.variants ?? { edges: [] },
         options: e.node.options ?? [],
       },
     };
@@ -393,9 +396,42 @@ export async function fetchFeaturedProducts(first = 8): Promise<ShopifyProduct[]
  */
 export async function fetchRelatedProducts(
   currentHandle: string,
-  opts: { vendor?: string; productType?: string; tags?: string[] },
+  opts: { productId?: string; vendor?: string; productType?: string; tags?: string[] },
   limit = 4,
 ): Promise<ShopifyProduct[]> {
+  // Prefer Shopify's own productRecommendations API when we have a product id.
+  // Falls back to a vendor / productType / tag query if the API returns nothing.
+  if (opts.productId) {
+    try {
+      const rec = await storefrontApiRequest(PRODUCT_RECOMMENDATIONS_QUERY, {
+        productId: opts.productId,
+      });
+      const rows: Array<ShopifyProduct["node"]> = rec?.data?.productRecommendations ?? [];
+      const shaped: ShopifyProduct[] = [];
+      const seen = new Set<string>();
+      for (const n of rows) {
+        if (!n || n.handle === currentHandle) continue;
+        if (n.availableForSale === false) continue;
+        if (seen.has(n.handle)) continue;
+        seen.add(n.handle);
+        const img = n.featuredImage;
+        shaped.push({
+          node: {
+            ...n,
+            description: n.description ?? "",
+            images: img ? { edges: [{ node: img }] } : { edges: [] },
+            variants: n.variants ?? { edges: [] },
+            options: n.options ?? [],
+          },
+        });
+        if (shaped.length >= limit) break;
+      }
+      if (shaped.length > 0) return shaped;
+    } catch {
+      // Fall through to vendor/tag query below.
+    }
+  }
+
   const clauses: string[] = [];
   const safe = (s: string) => s.replace(/["\\]/g, "").trim();
   if (opts.vendor && opts.vendor.trim()) clauses.push(`vendor:"${safe(opts.vendor)}"`);
@@ -420,6 +456,7 @@ export async function fetchRelatedProducts(
         ...e.node,
         description: e.node.description ?? "",
         images: img ? { edges: [{ node: img }] } : { edges: [] },
+        variants: e.node.variants ?? { edges: [] },
         options: e.node.options ?? [],
       },
     });
