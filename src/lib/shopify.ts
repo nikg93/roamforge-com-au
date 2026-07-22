@@ -6,6 +6,28 @@ export const SHOPIFY_STORE_PERMANENT_DOMAIN = SHOPIFY.storeDomain;
 export { SHOPIFY_STOREFRONT_URL };
 export const SHOPIFY_STOREFRONT_TOKEN = SHOPIFY.storefrontToken;
 
+/**
+ * Build a responsive srcset for a Shopify CDN image URL. Shopify's image CDN
+ * honours a `width` query param and reformats the source, so we can request
+ * multiple sizes for the browser to pick from.
+ */
+export function shopifySrcSet(
+  url: string,
+  widths: number[] = [400, 600, 900, 1200, 1600],
+): string {
+  try {
+    return widths
+      .map((w) => {
+        const u = new URL(url);
+        u.searchParams.set("width", String(w));
+        return `${u.toString()} ${w}w`;
+      })
+      .join(", ");
+  } catch {
+    return "";
+  }
+}
+
 /** Thrown by storefrontApiRequest when Shopify billing is not active (HTTP 402). */
 export class ShopifyBillingError extends Error {
   status = 402 as const;
