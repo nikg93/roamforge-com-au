@@ -43,26 +43,8 @@ export function ConsentBanner() {
     };
   }, []);
 
-  if (!prefs) return null;
-
-  const acceptAll = () => {
-    writeConsent({ analytics: true, marketing: true, decided: true });
-    setShowPanel(false);
-  };
-  const rejectAll = () => {
-    writeConsent({ analytics: false, marketing: false, decided: true });
-    setShowPanel(false);
-  };
-  const savePanel = () => {
-    writeConsent({ analytics, marketing, decided: true });
-    setShowPanel(false);
-  };
-
-  const bannerVisible = !prefs.decided && !showPanel;
-
   // Focus management + ESC to close the preferences dialog.
   // Keeps focus inside the modal and returns it to the opener on close.
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     if (!showPanel) return;
     previouslyFocused.current = (document.activeElement as HTMLElement) ?? null;
@@ -94,6 +76,23 @@ export function ConsentBanner() {
       previouslyFocused.current?.focus?.();
     };
   }, [showPanel]);
+
+  if (!prefs) return null;
+
+  const acceptAll = () => {
+    writeConsent({ analytics: true, marketing: true, decided: true });
+    setShowPanel(false);
+  };
+  const rejectAll = () => {
+    writeConsent({ analytics: false, marketing: false, decided: true });
+    setShowPanel(false);
+  };
+  const savePanel = () => {
+    writeConsent({ analytics, marketing, decided: true });
+    setShowPanel(false);
+  };
+
+  const bannerVisible = !prefs.decided && !showPanel;
 
   return (
     <>
