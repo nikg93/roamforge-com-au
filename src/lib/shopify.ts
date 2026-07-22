@@ -114,7 +114,7 @@ export async function storefrontApiRequest(query: string, variables: Record<stri
     throw new ShopifyRequestError(`Shopify HTTP ${response.status}`, response.status);
   }
 
-  let data: { errors?: Array<{ message: string }>; data?: unknown };
+  let data: any;
   try {
     data = await response.json();
   } catch (err) {
