@@ -18,6 +18,7 @@ export function CartDrawer() {
     useCartStore();
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
   const totalPrice = items.reduce((s, i) => s + parseFloat(i.price.amount) * i.quantity, 0);
+  const currency = items[0]?.price.currencyCode ?? "AUD";
 
   useEffect(() => {
     if (isOpen) syncCart();
@@ -133,11 +134,14 @@ export function CartDrawer() {
               <div className="flex-shrink-0 space-y-4 pt-4 border-t bg-background">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold">Total</span>
-                  <span className="text-xl font-bold">${totalPrice.toFixed(2)}</span>
+                  <span className="text-xl font-bold">
+                    ${totalPrice.toFixed(2)} {currency}
+                  </span>
                 </div>
+                <p className="text-xs text-muted-foreground">Shipping calculated at checkout.</p>
                 <Button
                   onClick={handleCheckout}
-                  className="w-full bg-rf-dark text-rf-cream hover:bg-rf-dark-2"
+                  className="w-full min-h-11 bg-rf-dark text-rf-cream hover:bg-rf-dark-2"
                   size="lg"
                   disabled={items.length === 0 || isLoading || isSyncing}
                 >
