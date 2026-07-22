@@ -368,6 +368,8 @@ function ProductPageInner() {
                       >
                         <img
                           src={img.url}
+                          srcSet={shopifySrcSet(img.url, [120, 180, 240])}
+                          sizes="120px"
                           alt=""
                           width={120}
                           height={120}
