@@ -118,23 +118,43 @@ export const Route = createFileRoute("/category/$slug")({
       <SiteFooter />
     </div>
   ),
-  errorComponent: () => (
+  errorComponent: ({ reset }) => <CategoryErrorFallback reset={reset} />,
+  component: CategoryPage,
+});
+
+function CategoryErrorFallback({ reset }: { reset: () => void }) {
+  const router = useRouter();
+  return (
     <div className="min-h-dvh flex flex-col bg-background">
       <SiteHeader />
       <main className="mx-auto max-w-7xl flex-1 px-4 py-20 lg:px-8">
         <h1 className="font-display text-3xl tracking-widest text-rf-dark">SOMETHING WENT WRONG</h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          Category products failed to load. Try refreshing.
+          Category products couldn't load. Please check your connection and try again.
         </p>
-        <Link to="/" className="mt-6 inline-block text-rf-tan underline">
-          Back to home
-        </Link>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => {
+              reset();
+              router.invalidate();
+            }}
+            className="min-h-11 inline-flex items-center justify-center bg-rf-dark px-5 py-3 text-sm font-medium tracking-widest text-rf-cream hover:bg-rf-dark-2"
+          >
+            RETRY
+          </button>
+          <Link
+            to="/"
+            className="min-h-11 inline-flex items-center justify-center border border-rf-dark px-5 py-3 text-sm font-medium tracking-widest text-rf-dark hover:bg-rf-dark hover:text-rf-cream"
+          >
+            BACK TO SHOP
+          </Link>
+        </div>
       </main>
       <SiteFooter />
     </div>
-  ),
-  component: CategoryPage,
-});
+  );
+}
 
 function CategoryPage() {
   const { slug } = Route.useParams();
