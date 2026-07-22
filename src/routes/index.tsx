@@ -131,8 +131,7 @@ function Index() {
             {/* Floating watermark logo */}
             <img
               src={logo}
-              alt=""
-              aria-hidden
+              alt="Roamforge logo"
               className="hidden md:block absolute bottom-6 right-6 h-24 opacity-90"
             />
           </div>
