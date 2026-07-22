@@ -96,15 +96,17 @@ check(
 
 // 8. Root route sets base SEO with absolute origin.
 const root = read("src/routes/__root.tsx");
-check("__root uses SITE base for og/canonical", /SITE\.url|roamforge\.com\.au/.test(root));
+check("__root uses SITE base for og/canonical", /SITE\.url|SITE_URL|roamforge\.com\.au/.test(root));
 
-// 9. Single <main> pattern: routes should not each render their own <main> AND __root also render one.
-const rootHasMain = /<main[\s>]/.test(root);
-const routeFiles = walk("src/routes").filter((f) => /\.(tsx)$/.test(f) && !/__root/.test(f));
-const routesWithMain = routeFiles.filter((f) => /<main[\s>]/.test(read(f)));
-// Either root renders <main> (and routes don't) OR each route renders exactly one.
-const dupMain = rootHasMain && routesWithMain.length > 0;
-check("no duplicated <main> landmark between root and routes", !dupMain, routesWithMain.join(", "));
+// 9. Every content route renders exactly one <main> landmark.
+const routeFiles = walk("src/routes").filter((f) => /\.tsx$/.test(f) && !/__root/.test(f));
+const badMain = [];
+for (const f of routeFiles) {
+  const body = read(f);
+  const count = (body.match(/<main[\s>]/g) || []).length;
+  if (count !== 1) badMain.push(`${f} (${count})`);
+}
+check("each content route renders exactly one <main>", badMain.length === 0, badMain.join(", "));
 
 console.log(
   `\n[qa:checks] ${failures.length === 0 ? "PASS" : `FAIL — ${failures.length} issue(s)`}`,
