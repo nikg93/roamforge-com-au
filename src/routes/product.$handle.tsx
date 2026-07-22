@@ -551,7 +551,7 @@ function ProductPageInner() {
       <SiteFooter />
       {/* Sticky mobile add-to-cart bar. Hidden on lg+ (desktop ATC is inline). */}
       <div
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 p-3 shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.2)] backdrop-blur lg:hidden"
+        className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-3 pt-3 pb-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] shadow-[0_-4px_20px_-8px_rgba(0,0,0,0.2)] backdrop-blur lg:hidden"
         role="region"
         aria-label="Add to cart"
       >
