@@ -65,10 +65,6 @@ function isCartNotFound(errs: Array<{ message: string }>) {
   });
 }
 
-type OpResult<T = unknown> =
-  | ({ success: true } & T)
-  | { success: false; cartNotFound?: boolean; errorMessage: string };
-
 function summarizeUserErrors(errs: Array<{ message: string }>): string {
   const first = errs.find((e) => e.message)?.message;
   return first ?? "Shopify rejected the request.";
