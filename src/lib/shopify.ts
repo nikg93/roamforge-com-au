@@ -279,20 +279,55 @@ export async function predictiveSearchProducts(
   query: string,
   limit = 10,
 ): Promise<ShopifyProduct[]> {
-  const data = await storefrontApiRequest(PREDICTIVE_SEARCH_QUERY, { query, limit });
-  const rows = data?.data?.predictiveSearch?.products ?? [];
-  return rows.map((n: ShopifyProduct["node"]) => {
-    const img = n.featuredImage;
-    return {
-      node: {
-        ...n,
-        description: n.description ?? "",
-        images: img ? { edges: [{ node: img }] } : { edges: [] },
-        variants: n.variants ?? { edges: [] },
-        options: n.options ?? [],
-      },
-    } as ShopifyProduct;
-  });
+  // Sanitize: strip GraphQL-breaking quotes/backslashes and control chars,
+  // then clamp to Shopify's documented limits (predictiveSearch: 1–10).
+  const cleaned = query
+    .replace(/["\\]/g, " ")
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001f]/g, " ")
+    .trim();
+  if (!cleaned) return [];
+  const safeLimit = Math.max(1, Math.min(10, Math.floor(limit) || 10));
+  const shape = (rows: ShopifyProduct["node"][]) =>
+    rows.map((n) => {
+      const img = n.featuredImage;
+      return {
+        node: {
+          ...n,
+          description: n.description ?? "",
+          images: img ? { edges: [{ node: img }] } : { edges: [] },
+          variants: n.variants ?? { edges: [] },
+          options: n.options ?? [],
+        },
+      } as ShopifyProduct;
+    });
+
+  try {
+    const data = await storefrontApiRequest(PREDICTIVE_SEARCH_QUERY, {
+      query: cleaned,
+      limit: safeLimit,
+    });
+    const rows = data?.data?.predictiveSearch?.products ?? [];
+    if (rows.length > 0) return shape(rows);
+    // Fall through to products(query:) fallback when predictiveSearch is empty.
+  } catch (err) {
+    console.warn("[shopify] predictiveSearch failed, falling back to products()", err);
+  }
+
+  // Fallback: standard products query with a permissive title/vendor/tag
+  // predicate. Never fabricates — returns whatever Shopify actually matches.
+  try {
+    const terms = cleaned.split(/\s+/).filter(Boolean).slice(0, 6);
+    const clauses = terms.map(
+      (t) => `(title:*${t}* OR vendor:*${t}* OR tag:*${t}* OR product_type:*${t}*)`,
+    );
+    const fallbackQuery = clauses.join(" AND ");
+    const rows = await fetchProducts(safeLimit, fallbackQuery);
+    return rows;
+  } catch (err) {
+    console.error("[shopify] fallback search failed", err);
+    throw err;
+  }
 }
 
 export async function fetchProducts(first = 20, query?: string): Promise<ShopifyProduct[]> {
