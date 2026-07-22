@@ -3,6 +3,18 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 
 export const Route = createFileRoute("/$")({
+  // Signal a true HTTP 404 during SSR so crawlers see the correct status,
+  // not a soft-200. `setResponseStatus` is only defined when a server
+  // request context exists (SSR); harmless no-op on client navigation.
+  loader: async () => {
+    try {
+      const mod = await import("@tanstack/react-start/server");
+      mod.setResponseStatus?.(404);
+    } catch {
+      // Client-side navigation — no response object to mutate.
+    }
+    return null;
+  },
   component: NotFoundPage,
   head: () => ({
     meta: [
