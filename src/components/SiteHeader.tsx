@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Search, Menu, X } from "lucide-react";
 import logo from "@/assets/logo.png";
@@ -17,6 +17,7 @@ import {
 export function SiteHeader() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const searchTriggerRef = useRef<HTMLButtonElement>(null);
 
   return (
     <header className="bg-rf-dark text-rf-cream">
@@ -136,6 +137,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-1">
           <button
             type="button"
+            ref={searchTriggerRef}
             onClick={() => setSearchOpen(true)}
             aria-label="Search products"
             className="grid h-11 w-11 place-items-center text-rf-cream/90 hover:text-rf-tan"
@@ -145,7 +147,7 @@ export function SiteHeader() {
           <CartDrawer />
         </div>
       </div>
-      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
+      <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} triggerRef={searchTriggerRef} />
     </header>
   );
 }

@@ -27,8 +27,7 @@ function firstAvailableVariant(p: ShopifyProduct["node"]) {
 }
 
 export const Route = createFileRoute("/product/$handle")({
-  loader: ({ params, context }) =>
-    context.queryClient.ensureQueryData(productQuery(params.handle)),
+  loader: ({ params, context }) => context.queryClient.ensureQueryData(productQuery(params.handle)),
   head: ({ params, loaderData }) => {
     const url = canonicalFor(`/product/${params.handle}`);
     if (!loaderData) {
@@ -71,9 +70,7 @@ export const Route = createFileRoute("/product/$handle")({
         url,
         priceCurrency: price.currencyCode,
         price: price.amount,
-        availability: anyAvailable
-          ? "https://schema.org/InStock"
-          : "https://schema.org/OutOfStock",
+        availability: anyAvailable ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       },
     };
     if (sku) productSchema.sku = sku;
@@ -127,7 +124,9 @@ export const Route = createFileRoute("/product/$handle")({
         <p className="mt-3 text-sm text-muted-foreground">
           This product couldn&apos;t load. Try refreshing, or head back to the shop.
         </p>
-        <Link to="/" className="mt-6 inline-block text-rf-tan underline">Back to shop</Link>
+        <Link to="/" className="mt-6 inline-block text-rf-tan underline">
+          Back to shop
+        </Link>
       </main>
       <SiteFooter />
     </div>
@@ -140,7 +139,9 @@ export const Route = createFileRoute("/product/$handle")({
         <p className="mt-3 text-sm text-muted-foreground">
           This product may have been removed or renamed.
         </p>
-        <Link to="/" className="mt-6 inline-block text-rf-tan underline">Back to shop</Link>
+        <Link to="/" className="mt-6 inline-block text-rf-tan underline">
+          Back to shop
+        </Link>
       </main>
       <SiteFooter />
     </div>
@@ -173,8 +174,12 @@ function ProductPage() {
       <main className="flex-1 bg-background">
         <div className="mx-auto max-w-6xl px-4 py-12 lg:px-8">
           <nav aria-label="Breadcrumb" className="mb-6 text-xs text-muted-foreground">
-            <Link to="/" className="hover:text-rf-dark">Home</Link>
-            <span className="mx-2" aria-hidden>/</span>
+            <Link to="/" className="hover:text-rf-dark">
+              Home
+            </Link>
+            <span className="mx-2" aria-hidden>
+              /
+            </span>
             <span className="text-rf-dark">{p.title}</span>
           </nav>
           <div className="grid gap-12 lg:grid-cols-2">
@@ -206,7 +211,7 @@ function ProductPage() {
                 }`}
                 aria-live="polite"
               >
-                {canAdd ? "\u2713 In Stock" : "Sold out"}
+                {canAdd ? "✓ In Stock" : "Sold out"}
               </p>
               {descriptionHtml ? (
                 <div
@@ -277,19 +282,27 @@ function ProductPage() {
               <ul className="mt-6 grid gap-2 text-xs text-muted-foreground sm:grid-cols-2 lg:grid-cols-4">
                 <li className="flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 text-rf-tan" aria-hidden />
-                  <Link to="/warranty" className="hover:text-rf-dark">Warranty info</Link>
+                  <Link to="/warranty" className="hover:text-rf-dark">
+                    Warranty info
+                  </Link>
                 </li>
                 <li className="flex items-center gap-2">
                   <Truck className="h-4 w-4 text-rf-tan" aria-hidden />
-                  <Link to="/shipping" className="hover:text-rf-dark">Shipping details</Link>
+                  <Link to="/shipping" className="hover:text-rf-dark">
+                    Shipping details
+                  </Link>
                 </li>
                 <li className="flex items-center gap-2">
                   <Undo2 className="h-4 w-4 text-rf-tan" aria-hidden />
-                  <Link to="/returns" className="hover:text-rf-dark">Returns policy</Link>
+                  <Link to="/returns" className="hover:text-rf-dark">
+                    Returns policy
+                  </Link>
                 </li>
                 <li className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-rf-tan" aria-hidden />
-                  <Link to="/contact" className="hover:text-rf-dark">Contact us</Link>
+                  <Link to="/contact" className="hover:text-rf-dark">
+                    Contact us
+                  </Link>
                 </li>
               </ul>
             </div>

@@ -7,7 +7,8 @@ export const Route = createFileRoute("/shipping")({
     routeMeta({
       path: "/shipping",
       title: "Shipping Information | Roamforge",
-      description: "Roamforge shipping options, dispatch times and delivery information for Australia.",
+      description:
+        "Roamforge shipping options, dispatch times and delivery information for Australia.",
     }),
   component: ShippingPage,
 });

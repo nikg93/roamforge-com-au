@@ -7,7 +7,8 @@ export const Route = createFileRoute("/warranty")({
     routeMeta({
       path: "/warranty",
       title: "Warranty Information | Roamforge",
-      description: "Roamforge warranty coverage, claim process and exclusions for gear purchased through our store.",
+      description:
+        "Roamforge warranty coverage, claim process and exclusions for gear purchased through our store.",
     }),
   component: WarrantyPage,
 });

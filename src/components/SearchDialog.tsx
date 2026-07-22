@@ -13,6 +13,7 @@ import {
 interface SearchDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  triggerRef?: React.RefObject<HTMLElement | null>;
 }
 
 function useDebouncedValue<T>(value: T, delay = 250): T {
@@ -24,7 +25,7 @@ function useDebouncedValue<T>(value: T, delay = 250): T {
   return v;
 }
 
-export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
+export function SearchDialog({ open, onOpenChange, triggerRef }: SearchDialogProps) {
   const [query, setQuery] = useState("");
   const debounced = useDebouncedValue(query.trim(), 300);
   const [results, setResults] = useState<ShopifyProduct[]>([]);
@@ -84,6 +85,13 @@ export function SearchDialog({ open, onOpenChange }: SearchDialogProps) {
           // Focus the input instead of the close button.
           e.preventDefault();
           inputRef.current?.focus();
+        }}
+        onCloseAutoFocus={(e) => {
+          // Return focus to the search trigger so keyboard users land back on it.
+          if (triggerRef?.current) {
+            e.preventDefault();
+            triggerRef.current.focus();
+          }
         }}
       >
         <DialogHeader className="sr-only">

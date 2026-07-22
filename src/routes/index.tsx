@@ -33,7 +33,7 @@ export const Route = createFileRoute("/")({
       path: "/",
       title: "Roamforge — Forged for Adventure | 4WD, Camping & Touring Gear",
       description:
-        "Premium 4WD, camping and touring gear tested for Australian conditions. Recovery, electrical, camping and Roamforge merch.",
+        "Premium 4WD, camping and touring gear selected for Australian adventures. Recovery, electrical, camping and Roamforge merch.",
     }),
   component: Index,
 });
@@ -53,7 +53,11 @@ const CATEGORY_ICONS: Record<CategorySlug, React.ComponentType<{ className?: str
 
 const WHY = [
   { Icon: MapIcon, title: "AUSTRALIAN OWNED", desc: "WA based adventure brand supporting local." },
-  { Icon: Award, title: "TRUSTED BRANDS", desc: "Curated gear from established Australian brands." },
+  {
+    Icon: Award,
+    title: "TRUSTED BRANDS",
+    desc: "Curated gear from established Australian brands.",
+  },
   { Icon: ShieldCheck, title: "SECURE CHECKOUT", desc: "Encrypted payments via Shopify." },
   { Icon: Truck, title: "AUSTRALIA-WIDE DELIVERY", desc: "Shipping right across Australia." },
   { Icon: Compass, title: "BUILT FOR TOURING", desc: "Selected for real Australian touring." },
@@ -85,7 +89,7 @@ function Index() {
                   <span className="text-rf-tan">FOR ADVENTURE</span>
                 </h1>
                 <p className="mt-5 text-base sm:text-lg text-rf-cream/85 max-w-md">
-                  Premium 4WD, camping and touring gear tested for Australian conditions.
+                  Premium 4WD, camping and touring gear selected for Australian adventures.
                 </p>
                 <div className="mt-7 flex flex-wrap gap-3">
                   <Link

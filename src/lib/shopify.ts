@@ -19,7 +19,10 @@ export class ShopifyBillingError extends Error {
 
 /** Thrown by storefrontApiRequest for GraphQL / HTTP failures. */
 export class ShopifyRequestError extends Error {
-  constructor(message: string, public status?: number) {
+  constructor(
+    message: string,
+    public status?: number,
+  ) {
     super(message);
     this.name = "ShopifyRequestError";
   }
@@ -148,7 +151,7 @@ export const PRODUCT_BY_HANDLE_QUERY = `
 // Handle-only pagination query for the sitemap. Kept tiny to minimise cost.
 const PRODUCT_HANDLES_QUERY = `
   query ProductHandles($first: Int!, $after: String) {
-    products(first: $first, after: $after, query: "available_for_sale:true") {
+    products(first: $first, after: $after) {
       edges { cursor node { handle } }
       pageInfo { hasNextPage endCursor }
     }
@@ -184,15 +187,18 @@ export async function fetchProductByHandle(handle: string) {
  * own tiny query so we don't ship the full product payload just to build URLs.
  * Bounded by `maxPages` as a safety fuse for huge stores.
  */
-export async function fetchAllProductHandles(
-  pageSize = 100,
-  maxPages = 50,
-): Promise<string[]> {
+export async function fetchAllProductHandles(pageSize = 100, maxPages = 50): Promise<string[]> {
   const handles: string[] = [];
   let after: string | null = null;
   for (let i = 0; i < maxPages; i++) {
-    const data: { data?: { products?: { edges: Array<{ node: { handle: string } }>; pageInfo: { hasNextPage: boolean; endCursor: string | null } } } } =
-      await storefrontApiRequest(PRODUCT_HANDLES_QUERY, { first: pageSize, after });
+    const data: {
+      data?: {
+        products?: {
+          edges: Array<{ node: { handle: string } }>;
+          pageInfo: { hasNextPage: boolean; endCursor: string | null };
+        };
+      };
+    } = await storefrontApiRequest(PRODUCT_HANDLES_QUERY, { first: pageSize, after });
     const page = data?.data?.products;
     if (!page) break;
     for (const e of page.edges) handles.push(e.node.handle);
