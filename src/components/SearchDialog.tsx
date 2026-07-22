@@ -50,11 +50,16 @@ export function SearchDialog({ open, onOpenChange, triggerRef }: SearchDialogPro
     }
     let cancelled = false;
     setStatus("loading");
-    const q = debounced.replace(/"/g, "").trim();
+    const q = debounced.replace(/["\\]/g, " ").trim();
+    if (!q) {
+      setResults([]);
+      setStatus("idle");
+      return;
+    }
     const timeoutId = setTimeout(() => {
       if (!cancelled) setStatus("error");
     }, 12_000);
-    predictiveSearchProducts(q, 12)
+    predictiveSearchProducts(q, 10)
       .then((rows) => {
         if (cancelled) return;
         clearTimeout(timeoutId);
