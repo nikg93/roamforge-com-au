@@ -50,7 +50,9 @@ check("sitemap includes /shop", /["'`]\/shop["'`]/.test(sitemap));
 
 // 3. No remote Google Fonts anywhere in source or public html.
 const srcFiles = walk("src").concat(existsSync("index.html") ? ["index.html"] : []);
-const gFonts = srcFiles.filter((f) => /\.(tsx?|jsx?|css|html)$/.test(f) && /fonts\.(googleapis|gstatic)\.com/.test(read(f)));
+const gFonts = srcFiles.filter(
+  (f) => /\.(tsx?|jsx?|css|html)$/.test(f) && /fonts\.(googleapis|gstatic)\.com/.test(read(f)),
+);
 check("no remote Google Fonts", gFonts.length === 0, gFonts.join(", "));
 
 // 4. No stale TROLL3N campaign references.
@@ -59,19 +61,26 @@ check("no TROLL3N campaign references", troll.length === 0, troll.join(", "));
 
 // 5. Consent gating markers present.
 const integrations = read("src/components/Integrations.tsx");
-check(
-  "Integrations gates on consent",
-  /readConsent|CONSENT_UPDATED_EVENT/.test(integrations),
-);
+check("Integrations gates on consent", /readConsent|CONSENT_UPDATED_EVENT/.test(integrations));
 const consentLib = read("src/lib/consent.ts");
-check("consent lib exports readConsent + CONSENT_UPDATED_EVENT", /readConsent/.test(consentLib) && /CONSENT_UPDATED_EVENT/.test(consentLib));
+check(
+  "consent lib exports readConsent + CONSENT_UPDATED_EVENT",
+  /readConsent/.test(consentLib) && /CONSENT_UPDATED_EVENT/.test(consentLib),
+);
 
 // 6. Absolute SEO origin is https://roamforge.com.au.
 const site = read("src/lib/site.ts");
-check("SITE.url === https://roamforge.com.au", /url:\s*["']https:\/\/roamforge\.com\.au["']/.test(site));
+check(
+  "SITE.url === https://roamforge.com.au",
+  /url:\s*["']https:\/\/roamforge\.com\.au["']/.test(site),
+);
 
 // 7. No unsupported static shipping/payment claims outside dedicated legal pages.
-const bannedPhrases = [/free shipping australia[- ]wide/i, /free shipping on all orders/i, /same[- ]day dispatch/i];
+const bannedPhrases = [
+  /free shipping australia[- ]wide/i,
+  /free shipping on all orders/i,
+  /same[- ]day dispatch/i,
+];
 const claimHits = [];
 for (const f of srcFiles) {
   if (!/\.(tsx?|jsx?|md)$/.test(f)) continue;
@@ -79,7 +88,11 @@ for (const f of srcFiles) {
   const body = read(f);
   for (const rx of bannedPhrases) if (rx.test(body)) claimHits.push(`${f} (${rx})`);
 }
-check("no unsupported shipping/payment claims outside legal pages", claimHits.length === 0, claimHits.join("; "));
+check(
+  "no unsupported shipping/payment claims outside legal pages",
+  claimHits.length === 0,
+  claimHits.join("; "),
+);
 
 // 8. Root route sets base SEO with absolute origin.
 const root = read("src/routes/__root.tsx");
@@ -93,5 +106,7 @@ const routesWithMain = routeFiles.filter((f) => /<main[\s>]/.test(read(f)));
 const dupMain = rootHasMain && routesWithMain.length > 0;
 check("no duplicated <main> landmark between root and routes", !dupMain, routesWithMain.join(", "));
 
-console.log(`\n[qa:checks] ${failures.length === 0 ? "PASS" : `FAIL — ${failures.length} issue(s)`}`);
+console.log(
+  `\n[qa:checks] ${failures.length === 0 ? "PASS" : `FAIL — ${failures.length} issue(s)`}`,
+);
 process.exit(failures.length === 0 ? 0 : 1);
