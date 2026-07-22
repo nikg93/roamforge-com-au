@@ -268,7 +268,7 @@ function FeaturedGear() {
           </Link>
         </div>
         <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-4">
-          {featured.slice(0, 4).map((p) => (
+          {featured.slice(0, 4).map((p: ShopifyProduct) => (
             <ProductCard key={p.node.id} product={p} />
           ))}
         </div>
