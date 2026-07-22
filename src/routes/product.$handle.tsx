@@ -326,7 +326,7 @@ function ProductPageInner() {
                         setImageIdx((i) => (i - 1 + galleryImages.length) % galleryImages.length)
                       }
                       aria-label="Previous image"
-                      className="absolute left-2 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-rf-cream/90 text-rf-dark shadow-sm hover:bg-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 grid h-11 w-11 place-items-center rounded-full bg-rf-cream/90 text-rf-dark shadow-sm hover:bg-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
                     >
                       <span aria-hidden>‹</span>
                     </button>
@@ -334,7 +334,7 @@ function ProductPageInner() {
                       type="button"
                       onClick={() => setImageIdx((i) => (i + 1) % galleryImages.length)}
                       aria-label="Next image"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 grid h-10 w-10 place-items-center rounded-full bg-rf-cream/90 text-rf-dark shadow-sm hover:bg-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 grid h-11 w-11 place-items-center rounded-full bg-rf-cream/90 text-rf-dark shadow-sm hover:bg-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
                     >
                       <span aria-hidden>›</span>
                     </button>
@@ -594,6 +594,17 @@ function ProductPageInner() {
  * when nothing is found so the PDP can hide the block cleanly — we never
  * invent fitment data. Kept intentionally conservative; adjust the KNOWN
  * list only when we can verify the mapping.
+ *
+ * Matching rules:
+ *  - Uses word-boundary regex, not substring — "Ram" won't match "frame",
+ *    "Ford" won't match "affordable", "Y61" won't match "Y612".
+ *  - Description is stripped of HTML first via textFromHtml so we don't
+ *    match tokens sitting inside class names, hrefs, or inline styles.
+ *  - Model matches take priority over make matches: if a specific model
+ *    is mentioned we suppress the generic make label to avoid the
+ *    misleading "Ford, Ranger" pairing (should just read "Ranger").
+ *  - "LandCruiser" and "Land Cruiser" collapse to a single canonical
+ *    label so we never duplicate the same vehicle.
  */
 const KNOWN_MAKES = [
   "Toyota",
@@ -609,36 +620,66 @@ const KNOWN_MAKES = [
   "Ram",
   "LDV",
   "GWM",
+] as const;
+// Each model entry lists its canonical label first, then any aliases we
+// want to catch in copy. Aliases collapse into the canonical label so the
+// UI never shows "LandCruiser, Land Cruiser" side by side. Also tracks
+// which make each model belongs to so we can suppress the generic make.
+const KNOWN_MODELS: Array<{ label: string; make: string; aliases: string[] }> = [
+  { label: "LandCruiser", make: "Toyota", aliases: ["LandCruiser", "Land Cruiser"] },
+  { label: "Prado", make: "Toyota", aliases: ["Prado"] },
+  { label: "Hilux", make: "Toyota", aliases: ["Hilux"] },
+  { label: "Fortuner", make: "Toyota", aliases: ["Fortuner"] },
+  { label: "Patrol", make: "Nissan", aliases: ["Patrol", "Y62", "Y61", "GU Patrol", "GQ Patrol"] },
+  { label: "Navara", make: "Nissan", aliases: ["Navara"] },
+  { label: "Ranger", make: "Ford", aliases: ["Ranger", "PX Ranger"] },
+  { label: "Everest", make: "Ford", aliases: ["Everest"] },
+  { label: "D-Max", make: "Isuzu", aliases: ["D-Max", "DMax"] },
+  { label: "MU-X", make: "Isuzu", aliases: ["MU-X", "MUX"] },
+  { label: "Triton", make: "Mitsubishi", aliases: ["Triton"] },
+  { label: "Pajero", make: "Mitsubishi", aliases: ["Pajero"] },
+  { label: "BT-50", make: "Mazda", aliases: ["BT-50", "BT50"] },
+  { label: "Amarok", make: "Volkswagen", aliases: ["Amarok"] },
+  { label: "Wrangler", make: "Jeep", aliases: ["Wrangler"] },
+  { label: "Defender", make: "Land Rover", aliases: ["Defender"] },
+  { label: "Discovery", make: "Land Rover", aliases: ["Discovery"] },
 ];
-const KNOWN_MODELS = [
-  "LandCruiser",
-  "Land Cruiser",
-  "Prado",
-  "Hilux",
-  "Fortuner",
-  "Patrol",
-  "Navara",
-  "Ranger",
-  "Everest",
-  "D-Max",
-  "MU-X",
-  "Triton",
-  "Pajero",
-  "BT-50",
-  "Amarok",
-  "Wrangler",
-  "Defender",
-  "Discovery",
-  "Y62",
-  "Y61",
-];
+
+// Escape regex metacharacters in aliases like "D-Max" or "MU-X" so they
+// match literally, not as regex ranges.
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 function extractFitment(p: ShopifyProduct["node"]): string[] | null {
-  const haystack = [p.title, p.productType ?? "", p.description ?? "", ...(p.tags ?? [])]
-    .join(" ")
-    .toLowerCase();
-  const matches = new Set<string>();
-  for (const m of [...KNOWN_MAKES, ...KNOWN_MODELS]) {
-    if (haystack.includes(m.toLowerCase())) matches.add(m);
+  // Strip HTML from description so tokens can't hide inside markup.
+  const plainDescription = textFromHtml(p.descriptionHtml || p.description || "", 4000);
+  const haystack = [p.title, p.productType ?? "", plainDescription, ...(p.tags ?? [])]
+    .filter(Boolean)
+    .join(" \u00b7 ");
+
+  const matchesWord = (needle: string) => {
+    // Word boundaries so "Ram" won't fire on "frame" and "Y61" won't fire
+    // on "Y612". Kept case-insensitive; alphanumeric-safe on both sides.
+    const re = new RegExp(`(?:^|[^\\p{L}\\p{N}])${escapeRe(needle)}(?:$|[^\\p{L}\\p{N}])`, "iu");
+    return re.test(haystack);
+  };
+
+  const modelHits = new Set<string>();
+  const modelMakes = new Set<string>();
+  for (const model of KNOWN_MODELS) {
+    if (model.aliases.some(matchesWord)) {
+      modelHits.add(model.label);
+      modelMakes.add(model.make);
+    }
   }
-  return matches.size > 0 ? [...matches] : null;
+
+  const makeHits = new Set<string>();
+  for (const make of KNOWN_MAKES) {
+    // Skip the generic make label if a model from that make already
+    // matched — "Ranger" is enough; adding "Ford" is noise.
+    if (modelMakes.has(make)) continue;
+    if (matchesWord(make)) makeHits.add(make);
+  }
+
+  const out = [...makeHits, ...modelHits];
+  return out.length > 0 ? out : null;
 }
