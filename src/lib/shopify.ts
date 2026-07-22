@@ -163,17 +163,8 @@ export const PRODUCTS_QUERY = `
             id title sku availableForSale
             price { amount currencyCode }
             compareAtPrice { amount currencyCode }
+            image { url altText }
             selectedOptions { name value }
-          }
-          variants(first: 4) {
-            edges {
-              node {
-                id title sku availableForSale
-                price { amount currencyCode }
-                compareAtPrice { amount currencyCode }
-                selectedOptions { name value }
-              }
-            }
           }
         }
       }
@@ -197,17 +188,8 @@ export const PRODUCTS_PAGE_QUERY = `
             id title sku availableForSale
             price { amount currencyCode }
             compareAtPrice { amount currencyCode }
+            image { url altText }
             selectedOptions { name value }
-          }
-          variants(first: 4) {
-            edges {
-              node {
-                id title sku availableForSale
-                price { amount currencyCode }
-                compareAtPrice { amount currencyCode }
-                selectedOptions { name value }
-              }
-            }
           }
         }
       }
@@ -378,17 +360,8 @@ export const FEATURED_PRODUCTS_QUERY = `
             id title sku availableForSale
             price { amount currencyCode }
             compareAtPrice { amount currencyCode }
+            image { url altText }
             selectedOptions { name value }
-          }
-          variants(first: 4) {
-            edges {
-              node {
-                id title sku availableForSale
-                price { amount currencyCode }
-                compareAtPrice { amount currencyCode }
-                selectedOptions { name value }
-              }
-            }
           }
         }
       }
