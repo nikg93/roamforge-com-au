@@ -372,6 +372,29 @@ export const FEATURED_PRODUCTS_QUERY = `
 `;
 
 export async function fetchFeaturedProducts(first = 8): Promise<ShopifyProduct[]> {
+  return fetchFeaturedProductsImpl(first);
+}
+
+// Shopify's own recommendation graph — same shape as the grid query.
+const PRODUCT_RECOMMENDATIONS_QUERY = `
+  query ProductRecommendations($productId: ID!) {
+    productRecommendations(productId: $productId) {
+      id title handle vendor availableForSale
+      priceRange { minVariantPrice { amount currencyCode } }
+      compareAtPriceRange { minVariantPrice { amount currencyCode } }
+      featuredImage { url altText }
+      selectedOrFirstAvailableVariant {
+        id title sku availableForSale
+        price { amount currencyCode }
+        compareAtPrice { amount currencyCode }
+        image { url altText }
+        selectedOptions { name value }
+      }
+    }
+  }
+`;
+
+async function fetchFeaturedProductsImpl(first: number): Promise<ShopifyProduct[]> {
   const data = await storefrontApiRequest(FEATURED_PRODUCTS_QUERY, { first });
   const edges = data?.data?.products?.edges ?? [];
   return edges.map((e: { node: ShopifyProduct["node"] }) => {
