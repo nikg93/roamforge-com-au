@@ -21,12 +21,23 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SectionHeading } from "@/components/SectionHeading";
 import { TrustedBrands } from "@/components/TrustedBrands";
 import { LifestyleSection } from "@/components/LifestyleSection";
+import { ProductCard } from "@/components/ProductCard";
 import logo from "@/assets/logo.png";
 import heroGear from "@/assets/lifestyle-journey.jpg";
 import { CATEGORIES, type CategorySlug } from "@/lib/categories";
 import { routeMeta } from "@/lib/seo";
+import { fetchFeaturedProducts } from "@/lib/shopify";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+
+const featuredQuery = queryOptions({
+  queryKey: ["featured-products"],
+  queryFn: () => fetchFeaturedProducts(8),
+  staleTime: 5 * 60_000,
+  retry: 1,
+});
 
 export const Route = createFileRoute("/")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(featuredQuery),
   head: () =>
     routeMeta({
       path: "/",
