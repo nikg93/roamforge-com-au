@@ -1,138 +1,117 @@
-# Roamforge — Technical Audit (Read-Only)
 
-Scope: source review only. Rankings — **P0** blocker, **P1** high, **P2** medium, **P3** low. "Confirmed" = visible in code; "Risk" = likely but not verified at runtime.
+# Roamforge audit — HEAD + preview
 
----
+Read-only audit. No files changed. Evidence is from source reads on HEAD and a Playwright pass at 1440×900 and 390×844 against `localhost:8080`, plus curl on `/sitemap.xml` and `/robots.txt`.
 
-## P0 — Blocker / User-Impacting
-
-**1. Storefront access token is hardcoded in the client bundle.** Confirmed.
-`src/lib/shopify.ts:6` — `SHOPIFY_STOREFRONT_TOKEN = "3fe65ac91d37eb..."`. Shopify Storefront tokens are technically "public", but committing them in source ties the site to that specific token permanently and exposes it to any scraper. Should live behind `VITE_SHOPIFY_STOREFRONT_TOKEN` env var so it's rotatable, and the store domain likewise.
-
-**2. Product route: `<title>` is the raw handle.** Confirmed.
-`src/routes/product.$handle.tsx:14` sets `title: "${params.handle} | Roamforge"` → e.g. "ultimate9-codebreaker-gps-head-up-display | Roamforge". No product title, no `og:image`, no schema, no canonical. This is every product page's SEO — currently near-zero.
-
-**3. No canonical tags on any route.** Confirmed.
-Neither `__root.tsx` nor any leaf route emits `<link rel="canonical">` or `og:url`. Combined with the sitemap advertising `https://roamforge.com.au` while the site is also live at `roamforge-com-au.lovable.app` and the preview URL, this creates duplicate-content risk across mirrored domains.
+`768px` was not run in the browser sweep — only 1440 and 390 were. Tablet layout risks below are inferred from the CSS breakpoints (`sm/md/lg`) in the source. Flag if you want a re-run at 768 before implementation.
 
 ---
 
-## P1 — High
+## Critical
 
-**4. Sitemap references categories that don't exist.** Confirmed.
-`sitemap[.]xml.ts:13–31` lists 8 categories but omits `vehicle-protection` and `merch` while `CATEGORY_MAP` has them. Missing URLs will never be indexed.
+**C1. Home and category routes have no `<main>` landmark.**
+- Evidence: Playwright `document.querySelectorAll('main').length` = **0** on `/`, `/category/performance`, `/category/recovery` at both viewports. Product, 404, about, contact, faq all return 1.
+- Source: `src/routes/index.tsx` wraps content in `<section>` only. `src/routes/category.$slug.tsx` `CategoryPage` component (line ~100) same — the `<main>` at lines 68/83 only exists in the error/notFound branches.
+- Impact: screen-reader "jump to main content" fails on the two most-trafficked page types; WCAG 1.3.1 / 2.4.1; contributes to `a11y-landmark-one-main` scanner failure.
 
-**5. Footer "SHOP" column links to slugs that don't exist in `CATEGORY_MAP`.** Confirmed.
-`SiteFooter.tsx:13–17` — `throttle-controllers`, `tailgate-systems`, `nudge-bars`, `lighting-packs`. Only `lighting` is valid; the other four will trigger the category `notFound` boundary. Same issue in `TrustedBrands.tsx:8` (`throttle-controllers`).
-
-**6. Footer newsletter form is inert.** Confirmed.
-`SiteFooter.tsx:77–84` — `<form>` with no action, submit button is `type="button"`, no handler, no storage of email. Users think they've subscribed.
-
-**7. Social icons link to `href="#"`.** Confirmed.
-`SiteFooter.tsx:91–93`. Dead links; jumps user to top of page.
-
-**8. Header search & account buttons do nothing.** Confirmed.
-`SiteHeader.tsx:62–67` — no onClick, no dialog, no route. Visible UI implies functionality that isn't there.
-
-**9. No mobile navigation.** Confirmed.
-`SiteHeader.tsx:31` — main nav is `hidden lg:flex`. Below ~1024 px there is no menu button, no drawer — categories are unreachable except via the homepage grid. Major conversion problem on mobile.
-
-**10. Cart drawer sync/checkout race conditions.** Risk (code review).
-`CartDrawer.tsx:26` opens checkout in a new tab via `window.open` from an async callback. On iOS Safari popup blockers commonly reject async `window.open`; the checkout URL is cached in the store so this usually works but not always. Also, `syncCart` on drawer open (`:22–24`) can clear the cart mid-render if Shopify reports 0 quantity while a request is still in flight.
-
-**11. Duplicate Storefront domain / token in source.** Confirmed.
-Same as #1; also blocks connecting a different Shopify store without a code change.
-
-**12. `product.$handle` route missing `beforeLoad`/`loader`.** Confirmed.
-Data is fetched only in the component with `useQuery`, so SSR emits a shell with a spinner (no title/description populated from real product) and Googlebot won't see product content. Titles/descriptions can't derive from product data because the loader is empty (see #2).
+**C2. Category `og:image` is a relative Vite-hashed asset path, not an absolute https URL.**
+- Evidence: Playwright reports `og:image = /src/assets/cat-performance-new.jpg` on `/category/performance` and `/src/assets/cat-recovery-new.jpg` on `/category/recovery`. Prod build will hash it to `/assets/xxx.jpg` — still relative.
+- Source: `src/routes/category.$slug.tsx:44` passes `cfg.image` (a bundler import) straight into `og:image`. The `routeMeta` helper in `src/lib/seo.ts:42` guards against this with `/^https?:\/\//i.test(...)` but category route bypasses the helper.
+- Impact: Facebook / X / LinkedIn / Slack crawlers require absolute URLs and will drop the preview image for every category share.
 
 ---
 
-## P2 — Medium
+## High
 
-**13. Heading hierarchy: `<SectionHeading>` always renders `<h2>` regardless of nesting.** Confirmed.
-`SectionHeading.tsx:7`. Homepage has `<h1>`FORGED..., then multiple `<h2>` — fine. But `PageShell` article children use `H2` (`mt-10`) inside `<article>` — acceptable but inconsistent skip levels vs. no `<h3>` usage.
+**H1. `<meta name="google-site-verification">` is on the root route (all pages).**
+- Source: `src/routes/__root.tsx:96`. Correct location is fine (root works), but the value `mu2c75c6...` should be verified as still active in Search Console — hardcoded tokens go stale silently.
+- Verification status: **requires external Google Search Console check**.
 
-**14. Category not-found + error components lack `<main>` + `notFound` metadata.** Confirmed.
-`category.$slug.tsx:108–125` — no `<meta name="robots" content="noindex">` on the notFound component. `$.tsx` sets `noindex, follow` — inconsistent.
+**H2. Product `og:image` uses Shopify `.png` at a `p2.png` filename.**
+- Evidence: `/product/n70-hilux-front-mount-intercooler-600x400` returns `og:image = https://cdn.shopify.com/.../p2.png?v=1782385045`.
+- The Shopify CDN URL is fine and absolute (✓), but `p2.png` suggests the placeholder asset series copied from local `p2.jpg`/`p3.jpg`/… in project root was re-uploaded into Shopify. Confirm this specific product actually has a real N70 intercooler image, not a reused placeholder.
+- Verification: **requires Shopify Admin review** per product.
 
-**15. `<img alt="Roamforge">` used twice on every page** (header + footer logos). Confirmed.
-Screen readers announce "Roamforge, Roamforge, image, Roamforge". One should be `alt=""` (decorative) or wrapped in the link with `aria-label="Roamforge home"` and empty alt.
+**H3. Home H1 renders as concatenated text to assistive tech.**
+- Evidence: Playwright text scrape returns `"FORGEDFOR ADVENTURE"` (no space). Source: `src/routes/index.tsx:82-84` — `<h1>FORGED<br /><span>FOR ADVENTURE</span></h1>`. Visually correct, but screen readers announce the two text nodes with no separator.
+- Fix direction: keep the visual line-break, add a space either side of the `<br />` or wrap in aria-label.
 
-**16. Category `<img>` uses full-cover `absolute inset-0` without `width`/`height`.** Confirmed.
-`category.$slug.tsx:144–149`, `LifestyleSection.tsx:8–12`, `SiteHeader.tsx:29`. No CLS reservation. Also hero `img` in `index.tsx:73–77` uses fixed CSS heights so CLS is bounded, but no `fetchpriority="high"` or preload — LCP candidate is unmarked.
+**H4. Robots.txt lists a `Sitemap:` at the canonical domain, but the sitemap is served by the app.**
+- Evidence: `curl /sitemap.xml` → 200, 94 `<loc>` entries, all under `https://roamforge.com.au`. Consistent.
+- Requires external: DNS/domain must actually be `roamforge.com.au` in production (currently `roamforge-com-au.lovable.app` per project URLs). If the custom domain isn't yet the primary host, Google will treat the canonical/sitemap host mismatch as a soft signal against indexing.
 
-**17. `defaultPreloadStaleTime: 0` on router.** Confirmed.
-`src/router.tsx:12`. Every link hover refetches → wasted network calls and Shopify quota burn.
-
-**18. Every route mounts `useCartSync()` independently.** Confirmed.
-Root + index + category + product all call it (via component + `<Toaster>` in `__root`). This fires a `cart` query on every navigation and every tab-visibility change. Move `useCartSync` into `__root.tsx` once, remove from routes.
-
-**19. Icon-only mobile tap targets are 36×36.** Confirmed.
-`SiteHeader.tsx:62,65` (`h-9 w-9`). Below WCAG 2.5.5 44×44 target size, and below the shadcn `size="icon"` bump you already noted in a11y guide.
-
-**20. Cart drawer decrement past 1 calls `removeItem`.** Not confirmed — actually, `updateQuantity(_, quantity - 1)` calls `updateQuantity`, which for `quantity <= 0` returns `removeItem` (`cartStore.ts:154`). Fine, but clicking "-" at qty=1 silently removes with no confirmation.
-
-**21. Klaviyo/Tidio/GA4 env vars — script tags render undefined if empty string.** Risk.
-`Integrations.tsx:15–17` treats `undefined | ""` the same because `if (ga4)` is falsy for empty string, so OK. But since the user says the apps are "installed", none of them are wired via `VITE_*` — they're not loading, confirmed by the earlier diagnostic.
-
-**22. Category page loader-less; SSR renders skeleton.** Same as #12 for categories.
-Product grid depends on `useQuery` client-side; server response never carries product data. Google can index the H1/description but not the products themselves.
+**H5. Hardcoded Storefront token fallback still ships in the client bundle.**
+- Source: `src/lib/site.ts:29` — literal fallback `"3fe65ac91d37eb6061771366ba9d1393"` when `VITE_SHOPIFY_STOREFRONT_TOKEN` is unset. Storefront tokens are public by design (documented in the file), so this is not a leak — but it means rotating the token requires a code change, not a config change. Move the fallback out or explicitly require the env var in prod.
 
 ---
 
-## P3 — Low / Recommendations
+## Medium
 
-**23. Duplicate/dead image assets.** Confirmed.
-`cat-electrical.jpg`, `cat-camping.jpg`, `cat-nudge.jpg`, `product-*.jpg` (throttle, snatch-strap, watertank, tailgate, snorkel, obd2, rocklights, recovery-kit, nudgebar, nudge-lights, lightbar, isolator, gps, dcdc, deflator, compressor, battmonitor, hero-patrol) and `evc-controller.webp` are not imported anywhere. Bundle bloat.
+**M1. Category description meta stops mid-word.**
+- Evidence: `/category/performance` description returns `"Throttle controllers, intercoolers, snorkels and performance upgrades "` (trailing space, truncated by the 70-char test slice but the full string in `categories.ts` is 156 chars — safe). No action needed; noted only to confirm scanner won't flag.
 
-**24. No JSON-LD schema anywhere.** Confirmed.
-No `Organization`, `WebSite`, `BreadcrumbList`, or `Product` schema. `Product` schema on product page + `Organization`/`WebSite` on root would materially improve rich-result eligibility.
+**M2. Home page has zero JSON-LD product/collection schema.**
+- Evidence: home returns `jsonld count = 1` (the root Organization/WebSite graph). No `ItemList` for featured categories.
+- Impact: category tile grid on home is a natural place for an `ItemList` / `CollectionPage` schema for rich-result eligibility. Category pages themselves also lack `CollectionPage`+`ItemList` — only `BreadcrumbList` is emitted.
 
-**25. `<html lang="en">` — should be `en-AU` for an AU store.** Confirmed. `__root.tsx:114`.
+**M3. Search dialog fetches every keystroke debounce with a broad Shopify search query.**
+- Source: `src/components/SearchDialog.tsx:53` — `title:*q* OR vendor:*q* OR tag:*q*`. Leading wildcards in Shopify search are expensive and produce noisy results.
+- Recommendation: drop leading `*` (Shopify search is prefix by default), or switch to Shopify Storefront `predictiveSearch` (`predictiveSearch(query: $q, types: [PRODUCT])`) which is purpose-built and much faster.
 
-**26. `min-h-screen` used everywhere.** Confirmed.
-On iOS this excludes address bar chrome. Should be `min-h-dvh`.
+**M4. Category page uses one `<img>` at `h-full` with `opacity-45` over a dark bg for the hero.**
+- Source: `src/routes/category.$slug.tsx:113`. This ships the full image at hero size on mobile too. There is no `sizes=` attribute or `<picture>` with a smaller mobile variant, and no `srcset`. LCP on mobile category pages will be the same 1600×600 file the desktop uses.
 
-**27. Header nav order duplicates category grid but with different labels.** Confirmed.
-Nav says "PROTECTION", grid says "VEHICLE PROTECTION"; nav "12V & MONITORING", grid "12V & VEHICLE MONITORING". Not broken, just inconsistent branding.
+**M5. Third-party integrations gate scripts on env vars but do not defer or preload origins.**
+- Source: `src/components/Integrations.tsx` (not read in this audit; inferred from prior turns). Confirm scripts are `async` / gated by consent where AU privacy expectations apply (Tidio chat + GA4). GA4 also needs a consent banner if EU visitors are possible.
+- Requires external: Lovable env config check for `VITE_GA4_ID`, `VITE_KLAVIYO_ID`, `VITE_TIDIO_KEY`.
 
-**28. `PRODUCTS_QUERY` fetches 5 images + 10 variants for grid rendering.** Confirmed.
-`shopify.ts:57–70`. Grid only uses first image + first variant. Trim to `images(first:1) variants(first:1)` for category listings to cut payload ~5×.
-
-**29. Product page description printed as `whitespace-pre-line`.** Confirmed.
-Shopify descriptions come back as HTML; you're rendering as plain text, so `<p>`/`<ul>` tags appear as literal text. Either strip tags or render sanitized HTML.
-
-**30. Cart persisted to `localStorage` but only re-validated on drawer open / tab focus.** Confirmed.
-If a variant is deleted in Shopify, users can add stale line items before validation runs.
-
-**31. robots.txt: no explicit disallow of `/cart`, `/checkout`, `/product/*?variant=`.** Minor.
-
-**32. Newsletter compliance.** If wired later, needs an opt-in and privacy notice next to the input for AU spam law.
-
-**33. `Integrations.tsx` never removes GA4 dataLayer/gtag once injected.** Confirmed.
-Cleanup on `:57` only removes script tags, not the globals. Non-issue in production (component never unmounts), but flag for future SSR/hot-reload cleanliness.
-
-**34. Type-narrowing in `SiteHeader` NavItem union is over-engineered.** P3 refactor.
+**M6. Footer displays only 5 of 10 categories.**
+- Source: `src/components/SiteFooter.tsx:6-13` — `featuredSlugs` omits monitoring, gps-tracking, air-compressors, merch, planners. Deliberate curation is fine; flag for confirmation this matches the intended IA.
 
 ---
 
-## Build / Lint / Type Risks
+## Quick wins
 
-- `defaultPreloadStaleTime: 0` — see #17.
-- `useCartSync` in `__root` via `<Integrations />` sibling AND in every route — double-registration risk if a future edit turns `syncCart` non-idempotent.
-- All Shopify calls throw to nearest error boundary; category route has one, product route does not have a full-page one — only inline text (`product.$handle.tsx:19–22`), no header/footer.
-- `SiteFooter.tsx` FooterLink union uses hard-coded slug type unions; adding a new category doesn't fail typecheck unless slug is one of these — future footer entries can silently 404 (see #5).
-- `eslint` script exists; recommend running `bun run lint` and `tsgo --noEmit` at build time. Not run in this audit.
+**Q1.** Wrap `<Outlet />` in `src/routes/__root.tsx:174` with a single `<main>` and remove the duplicated `<main>` blocks from every leaf route (`about`, `contact`, `product`, `PageShell`, `$.tsx`). One landmark, defined once, satisfies C1 for every route in one place.
+
+**Q2.** Route category through `routeMeta` from `src/lib/seo.ts` and pass `image: new URL(cfg.image, SITE.url).href` (resolve at build time via `SITE.url + <hashed-path>`) — solves C2 and dedupes 30 lines of head() boilerplate.
+
+**Q3.** Add a space around the `<br />` in the home H1 (or split H1 across two spans with an aria-label on the H1) — resolves H3.
+
+**Q4.** Replace search query with Shopify Storefront `predictiveSearch` — resolves M3 and improves perceived latency.
+
+**Q5.** Add `sizes="(max-width: 640px) 100vw, 1600px"` and a `srcset` to the category hero `<img>` — resolves M4 with no visual change.
+
+**Q6.** Add `ItemList` JSON-LD to `/category/*` (products already loaded in the loader) and `CollectionPage` type — resolves M2 for category pages.
 
 ---
 
-## Fix Order (Recommended)
+## Verified vs inferred vs external
 
-1. Fix P0 items #1, #2, #3 in one PR.
-2. Sweep P1 broken links (#4, #5), inert form (#6), dead socials (#7), header ghost buttons (#8), and ship mobile nav (#9).
-3. Cart reliability pass — checkout popup (#10), single `useCartSync` (#18), stale-variant refresh (#30).
-4. Loaders + SEO — move category/product fetches into loaders, add canonical, product JSON-LD (#12, #22, #24), sitemap parity (#4).
-5. Polish — a11y (#15, #19), CLS (#16), payload trim (#28), asset cleanup (#23).
+**Verified via read + browser:**
+- Sitemap 200 + 94 URLs, robots.txt content, canonical URLs on every route, meta descriptions, H1s, `img[alt]` coverage (0 missing on tested pages), 404 `noindex`, JSON-LD counts per route, no console pageerrors on any tested route at 1440 or 390.
 
-No files will be modified in plan mode. Approve to have any subset of the above implemented.
+**Inferred (not directly executed):**
+- Tablet 768 layout (breakpoints suggest safe; not sampled).
+- Cross-browser (Firefox/Safari) — only Chromium sampled.
+- LCP / CLS / INP numbers — no Lighthouse pass this turn.
+- Cart drawer keyboard trap + Escape restore — not re-exercised.
+- Prior turn's mobile menu focus + search focus return — trusted from that turn's PASS, not re-run.
+
+**Requires external configuration to fully resolve:**
+- Google Search Console verification token still valid (H1).
+- Custom domain `roamforge.com.au` pointing at Lovable prod (H4).
+- Real product imagery in Shopify Admin for every SKU (H2, and general merchandising).
+- GA4 / Klaviyo / Tidio env vars set for the prod deploy (M5).
+- Consent banner posture for AU + international visitors (M5).
+
+---
+
+## Suggested implementation order (only after approval)
+
+1. Q1 (single `<main>` at root) — one-file, kills C1.
+2. Q2 (category `routeMeta` + absolute og:image) — kills C2.
+3. Q3, Q5, Q6 — small quality wins.
+4. Q4 (predictive search) — larger change, do last.
+
+No files touched yet; this plan is the audit deliverable.
