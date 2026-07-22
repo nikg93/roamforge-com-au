@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Instagram } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { CATEGORIES } from "@/lib/categories";
+import { openConsentPreferences } from "@/lib/consent";
 
 const featuredSlugs: Array<(typeof CATEGORIES)[number]["slug"]> = [
   "performance",
@@ -74,6 +75,15 @@ export function SiteFooter() {
               <Link to="/privacy" className="text-rf-cream/70 hover:text-rf-tan transition-colors">
                 Privacy Policy
               </Link>
+            </li>
+            <li>
+              <button
+                type="button"
+                onClick={openConsentPreferences}
+                className="text-rf-cream/70 hover:text-rf-tan transition-colors text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
+              >
+                Privacy preferences
+              </button>
             </li>
           </ul>
         </div>

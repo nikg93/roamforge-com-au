@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { routeMeta } from "@/lib/seo";
 import { PageShell, H2, P, UL } from "@/components/PageShell";
+import { openConsentPreferences } from "@/lib/consent";
 
 export const Route = createFileRoute("/privacy")({
   head: () =>
@@ -52,6 +53,17 @@ function PrivacyPage() {
           privacy@roamforge.com.au
         </a>
       </P>
+      <H2>Your Choices</H2>
+      <P>You can review or change your analytics and marketing preferences at any time.</P>
+      <p className="mt-2">
+        <button
+          type="button"
+          onClick={openConsentPreferences}
+          className="min-h-11 inline-flex items-center border border-rf-dark px-4 py-2 text-xs font-semibold tracking-widest text-rf-dark hover:bg-rf-dark hover:text-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
+        >
+          MANAGE PRIVACY PREFERENCES
+        </button>
+      </p>
     </PageShell>
   );
 }
