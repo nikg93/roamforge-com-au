@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute, notFound, Link } from "@tanstack/react-router";
+import { createFileRoute, notFound, Link, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -25,6 +25,8 @@ const categoryQuery = (slug: string, q: string) =>
     queryKey: ["products", "category", slug],
     queryFn: () => fetchProductsPage(PAGE_SIZE, q, null),
     staleTime: 60_000,
+    retry: 1,
+    retryDelay: 500,
   });
 
 export const Route = createFileRoute("/category/$slug")({
