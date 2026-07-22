@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Search as SearchIcon, Loader2 } from "lucide-react";
-import { fetchProducts, type ShopifyProduct } from "@/lib/shopify";
+import { predictiveSearchProducts, type ShopifyProduct } from "@/lib/shopify";
 import {
   Dialog,
   DialogContent,
@@ -50,8 +50,7 @@ export function SearchDialog({ open, onOpenChange, triggerRef }: SearchDialogPro
     let cancelled = false;
     setStatus("loading");
     const q = debounced.replace(/"/g, "").trim();
-    const shopifyQuery = `title:*${q}* OR vendor:*${q}* OR tag:*${q}*`;
-    fetchProducts(12, shopifyQuery)
+    predictiveSearchProducts(q, 12)
       .then((rows) => {
         if (cancelled) return;
         setResults(rows);
