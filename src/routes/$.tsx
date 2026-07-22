@@ -7,11 +7,11 @@ export const Route = createFileRoute("/$")({
   // not a soft-200. `setResponseStatus` is only defined when a server
   // request context exists (SSR); harmless no-op on client navigation.
   loader: async () => {
-    try {
-      const mod = await import("@tanstack/react-start/server");
-      mod.setResponseStatus?.(404);
-    } catch {
-      // Client-side navigation — no response object to mutate.
+    // Dynamic import keeps the server-only module out of the client bundle;
+    // the *.server.ts file is stripped from client-reachable graphs.
+    if (typeof window === "undefined") {
+      const { markNotFoundStatus } = await import("@/lib/not-found-status.server");
+      markNotFoundStatus();
     }
     return null;
   },
