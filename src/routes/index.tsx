@@ -45,10 +45,6 @@ const featuredQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/")({
-  // Server-render the featured grid: prime the cache during SSR. Errors are
-  // already swallowed inside the query fn, so a Shopify failure won't crash
-  // the homepage — the section renders empty and hides.
-  loader: ({ context }) => context.queryClient.ensureQueryData(featuredQuery),
   head: () =>
     routeMeta({
       path: "/",
