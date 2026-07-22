@@ -23,7 +23,7 @@ const shopQuery = queryOptions({
 
 export const Route = createFileRoute("/shop")({
   loader: ({ context }) => context.queryClient.ensureQueryData(shopQuery),
-  head: () => ({
+  head: ({ loaderData }) => ({
     ...routeMeta({
       path: "/shop",
       title: "Shop All Gear — Roamforge",
@@ -38,6 +38,28 @@ export const Route = createFileRoute("/shop")({
           "@type": "CollectionPage",
           name: "Shop All Gear",
           url: `${SITE_URL}/shop`,
+          mainEntity: {
+            "@type": "ItemList",
+            itemListOrder: "https://schema.org/ItemListOrderDescending",
+            numberOfItems: loaderData?.products?.length ?? 0,
+            itemListElement: (loaderData?.products ?? []).map((p, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              url: `${SITE_URL}/product/${p.node.handle}`,
+              name: p.node.title,
+            })),
+          },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
+            { "@type": "ListItem", position: 2, name: "Shop All", item: `${SITE_URL}/shop` },
+          ],
         }),
       },
     ],
