@@ -28,6 +28,7 @@ import { CATEGORIES, type CategorySlug } from "@/lib/categories";
 import { routeMeta } from "@/lib/seo";
 import { fetchFeaturedProducts } from "@/lib/shopify";
 import { queryOptions, useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
 
 // Bounded featured-gear query. Rejection becomes an empty list so a Shopify
 // hiccup can't take down the homepage — the section just hides cleanly.
