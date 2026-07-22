@@ -158,6 +158,40 @@ const PRODUCT_HANDLES_QUERY = `
   }
 `;
 
+// Predictive search: Shopify's purpose-built autocomplete endpoint. Faster
+// and more relevant than wildcard products(query:) — used by the search UI.
+const PREDICTIVE_SEARCH_QUERY = `
+  query PredictiveSearch($query: String!, $limit: Int!) {
+    predictiveSearch(query: $query, limit: $limit, types: [PRODUCT]) {
+      products {
+        id title handle vendor
+        priceRange { minVariantPrice { amount currencyCode } }
+        featuredImage { url altText }
+      }
+    }
+  }
+`;
+
+export async function predictiveSearchProducts(
+  query: string,
+  limit = 10,
+): Promise<ShopifyProduct[]> {
+  const data = await storefrontApiRequest(PREDICTIVE_SEARCH_QUERY, { query, limit });
+  const rows = data?.data?.predictiveSearch?.products ?? [];
+  return rows.map((n: ShopifyProduct["node"]) => {
+    const img = n.featuredImage;
+    return {
+      node: {
+        ...n,
+        description: n.description ?? "",
+        images: img ? { edges: [{ node: img }] } : { edges: [] },
+        variants: n.variants ?? { edges: [] },
+        options: n.options ?? [],
+      },
+    } as ShopifyProduct;
+  });
+}
+
 export async function fetchProducts(first = 20, query?: string): Promise<ShopifyProduct[]> {
   const availabilityQuery = "available_for_sale:true";
   const combinedQuery = query ? `(${query}) AND ${availabilityQuery}` : availabilityQuery;

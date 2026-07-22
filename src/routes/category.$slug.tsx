@@ -9,6 +9,12 @@ import { fetchProducts } from "@/lib/shopify";
 import { CATEGORY_MAP, isCategorySlug } from "@/lib/categories";
 import { canonicalFor, SITE_URL } from "@/lib/seo";
 
+function toAbsoluteUrl(pathOrUrl: string): string {
+  if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
+  const path = pathOrUrl.startsWith("/") ? pathOrUrl : `/${pathOrUrl}`;
+  return `${SITE_URL}${path}`;
+}
+
 const categoryQuery = (slug: string, q: string) =>
   queryOptions({
     queryKey: ["products", "category", slug],
@@ -26,11 +32,13 @@ export const Route = createFileRoute("/category/$slug")({
       categoryQuery(params.slug, CATEGORY_MAP[params.slug].query),
     );
   },
-  head: ({ params }) => {
+  head: ({ params, loaderData }) => {
     const cfg = isCategorySlug(params.slug) ? CATEGORY_MAP[params.slug] : undefined;
     const title = cfg ? `${cfg.label} — Roamforge` : "Roamforge";
     const desc = cfg?.description ?? "Roamforge gear.";
     const url = canonicalFor(`/category/${params.slug}`);
+    const absImage = cfg?.image ? toAbsoluteUrl(cfg.image) : undefined;
+    const products = (loaderData as Awaited<ReturnType<typeof fetchProducts>> | undefined) ?? [];
     return {
       meta: [
         { title },
@@ -41,7 +49,12 @@ export const Route = createFileRoute("/category/$slug")({
         { property: "og:type", content: "website" },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: desc },
-        ...(cfg?.image ? [{ property: "og:image", content: cfg.image }] : []),
+        ...(absImage
+          ? [
+              { property: "og:image", content: absImage },
+              { name: "twitter:image", content: absImage },
+            ]
+          : []),
         { name: "robots", content: cfg ? "index, follow" : "noindex, follow" },
       ],
       links: cfg ? [{ rel: "canonical", href: url }] : [],
@@ -56,6 +69,26 @@ export const Route = createFileRoute("/category/$slug")({
                   { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
                   { "@type": "ListItem", position: 2, name: cfg.label, item: url },
                 ],
+              }),
+            },
+            {
+              type: "application/ld+json",
+              children: JSON.stringify({
+                "@context": "https://schema.org",
+                "@type": "CollectionPage",
+                name: cfg.label,
+                description: cfg.description,
+                url,
+                mainEntity: {
+                  "@type": "ItemList",
+                  numberOfItems: products.length,
+                  itemListElement: products.slice(0, 20).map((p, i) => ({
+                    "@type": "ListItem",
+                    position: i + 1,
+                    url: `${SITE_URL}/product/${p.node.handle}`,
+                    name: p.node.title,
+                  })),
+                },
               }),
             },
           ]
@@ -104,6 +137,7 @@ function CategoryPage() {
   return (
     <div className="min-h-dvh flex flex-col bg-background">
       <SiteHeader />
+      <main className="flex-1 flex flex-col">
       <section className="relative bg-rf-dark overflow-hidden">
         {cfg.image && (
           <img
@@ -112,6 +146,7 @@ function CategoryPage() {
             width={1600}
             height={600}
             fetchPriority="high"
+            sizes="(max-width: 640px) 100vw, 1600px"
             className="absolute inset-0 h-full w-full object-cover opacity-45"
           />
         )}
@@ -134,6 +169,7 @@ function CategoryPage() {
           </div>
         </div>
       </section>
+      </main>
       <SiteFooter />
     </div>
   );
