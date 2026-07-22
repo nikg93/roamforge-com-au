@@ -9,12 +9,22 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
   const addItem = useCartStore((s) => s.addItem);
   const [busy, setBusy] = useState(false);
 
-  const variants = product.node.variants.edges;
-  // Pick the first available variant so the card action buys something real.
-  const variant = variants.find((e) => e.node.availableForSale)?.node ?? variants[0]?.node ?? null;
-  const inStock = !!variant?.availableForSale;
+  // Prefer Shopify's own resolution of which variant to surface — survives
+  // beyond the `variants(first:)` grid limit and matches Shopify storefronts.
+  const chosen = product.node.selectedOrFirstAvailableVariant;
+  const fallback =
+    product.node.variants?.edges?.find((e) => e.node.availableForSale)?.node ??
+    product.node.variants?.edges?.[0]?.node ??
+    null;
+  const variant = chosen ?? fallback;
+  const productAvailable = product.node.availableForSale;
+  const inStock =
+    typeof productAvailable === "boolean"
+      ? productAvailable && !!variant?.availableForSale
+      : !!variant?.availableForSale;
 
-  const img = product.node.images.edges[0]?.node;
+  const img =
+    variant?.image ?? product.node.featuredImage ?? product.node.images.edges[0]?.node ?? null;
   const price = variant?.price ?? product.node.priceRange.minVariantPrice;
   const compareAt =
     variant?.compareAtPrice ?? product.node.compareAtPriceRange?.minVariantPrice ?? null;

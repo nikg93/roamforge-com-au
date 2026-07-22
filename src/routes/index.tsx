@@ -27,17 +27,9 @@ import heroGear from "@/assets/lifestyle-journey.jpg";
 import { CATEGORIES, type CategorySlug } from "@/lib/categories";
 import { routeMeta } from "@/lib/seo";
 import { fetchFeaturedProducts } from "@/lib/shopify";
-import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-
-const featuredQuery = queryOptions({
-  queryKey: ["featured-products"],
-  queryFn: () => fetchFeaturedProducts(8),
-  staleTime: 5 * 60_000,
-  retry: 1,
-});
+import { useQuery } from "@tanstack/react-query";
 
 export const Route = createFileRoute("/")({
-  loader: ({ context }) => context.queryClient.ensureQueryData(featuredQuery),
   head: () =>
     routeMeta({
       path: "/",
@@ -211,9 +203,9 @@ function Index() {
           </div>
         </section>
 
-        <TrustedBrands />
-
         <FeaturedGear />
+
+        <TrustedBrands />
 
         <LifestyleSection />
 
@@ -244,13 +236,19 @@ function Index() {
 }
 
 function FeaturedGear() {
-  const { data } = useSuspenseQuery(featuredQuery);
-  if (!data || data.length === 0) return null;
+  // Client-fetched so a Shopify hiccup can't take down the homepage.
+  const { data, isError } = useQuery({
+    queryKey: ["featured-products", 4],
+    queryFn: () => fetchFeaturedProducts(4),
+    staleTime: 5 * 60_000,
+    retry: 1,
+  });
+  if (isError || !data || data.length === 0) return null;
   return (
     <section aria-labelledby="featured-heading" className="bg-background py-14">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         <div className="flex items-end justify-between gap-4">
-          <SectionHeading>POPULAR GEAR</SectionHeading>
+          <SectionHeading>FEATURED GEAR</SectionHeading>
           <Link
             to="/shop"
             className="hidden text-xs font-semibold tracking-[0.15em] text-rf-dark hover:text-rf-tan sm:inline"
@@ -258,8 +256,8 @@ function FeaturedGear() {
             SHOP ALL →
           </Link>
         </div>
-        <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {data.slice(0, 8).map((p) => (
+        <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-4">
+          {data.slice(0, 4).map((p) => (
             <ProductCard key={p.node.id} product={p} />
           ))}
         </div>

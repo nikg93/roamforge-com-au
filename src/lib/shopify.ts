@@ -6,6 +6,25 @@ export const SHOPIFY_STORE_PERMANENT_DOMAIN = SHOPIFY.storeDomain;
 export { SHOPIFY_STOREFRONT_URL };
 export const SHOPIFY_STOREFRONT_TOKEN = SHOPIFY.storefrontToken;
 
+/**
+ * Build a responsive srcset for a Shopify CDN image URL. Shopify's image CDN
+ * honours a `width` query param and reformats the source, so we can request
+ * multiple sizes for the browser to pick from.
+ */
+export function shopifySrcSet(url: string, widths: number[] = [400, 600, 900, 1200, 1600]): string {
+  try {
+    return widths
+      .map((w) => {
+        const u = new URL(url);
+        u.searchParams.set("width", String(w));
+        return `${u.toString()} ${w}w`;
+      })
+      .join(", ");
+  } catch {
+    return "";
+  }
+}
+
 /** Thrown by storefrontApiRequest when Shopify billing is not active (HTTP 402). */
 export class ShopifyBillingError extends Error {
   status = 402 as const;
@@ -163,17 +182,8 @@ export const PRODUCTS_QUERY = `
             id title sku availableForSale
             price { amount currencyCode }
             compareAtPrice { amount currencyCode }
+            image { url altText }
             selectedOptions { name value }
-          }
-          variants(first: 4) {
-            edges {
-              node {
-                id title sku availableForSale
-                price { amount currencyCode }
-                compareAtPrice { amount currencyCode }
-                selectedOptions { name value }
-              }
-            }
           }
         }
       }
@@ -197,17 +207,8 @@ export const PRODUCTS_PAGE_QUERY = `
             id title sku availableForSale
             price { amount currencyCode }
             compareAtPrice { amount currencyCode }
+            image { url altText }
             selectedOptions { name value }
-          }
-          variants(first: 4) {
-            edges {
-              node {
-                id title sku availableForSale
-                price { amount currencyCode }
-                compareAtPrice { amount currencyCode }
-                selectedOptions { name value }
-              }
-            }
           }
         }
       }
@@ -305,6 +306,7 @@ export async function fetchProducts(first = 20, query?: string): Promise<Shopify
       ...e.node,
       description: e.node.description ?? "",
       images: img ? { edges: [{ node: img }] } : { edges: [] },
+      variants: e.node.variants ?? { edges: [] },
       options: e.node.options ?? [],
     };
     return { node: withImages };
@@ -341,6 +343,7 @@ export async function fetchProductsPage(
         ...e.node,
         description: e.node.description ?? "",
         images: img ? { edges: [{ node: img }] } : { edges: [] },
+        variants: e.node.variants ?? { edges: [] },
         options: e.node.options ?? [],
       },
     };
@@ -378,17 +381,8 @@ export const FEATURED_PRODUCTS_QUERY = `
             id title sku availableForSale
             price { amount currencyCode }
             compareAtPrice { amount currencyCode }
+            image { url altText }
             selectedOptions { name value }
-          }
-          variants(first: 4) {
-            edges {
-              node {
-                id title sku availableForSale
-                price { amount currencyCode }
-                compareAtPrice { amount currencyCode }
-                selectedOptions { name value }
-              }
-            }
           }
         }
       }
@@ -397,6 +391,29 @@ export const FEATURED_PRODUCTS_QUERY = `
 `;
 
 export async function fetchFeaturedProducts(first = 8): Promise<ShopifyProduct[]> {
+  return fetchFeaturedProductsImpl(first);
+}
+
+// Shopify's own recommendation graph — same shape as the grid query.
+const PRODUCT_RECOMMENDATIONS_QUERY = `
+  query ProductRecommendations($productId: ID!) {
+    productRecommendations(productId: $productId) {
+      id title handle vendor availableForSale
+      priceRange { minVariantPrice { amount currencyCode } }
+      compareAtPriceRange { minVariantPrice { amount currencyCode } }
+      featuredImage { url altText }
+      selectedOrFirstAvailableVariant {
+        id title sku availableForSale
+        price { amount currencyCode }
+        compareAtPrice { amount currencyCode }
+        image { url altText }
+        selectedOptions { name value }
+      }
+    }
+  }
+`;
+
+async function fetchFeaturedProductsImpl(first: number): Promise<ShopifyProduct[]> {
   const data = await storefrontApiRequest(FEATURED_PRODUCTS_QUERY, { first });
   const edges = data?.data?.products?.edges ?? [];
   return edges.map((e: { node: ShopifyProduct["node"] }) => {
@@ -406,6 +423,7 @@ export async function fetchFeaturedProducts(first = 8): Promise<ShopifyProduct[]
         ...e.node,
         description: e.node.description ?? "",
         images: img ? { edges: [{ node: img }] } : { edges: [] },
+        variants: e.node.variants ?? { edges: [] },
         options: e.node.options ?? [],
       },
     };
@@ -420,9 +438,42 @@ export async function fetchFeaturedProducts(first = 8): Promise<ShopifyProduct[]
  */
 export async function fetchRelatedProducts(
   currentHandle: string,
-  opts: { vendor?: string; productType?: string; tags?: string[] },
+  opts: { productId?: string; vendor?: string; productType?: string; tags?: string[] },
   limit = 4,
 ): Promise<ShopifyProduct[]> {
+  // Prefer Shopify's own productRecommendations API when we have a product id.
+  // Falls back to a vendor / productType / tag query if the API returns nothing.
+  if (opts.productId) {
+    try {
+      const rec = await storefrontApiRequest(PRODUCT_RECOMMENDATIONS_QUERY, {
+        productId: opts.productId,
+      });
+      const rows: Array<ShopifyProduct["node"]> = rec?.data?.productRecommendations ?? [];
+      const shaped: ShopifyProduct[] = [];
+      const seen = new Set<string>();
+      for (const n of rows) {
+        if (!n || n.handle === currentHandle) continue;
+        if (n.availableForSale === false) continue;
+        if (seen.has(n.handle)) continue;
+        seen.add(n.handle);
+        const img = n.featuredImage;
+        shaped.push({
+          node: {
+            ...n,
+            description: n.description ?? "",
+            images: img ? { edges: [{ node: img }] } : { edges: [] },
+            variants: n.variants ?? { edges: [] },
+            options: n.options ?? [],
+          },
+        });
+        if (shaped.length >= limit) break;
+      }
+      if (shaped.length > 0) return shaped;
+    } catch {
+      // Fall through to vendor/tag query below.
+    }
+  }
+
   const clauses: string[] = [];
   const safe = (s: string) => s.replace(/["\\]/g, "").trim();
   if (opts.vendor && opts.vendor.trim()) clauses.push(`vendor:"${safe(opts.vendor)}"`);
@@ -447,6 +498,7 @@ export async function fetchRelatedProducts(
         ...e.node,
         description: e.node.description ?? "",
         images: img ? { edges: [{ node: img }] } : { edges: [] },
+        variants: e.node.variants ?? { edges: [] },
         options: e.node.options ?? [],
       },
     });
