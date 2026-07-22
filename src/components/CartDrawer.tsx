@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -11,14 +11,16 @@ import {
 } from "@/components/ui/sheet";
 import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2 } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
+import { toast } from "sonner";
 
 export function CartDrawer() {
-  const [isOpen, setIsOpen] = useState(false);
   const {
     items,
     isLoading,
     isSyncing,
     activeVariantIds,
+    isDrawerOpen,
+    setDrawerOpen,
     updateQuantity,
     removeItem,
     getCheckoutUrl,
@@ -28,24 +30,31 @@ export function CartDrawer() {
   // and unrelated lines stay usable.
   const isBusy = (variantId: string) => activeVariantIds.includes(variantId);
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
-  const totalPrice = items.reduce((s, i) => s + parseFloat(i.price.amount) * i.quantity, 0);
-  const currency = items[0]?.price.currencyCode ?? "AUD";
+  const currencies = Array.from(new Set(items.map((i) => i.price.currencyCode)));
+  const mixedCurrency = currencies.length > 1;
+  const currency = currencies[0] ?? "AUD";
+  const totalPrice = mixedCurrency
+    ? NaN
+    : items.reduce((s, i) => s + parseFloat(i.price.amount) * i.quantity, 0);
 
   useEffect(() => {
-    if (isOpen) syncCart();
-  }, [isOpen, syncCart]);
+    if (isDrawerOpen) syncCart();
+  }, [isDrawerOpen, syncCart]);
 
   const handleCheckout = () => {
     const url = getCheckoutUrl();
-    if (!url) return;
-    setIsOpen(false);
+    if (!url) {
+      toast.error("Checkout is not available right now. Please refresh and try again.");
+      return;
+    }
+    setDrawerOpen(false);
     // Synchronous navigation inside the click handler avoids Safari/iOS popup blockers
     // that reject window.open called from async callbacks.
     window.location.assign(url);
   };
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet open={isDrawerOpen} onOpenChange={setDrawerOpen}>
       <SheetTrigger asChild>
         <button
           aria-label="Open cart"
