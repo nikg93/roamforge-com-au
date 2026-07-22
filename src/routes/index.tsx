@@ -27,7 +27,23 @@ import heroGear from "@/assets/lifestyle-journey.jpg";
 import { CATEGORIES, type CategorySlug } from "@/lib/categories";
 import { routeMeta } from "@/lib/seo";
 import { fetchFeaturedProducts } from "@/lib/shopify";
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+
+// Bounded featured-gear query. Rejection becomes an empty list so a Shopify
+// hiccup can't take down the homepage — the section just hides cleanly.
+const featuredQuery = queryOptions({
+  queryKey: ["featured-products", 4],
+  queryFn: async () => {
+    try {
+      return await fetchFeaturedProducts(4);
+    } catch {
+      return [];
+    }
+  },
+  staleTime: 5 * 60_000,
+  retry: 1,
+});
 
 export const Route = createFileRoute("/")({
   head: () =>
@@ -236,14 +252,12 @@ function Index() {
 }
 
 function FeaturedGear() {
-  // Client-fetched so a Shopify hiccup can't take down the homepage.
-  const { data, isError } = useQuery({
-    queryKey: ["featured-products", 4],
-    queryFn: () => fetchFeaturedProducts(4),
-    staleTime: 5 * 60_000,
-    retry: 1,
-  });
-  if (isError || !data || data.length === 0) return null;
+  // Defer to post-hydration so SSR and initial client render both emit null
+  // (no hydration mismatch). Query kicks off once mounted.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const { data } = useQuery({ ...featuredQuery, enabled: mounted });
+  if (!mounted || !data || data.length === 0) return null;
   return (
     <section aria-labelledby="featured-heading" className="bg-background py-14">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
