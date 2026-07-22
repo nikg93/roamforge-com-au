@@ -18,8 +18,13 @@ interface CartStore {
   items: CartItem[];
   cartId: string | null;
   checkoutUrl: string | null;
+  /** True when any cart mutation is in flight (used by the drawer). Prefer
+   * `activeVariantIds` for per-card affordances so unrelated product cards
+   * are not disabled while another line is updating. */
   isLoading: boolean;
   isSyncing: boolean;
+  /** Set of variant IDs currently being mutated. */
+  activeVariantIds: string[];
   addItem: (item: Omit<CartItem, "lineId">) => Promise<void>;
   updateQuantity: (variantId: string, quantity: number) => Promise<void>;
   removeItem: (variantId: string) => Promise<void>;
@@ -68,6 +73,24 @@ function isCartNotFound(errs: Array<{ message: string }>) {
 function summarizeUserErrors(errs: Array<{ message: string }>): string {
   const first = errs.find((e) => e.message)?.message;
   return first ?? "Shopify rejected the request.";
+}
+
+/**
+ * Serialised mutation queue. Prevents rapid add/update/remove clicks (or a
+ * quick tab-return sync racing against an add) from corrupting cart state
+ * — every mutation runs strictly after the previous one resolves.
+ */
+let cartQueue: Promise<unknown> = Promise.resolve();
+export function enqueueCartOp<T>(fn: () => Promise<T>): Promise<T> {
+  const next = cartQueue.then(fn, fn);
+  // Keep the chain alive even if a step rejects — otherwise the promise
+  // returned to the next enqueue would surface an earlier error.
+  cartQueue = next.catch(() => undefined);
+  return next;
+}
+// Test hook so unit tests can reset the queue between cases.
+export function __resetCartQueueForTests() {
+  cartQueue = Promise.resolve();
 }
 
 async function createCart(item: CartItem) {
