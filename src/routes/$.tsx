@@ -1,8 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { markNotFoundStatus } from "@/lib/not-found-status";
 
 export const Route = createFileRoute("/$")({
+  // Signal a true HTTP 404 during SSR so crawlers see the correct status,
+  // not a soft-200. `setResponseStatus` is only defined when a server
+  // request context exists (SSR); harmless no-op on client navigation.
+  loader: async () => {
+    // Await so the status is set before the SSR response is committed.
+    await markNotFoundStatus();
+    return null;
+  },
   component: NotFoundPage,
   head: () => ({
     meta: [

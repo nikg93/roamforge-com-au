@@ -100,18 +100,21 @@ export function ConsentBanner() {
         <div
           role="region"
           aria-label="Privacy preferences"
-          className="fixed inset-x-3 bottom-3 z-50 max-w-3xl md:left-6 md:right-auto"
+          // Mobile: pin to TOP so it never overlaps the PDP sticky Add-to-Cart,
+          // cart drawer controls, or hero CTAs at the bottom of the viewport.
+          // Desktop (sm+): tuck into the bottom-left corner as a compact card.
+          className="fixed inset-x-0 top-0 z-40 sm:inset-x-auto sm:top-auto sm:bottom-4 sm:left-4 sm:max-w-sm"
+          style={{ paddingTop: "env(safe-area-inset-top)" }}
         >
-          <div className="rounded border border-rf-dark bg-rf-cream text-rf-dark shadow-lg">
-            <div className="flex flex-col gap-3 p-4 sm:p-5">
+          <div className="border-b border-rf-dark bg-rf-cream text-rf-dark shadow-lg sm:rounded sm:border">
+            <div className="flex flex-col gap-2 p-3 sm:gap-3 sm:p-4">
               <div>
-                <p className="font-display text-sm tracking-widest">YOUR PRIVACY</p>
-                <p className="mt-1 text-sm text-rf-dark/80">
-                  We use essential cookies to run the site. With your permission we&apos;d also like
-                  to use analytics (to understand how the site is used) and marketing tools (live
-                  chat, email capture). You can change your choice any time.{" "}
+                <p className="font-display text-xs tracking-widest sm:text-sm">YOUR PRIVACY</p>
+                <p className="mt-1 text-xs leading-snug text-rf-dark/80 sm:text-sm">
+                  Essential cookies keep the site working. With your permission we&apos;d also use
+                  analytics and marketing tools.{" "}
                   <Link to="/privacy" className="underline hover:text-rf-tan">
-                    Read our privacy policy
+                    Privacy policy
                   </Link>
                   .
                 </p>
