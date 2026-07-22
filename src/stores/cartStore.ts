@@ -410,7 +410,34 @@ export const useCartStore = create<CartStore>()(
     {
       name: "shopify-cart",
       storage: createJSONStorage(() => localStorage),
+      version: 2,
       partialize: (s) => ({ items: s.items, cartId: s.cartId, checkoutUrl: s.checkoutUrl }),
+      // Any older/corrupt shape from a previous release is dropped — a stale
+      // cartId or checkoutUrl that no longer maps to a real Shopify cart is
+      // worse than starting fresh.
+      migrate: (persisted, version) => {
+        if (version !== 2 || !persisted || typeof persisted !== "object") {
+          return { items: [], cartId: null, checkoutUrl: null } as Partial<CartStore>;
+        }
+        const p = persisted as Partial<CartStore>;
+        const items = Array.isArray(p.items)
+          ? p.items.filter(
+              (i): i is CartItem =>
+                !!i &&
+                typeof i === "object" &&
+                typeof (i as CartItem).variantId === "string" &&
+                typeof (i as CartItem).quantity === "number" &&
+                (i as CartItem).quantity > 0 &&
+                !!(i as CartItem).price?.amount,
+            )
+          : [];
+        const cartId = typeof p.cartId === "string" ? p.cartId : null;
+        const checkoutUrl =
+          typeof p.checkoutUrl === "string" && isValidCheckoutUrl(p.checkoutUrl)
+            ? p.checkoutUrl
+            : null;
+        return { items, cartId, checkoutUrl } as Partial<CartStore>;
+      },
     },
   ),
 );
