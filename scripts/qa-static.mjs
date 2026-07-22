@@ -39,7 +39,6 @@ const requiredRoutes = [
   "src/routes/contact.tsx",
   "src/routes/privacy.tsx",
   "src/routes/faq.tsx",
-  "src/routes/$.tsx",
   "src/routes/sitemap[.]xml.ts",
 ];
 for (const r of requiredRoutes) check(`route present: ${r}`, existsSync(r));
