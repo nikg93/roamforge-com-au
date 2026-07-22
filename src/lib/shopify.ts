@@ -40,6 +40,22 @@ export interface ShopifyProduct {
     productType?: string;
     tags?: string[];
     seo?: { title: string | null; description: string | null };
+    /** Product-level availability. Reflects Shopify's overall stock signal
+     * across every variant, not just the first 10 we ship to the card. */
+    availableForSale?: boolean;
+    /** Shopify's own resolution of "the variant a customer should see first".
+     * Prefer this over scanning `variants.edges` — it survives beyond the
+     * variants(first:) limit and matches Shopify's own storefronts. */
+    selectedOrFirstAvailableVariant?: {
+      id: string;
+      title: string;
+      sku?: string | null;
+      availableForSale: boolean;
+      price: { amount: string; currencyCode: string };
+      compareAtPrice?: { amount: string; currencyCode: string } | null;
+      image?: { url: string; altText: string | null } | null;
+      selectedOptions: Array<{ name: string; value: string }>;
+    } | null;
     priceRange: { minVariantPrice: { amount: string; currencyCode: string } };
     compareAtPriceRange?: { minVariantPrice: { amount: string; currencyCode: string } };
     featuredImage?: { url: string; altText: string | null } | null;
@@ -54,6 +70,7 @@ export interface ShopifyProduct {
           compareAtPrice?: { amount: string; currencyCode: string } | null;
           availableForSale: boolean;
           selectedOptions: Array<{ name: string; value: string }>;
+          image?: { url: string; altText: string | null } | null;
         };
       }>;
     };
@@ -138,11 +155,17 @@ export const PRODUCTS_QUERY = `
     products(first: $first, query: $query) {
       edges {
         node {
-          id title handle vendor
+          id title handle vendor availableForSale
           priceRange { minVariantPrice { amount currencyCode } }
           compareAtPriceRange { minVariantPrice { amount currencyCode } }
           featuredImage { url altText }
-          variants(first: 10) {
+          selectedOrFirstAvailableVariant {
+            id title sku availableForSale
+            price { amount currencyCode }
+            compareAtPrice { amount currencyCode }
+            selectedOptions { name value }
+          }
+          variants(first: 4) {
             edges {
               node {
                 id title sku availableForSale
@@ -160,17 +183,23 @@ export const PRODUCTS_QUERY = `
 
 // Grid query with cursor-based pagination for category pages.
 export const PRODUCTS_PAGE_QUERY = `
-  query GetProductsPage($first: Int!, $after: String, $query: String) {
-    products(first: $first, after: $after, query: $query) {
+  query GetProductsPage($first: Int!, $after: String, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean) {
+    products(first: $first, after: $after, query: $query, sortKey: $sortKey, reverse: $reverse) {
       pageInfo { hasNextPage endCursor }
       edges {
         cursor
         node {
-          id title handle vendor
+          id title handle vendor availableForSale
           priceRange { minVariantPrice { amount currencyCode } }
           compareAtPriceRange { minVariantPrice { amount currencyCode } }
           featuredImage { url altText }
-          variants(first: 10) {
+          selectedOrFirstAvailableVariant {
+            id title sku availableForSale
+            price { amount currencyCode }
+            compareAtPrice { amount currencyCode }
+            selectedOptions { name value }
+          }
+          variants(first: 4) {
             edges {
               node {
                 id title sku availableForSale
@@ -191,19 +220,27 @@ export const PRODUCTS_PAGE_QUERY = `
 export const PRODUCT_BY_HANDLE_QUERY = `
   query ProductByHandle($handle: String!) {
     product(handle: $handle) {
-      id title handle vendor productType tags
+      id title handle vendor productType tags availableForSale
       description descriptionHtml
       seo { title description }
       priceRange { minVariantPrice { amount currencyCode } }
       compareAtPriceRange { minVariantPrice { amount currencyCode } }
       featuredImage { url altText }
-      images(first: 10) { edges { node { url altText } } }
-      variants(first: 25) {
+      images(first: 20) { edges { node { url altText } } }
+      selectedOrFirstAvailableVariant {
+        id title sku availableForSale
+        price { amount currencyCode }
+        compareAtPrice { amount currencyCode }
+        image { url altText }
+        selectedOptions { name value }
+      }
+      variants(first: 100) {
         edges {
           node {
             id title sku availableForSale
             price { amount currencyCode }
             compareAtPrice { amount currencyCode }
+            image { url altText }
             selectedOptions { name value }
           }
         }
