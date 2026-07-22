@@ -22,8 +22,7 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { TrustedBrands } from "@/components/TrustedBrands";
 import { LifestyleSection } from "@/components/LifestyleSection";
 import logo from "@/assets/logo.png";
-import heroPatrolAsset from "@/assets/troll3n-real.jpg.asset.json";
-const heroPatrol = heroPatrolAsset.url;
+import heroGear from "@/assets/lifestyle-journey.jpg";
 import { CATEGORIES, type CategorySlug } from "@/lib/categories";
 import { routeMeta } from "@/lib/seo";
 
@@ -67,13 +66,13 @@ function Index() {
   return (
     <div className="min-h-dvh flex flex-col bg-background">
       <SiteHeader />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         {/* HERO */}
         <section className="relative overflow-hidden bg-rf-cream">
           <div className="relative">
             <img
-              src={heroPatrol}
-              alt="Roamforge TROLL3N Nissan Patrol"
+              src={heroGear}
+              alt="Roamforge 4WD, camping and touring gear"
               width={1920}
               height={620}
               fetchPriority="high"
@@ -98,11 +97,17 @@ function Index() {
                   </p>
                   <div className="mt-7 flex flex-wrap gap-3">
                     <Link
-                      to="/category/$slug"
-                      params={{ slug: "performance" }}
-                      className="bg-rf-tan text-rf-dark font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-tan-bright transition-colors"
+                      to="/shop"
+                      className="min-h-11 inline-flex items-center bg-rf-tan text-rf-dark font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-tan-bright transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-cream focus-visible:ring-offset-2 focus-visible:ring-offset-rf-dark"
                     >
-                      SHOP GEAR
+                      SHOP THE RANGE
+                    </Link>
+                    <Link
+                      to="/category/$slug"
+                      params={{ slug: "recovery" }}
+                      className="min-h-11 inline-flex items-center border border-rf-cream/80 text-rf-cream font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-cream hover:text-rf-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
+                    >
+                      SHOP RECOVERY
                     </Link>
                   </div>
                 </div>
@@ -122,7 +127,8 @@ function Index() {
         <section id="categories" className="bg-rf-cream py-14">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <SectionHeading>SHOP BY CATEGORY</SectionHeading>
-            <div className="mt-8 grid gap-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+            {/* Mobile: horizontal scroll strip for compact browsing. md+: full grid. */}
+            <div className="mt-8 -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:hidden">
               {CATEGORIES.map((c) => {
                 const Icon = CATEGORY_ICONS[c.slug];
                 return (
@@ -130,7 +136,34 @@ function Index() {
                     key={c.slug}
                     to="/category/$slug"
                     params={{ slug: c.slug }}
-                    className="group relative block aspect-[4/5] overflow-hidden bg-rf-dark"
+                    className="group relative flex-none w-40 snap-start overflow-hidden bg-rf-dark aspect-[4/5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
+                  >
+                    <img
+                      src={c.image}
+                      alt=""
+                      loading="lazy"
+                      className="h-full w-full object-cover opacity-75"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-rf-dark via-rf-dark/40 to-transparent" />
+                    <div className="absolute top-2 right-2 grid h-9 w-9 place-items-center rounded-full border border-rf-cream/60 bg-rf-dark/40 backdrop-blur-sm">
+                      <Icon className="h-4 w-4 text-rf-cream" aria-hidden />
+                    </div>
+                    <span className="absolute bottom-3 left-3 right-3 font-display text-xs tracking-[0.18em] text-rf-cream">
+                      {c.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+            <div className="mt-8 hidden gap-5 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+              {CATEGORIES.map((c) => {
+                const Icon = CATEGORY_ICONS[c.slug];
+                return (
+                  <Link
+                    key={c.slug}
+                    to="/category/$slug"
+                    params={{ slug: c.slug }}
+                    className="group relative block aspect-[4/5] overflow-hidden bg-rf-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
                   >
                     <img
                       src={c.image}
@@ -155,6 +188,14 @@ function Index() {
                   </Link>
                 );
               })}
+            </div>
+            <div className="mt-10 flex justify-center">
+              <Link
+                to="/shop"
+                className="min-h-11 inline-flex items-center border border-rf-dark px-6 py-3 text-sm font-semibold tracking-[0.15em] text-rf-dark hover:bg-rf-dark hover:text-rf-cream transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2"
+              >
+                SHOP ALL PRODUCTS
+              </Link>
             </div>
           </div>
         </section>

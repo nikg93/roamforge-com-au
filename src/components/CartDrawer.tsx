@@ -69,6 +69,9 @@ export function CartDrawer() {
             <>
               <div className="flex-1 overflow-y-auto pr-2 min-h-0">
                 <div className="space-y-4">
+                  <p role="status" aria-live="polite" className="sr-only">
+                    {isLoading ? "Updating cart" : ""}
+                  </p>
                   {items.map((item) => (
                     <div key={item.variantId} className="flex gap-4 p-2 border-b border-border/60">
                       <div className="w-16 h-16 bg-secondary rounded overflow-hidden flex-shrink-0">

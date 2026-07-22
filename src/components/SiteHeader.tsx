@@ -43,6 +43,16 @@ export function SiteHeader() {
               </SheetHeader>
               <nav aria-label="Mobile" className="flex-1 overflow-y-auto px-2 py-2">
                 <ul className="flex flex-col">
+                  <li>
+                    <SheetClose asChild>
+                      <Link
+                        to="/shop"
+                        className="flex min-h-11 items-center px-3 py-3 text-sm font-semibold tracking-[0.14em] text-rf-tan hover:bg-rf-dark-2 focus:outline-none"
+                      >
+                        SHOP ALL
+                      </Link>
+                    </SheetClose>
+                  </li>
                   {CATEGORIES.map((c) => (
                     <li key={c.slug}>
                       <SheetClose asChild>
@@ -119,14 +129,21 @@ export function SiteHeader() {
 
         <nav
           aria-label="Primary"
-          className="hidden lg:flex items-center gap-4 xl:gap-5 text-[11px] font-semibold tracking-[0.12em]"
+          className="hidden xl:flex items-center gap-4 xl:gap-5 text-[11px] font-semibold tracking-[0.12em]"
         >
+          <Link
+            to="/shop"
+            className="text-rf-tan hover:text-rf-tan-bright transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2 focus-visible:ring-offset-rf-dark"
+            activeProps={{ className: "text-rf-tan-bright" }}
+          >
+            SHOP ALL
+          </Link>
           {CATEGORIES.map((c) => (
             <Link
               key={c.slug}
               to="/category/$slug"
               params={{ slug: c.slug }}
-              className="text-rf-cream/90 hover:text-rf-tan transition-colors"
+              className="text-rf-cream/90 hover:text-rf-tan transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2 focus-visible:ring-offset-rf-dark"
               activeProps={{ className: "text-rf-tan" }}
             >
               {c.navLabel}
@@ -134,13 +151,23 @@ export function SiteHeader() {
           ))}
         </nav>
 
+        {/* Compact CTA between lg and xl to avoid crowding the full nav. */}
+        <div className="hidden lg:flex xl:hidden items-center gap-4 text-[11px] font-semibold tracking-[0.12em]">
+          <Link
+            to="/shop"
+            className="text-rf-tan hover:text-rf-tan-bright transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
+          >
+            SHOP ALL
+          </Link>
+        </div>
+
         <div className="flex items-center gap-1">
           <button
             type="button"
             ref={searchTriggerRef}
             onClick={() => setSearchOpen(true)}
             aria-label="Search products"
-            className="grid h-11 w-11 place-items-center text-rf-cream/90 hover:text-rf-tan"
+            className="grid h-11 w-11 place-items-center text-rf-cream/90 hover:text-rf-tan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
           >
             <Search className="h-5 w-5" />
           </button>

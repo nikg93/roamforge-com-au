@@ -14,6 +14,7 @@ interface SitemapEntry {
 
 const staticEntries: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0" },
+  { path: "/shop", changefreq: "weekly", priority: "0.9" },
   ...CATEGORIES.map((c) => ({
     path: `/category/${c.slug}`,
     changefreq: "weekly" as const,
