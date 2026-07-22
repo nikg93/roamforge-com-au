@@ -14,6 +14,7 @@ import favicon from "../assets/logo.png?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { Integrations } from "@/components/Integrations";
+import { ConsentBanner } from "@/components/ConsentBanner";
 import { useCartSync } from "@/hooks/useCartSync";
 import { SITE_URL } from "@/lib/seo";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -165,6 +166,7 @@ function RootComponent() {
       <Outlet />
       <Toaster position="top-right" />
       <Integrations />
+      <ConsentBanner />
     </QueryClientProvider>
   );
 }

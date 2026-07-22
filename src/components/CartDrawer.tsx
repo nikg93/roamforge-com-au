@@ -14,8 +14,19 @@ import { useCartStore } from "@/stores/cartStore";
 
 export function CartDrawer() {
   const [isOpen, setIsOpen] = useState(false);
-  const { items, isLoading, isSyncing, updateQuantity, removeItem, getCheckoutUrl, syncCart } =
-    useCartStore();
+  const {
+    items,
+    isLoading,
+    isSyncing,
+    activeVariantIds,
+    updateQuantity,
+    removeItem,
+    getCheckoutUrl,
+    syncCart,
+  } = useCartStore();
+  // Per-line busy — so only the line the user is editing shows a spinner,
+  // and unrelated lines stay usable.
+  const isBusy = (variantId: string) => activeVariantIds.includes(variantId);
   const totalItems = items.reduce((s, i) => s + i.quantity, 0);
   const totalPrice = items.reduce((s, i) => s + parseFloat(i.price.amount) * i.quantity, 0);
   const currency = items[0]?.price.currencyCode ?? "AUD";
@@ -103,8 +114,13 @@ export function CartDrawer() {
                           className="h-11 w-11"
                           aria-label={`Remove ${item.product.node.title} from cart`}
                           onClick={() => removeItem(item.variantId)}
+                          disabled={isBusy(item.variantId)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {isBusy(item.variantId) ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                         </Button>
                         <div className="flex items-center gap-1">
                           <Button
@@ -113,6 +129,7 @@ export function CartDrawer() {
                             className="h-11 w-11"
                             aria-label={`Decrease quantity of ${item.product.node.title}`}
                             onClick={() => updateQuantity(item.variantId, item.quantity - 1)}
+                            disabled={isBusy(item.variantId)}
                           >
                             <Minus className="h-4 w-4" />
                           </Button>
@@ -125,6 +142,7 @@ export function CartDrawer() {
                             className="h-11 w-11"
                             aria-label={`Increase quantity of ${item.product.node.title}`}
                             onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
+                            disabled={isBusy(item.variantId)}
                           >
                             <Plus className="h-4 w-4" />
                           </Button>

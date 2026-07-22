@@ -40,6 +40,22 @@ export interface ShopifyProduct {
     productType?: string;
     tags?: string[];
     seo?: { title: string | null; description: string | null };
+    /** Product-level availability. Reflects Shopify's overall stock signal
+     * across every variant, not just the first 10 we ship to the card. */
+    availableForSale?: boolean;
+    /** Shopify's own resolution of "the variant a customer should see first".
+     * Prefer this over scanning `variants.edges` — it survives beyond the
+     * variants(first:) limit and matches Shopify's own storefronts. */
+    selectedOrFirstAvailableVariant?: {
+      id: string;
+      title: string;
+      sku?: string | null;
+      availableForSale: boolean;
+      price: { amount: string; currencyCode: string };
+      compareAtPrice?: { amount: string; currencyCode: string } | null;
+      image?: { url: string; altText: string | null } | null;
+      selectedOptions: Array<{ name: string; value: string }>;
+    } | null;
     priceRange: { minVariantPrice: { amount: string; currencyCode: string } };
     compareAtPriceRange?: { minVariantPrice: { amount: string; currencyCode: string } };
     featuredImage?: { url: string; altText: string | null } | null;
@@ -54,6 +70,7 @@ export interface ShopifyProduct {
           compareAtPrice?: { amount: string; currencyCode: string } | null;
           availableForSale: boolean;
           selectedOptions: Array<{ name: string; value: string }>;
+          image?: { url: string; altText: string | null } | null;
         };
       }>;
     };
@@ -138,11 +155,17 @@ export const PRODUCTS_QUERY = `
     products(first: $first, query: $query) {
       edges {
         node {
-          id title handle vendor
+          id title handle vendor availableForSale
           priceRange { minVariantPrice { amount currencyCode } }
           compareAtPriceRange { minVariantPrice { amount currencyCode } }
           featuredImage { url altText }
-          variants(first: 10) {
+          selectedOrFirstAvailableVariant {
+            id title sku availableForSale
+            price { amount currencyCode }
+            compareAtPrice { amount currencyCode }
+            selectedOptions { name value }
+          }
+          variants(first: 4) {
             edges {
               node {
                 id title sku availableForSale
@@ -160,17 +183,23 @@ export const PRODUCTS_QUERY = `
 
 // Grid query with cursor-based pagination for category pages.
 export const PRODUCTS_PAGE_QUERY = `
-  query GetProductsPage($first: Int!, $after: String, $query: String) {
-    products(first: $first, after: $after, query: $query) {
+  query GetProductsPage($first: Int!, $after: String, $query: String, $sortKey: ProductSortKeys, $reverse: Boolean) {
+    products(first: $first, after: $after, query: $query, sortKey: $sortKey, reverse: $reverse) {
       pageInfo { hasNextPage endCursor }
       edges {
         cursor
         node {
-          id title handle vendor
+          id title handle vendor availableForSale
           priceRange { minVariantPrice { amount currencyCode } }
           compareAtPriceRange { minVariantPrice { amount currencyCode } }
           featuredImage { url altText }
-          variants(first: 10) {
+          selectedOrFirstAvailableVariant {
+            id title sku availableForSale
+            price { amount currencyCode }
+            compareAtPrice { amount currencyCode }
+            selectedOptions { name value }
+          }
+          variants(first: 4) {
             edges {
               node {
                 id title sku availableForSale
@@ -191,19 +220,27 @@ export const PRODUCTS_PAGE_QUERY = `
 export const PRODUCT_BY_HANDLE_QUERY = `
   query ProductByHandle($handle: String!) {
     product(handle: $handle) {
-      id title handle vendor productType tags
+      id title handle vendor productType tags availableForSale
       description descriptionHtml
       seo { title description }
       priceRange { minVariantPrice { amount currencyCode } }
       compareAtPriceRange { minVariantPrice { amount currencyCode } }
       featuredImage { url altText }
-      images(first: 10) { edges { node { url altText } } }
-      variants(first: 25) {
+      images(first: 20) { edges { node { url altText } } }
+      selectedOrFirstAvailableVariant {
+        id title sku availableForSale
+        price { amount currencyCode }
+        compareAtPrice { amount currencyCode }
+        image { url altText }
+        selectedOptions { name value }
+      }
+      variants(first: 100) {
         edges {
           node {
             id title sku availableForSale
             price { amount currencyCode }
             compareAtPrice { amount currencyCode }
+            image { url altText }
             selectedOptions { name value }
           }
         }
@@ -322,6 +359,100 @@ export async function fetchProductByHandle(handle: string) {
   const product = data?.data?.product;
   if (!product) return null;
   return { node: product } as ShopifyProduct;
+}
+
+// Best-selling / featured product query for the homepage. Storefront API
+// supports the BEST_SELLING sortKey out of the box — we do not invent
+// popularity signals. If Shopify returns an empty list (e.g. store has no
+// sales history) the caller falls back to a neutral "Featured Gear" heading.
+export const FEATURED_PRODUCTS_QUERY = `
+  query FeaturedProducts($first: Int!) {
+    products(first: $first, sortKey: BEST_SELLING, query: "available_for_sale:true") {
+      edges {
+        node {
+          id title handle vendor availableForSale
+          priceRange { minVariantPrice { amount currencyCode } }
+          compareAtPriceRange { minVariantPrice { amount currencyCode } }
+          featuredImage { url altText }
+          selectedOrFirstAvailableVariant {
+            id title sku availableForSale
+            price { amount currencyCode }
+            compareAtPrice { amount currencyCode }
+            selectedOptions { name value }
+          }
+          variants(first: 4) {
+            edges {
+              node {
+                id title sku availableForSale
+                price { amount currencyCode }
+                compareAtPrice { amount currencyCode }
+                selectedOptions { name value }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function fetchFeaturedProducts(first = 8): Promise<ShopifyProduct[]> {
+  const data = await storefrontApiRequest(FEATURED_PRODUCTS_QUERY, { first });
+  const edges = data?.data?.products?.edges ?? [];
+  return edges.map((e: { node: ShopifyProduct["node"] }) => {
+    const img = e.node.featuredImage;
+    return {
+      node: {
+        ...e.node,
+        description: e.node.description ?? "",
+        images: img ? { edges: [{ node: img }] } : { edges: [] },
+        options: e.node.options ?? [],
+      },
+    };
+  });
+}
+
+/**
+ * Related-product search. Uses vendor/productType/tags to build a
+ * Storefront `query` predicate, excluding the current product and any that
+ * come back unavailable. Returns up to `limit` products, or an empty list
+ * if Shopify can't find a good match — never fabricates.
+ */
+export async function fetchRelatedProducts(
+  currentHandle: string,
+  opts: { vendor?: string; productType?: string; tags?: string[] },
+  limit = 4,
+): Promise<ShopifyProduct[]> {
+  const clauses: string[] = [];
+  const safe = (s: string) => s.replace(/["\\]/g, "").trim();
+  if (opts.vendor && opts.vendor.trim()) clauses.push(`vendor:"${safe(opts.vendor)}"`);
+  if (opts.productType && opts.productType.trim())
+    clauses.push(`product_type:"${safe(opts.productType)}"`);
+  const catTag = (opts.tags ?? []).find((t) => /^cat-/i.test(t));
+  if (catTag) clauses.push(`tag:"${safe(catTag)}"`);
+  if (clauses.length === 0) return [];
+  const query = `(${clauses.join(" OR ")}) AND available_for_sale:true`;
+  const data = await storefrontApiRequest(PRODUCTS_QUERY, {
+    first: limit + 4,
+    query,
+  });
+  const edges: Array<{ node: ShopifyProduct["node"] }> = data?.data?.products?.edges ?? [];
+  const out: ShopifyProduct[] = [];
+  for (const e of edges) {
+    if (e.node.handle === currentHandle) continue;
+    if (e.node.availableForSale === false) continue;
+    const img = e.node.featuredImage;
+    out.push({
+      node: {
+        ...e.node,
+        description: e.node.description ?? "",
+        images: img ? { edges: [{ node: img }] } : { edges: [] },
+        options: e.node.options ?? [],
+      },
+    });
+    if (out.length >= limit) break;
+  }
+  return out;
 }
 
 /**

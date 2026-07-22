@@ -18,8 +18,13 @@ interface CartStore {
   items: CartItem[];
   cartId: string | null;
   checkoutUrl: string | null;
+  /** True when any cart mutation is in flight (used by the drawer). Prefer
+   * `activeVariantIds` for per-card affordances so unrelated product cards
+   * are not disabled while another line is updating. */
   isLoading: boolean;
   isSyncing: boolean;
+  /** Set of variant IDs currently being mutated. */
+  activeVariantIds: string[];
   addItem: (item: Omit<CartItem, "lineId">) => Promise<void>;
   updateQuantity: (variantId: string, quantity: number) => Promise<void>;
   removeItem: (variantId: string) => Promise<void>;
@@ -68,6 +73,24 @@ function isCartNotFound(errs: Array<{ message: string }>) {
 function summarizeUserErrors(errs: Array<{ message: string }>): string {
   const first = errs.find((e) => e.message)?.message;
   return first ?? "Shopify rejected the request.";
+}
+
+/**
+ * Serialised mutation queue. Prevents rapid add/update/remove clicks (or a
+ * quick tab-return sync racing against an add) from corrupting cart state
+ * — every mutation runs strictly after the previous one resolves.
+ */
+let cartQueue: Promise<unknown> = Promise.resolve();
+export function enqueueCartOp<T>(fn: () => Promise<T>): Promise<T> {
+  const next = cartQueue.then(fn, fn);
+  // Keep the chain alive even if a step rejects — otherwise the promise
+  // returned to the next enqueue would surface an earlier error.
+  cartQueue = next.catch(() => undefined);
+  return next;
+}
+// Test hook so unit tests can reset the queue between cases.
+export function __resetCartQueueForTests() {
+  cartQueue = Promise.resolve();
 }
 
 async function createCart(item: CartItem) {
@@ -146,113 +169,172 @@ export const useCartStore = create<CartStore>()(
       checkoutUrl: null,
       isLoading: false,
       isSyncing: false,
+      activeVariantIds: [],
 
       addItem: async (item) => {
-        const { items, cartId, clearCart } = get();
-        // Guard: never send an unavailable variant to Shopify.
         if (item.availableForSale === false) {
           toast.error("This item is currently sold out.");
           return;
         }
-        const existing = items.find((i) => i.variantId === item.variantId);
-        set({ isLoading: true });
-        try {
-          if (!cartId) {
-            const result = await createCart({ ...item, lineId: null });
-            if (result.success) {
+        await enqueueCartOp(async () => {
+          const beginBusy = () =>
+            set((s) => ({
+              isLoading: true,
+              activeVariantIds: s.activeVariantIds.includes(item.variantId)
+                ? s.activeVariantIds
+                : [...s.activeVariantIds, item.variantId],
+            }));
+          const endBusy = () =>
+            set((s) => ({
+              isLoading: false,
+              activeVariantIds: s.activeVariantIds.filter((v) => v !== item.variantId),
+            }));
+          beginBusy();
+          try {
+            const { items, cartId } = get();
+            const existing = items.find((i) => i.variantId === item.variantId);
+            if (!cartId) {
+              const r = await createCart({ ...item, lineId: null });
+              if (r.success) {
+                set({
+                  cartId: r.cartId,
+                  checkoutUrl: r.checkoutUrl,
+                  items: [{ ...item, lineId: r.lineId }],
+                });
+              } else {
+                toast.error(`Couldn't add to cart. ${r.errorMessage}`);
+              }
+              return;
+            }
+            if (existing) {
+              const newQty = existing.quantity + item.quantity;
+              if (!existing.lineId) return;
+              const r = await updateLine(cartId, existing.lineId, newQty);
+              if (r.success) {
+                set({
+                  items: get().items.map((i) =>
+                    i.variantId === item.variantId ? { ...i, quantity: newQty } : i,
+                  ),
+                });
+              } else if (r.cartNotFound) {
+                // Safe expired-cart recovery: recreate cart with only the
+                // item the user just tried to add (no duplicate quantities
+                // from a stale local cart) and inform them.
+                const created = await createCart({ ...item, lineId: null });
+                if (created.success) {
+                  set({
+                    cartId: created.cartId,
+                    checkoutUrl: created.checkoutUrl,
+                    items: [{ ...item, lineId: created.lineId }],
+                  });
+                  toast.message("Your previous cart expired — item added to a fresh cart.");
+                } else {
+                  set({ items: [], cartId: null, checkoutUrl: null });
+                  toast.error("Your cart expired. Please add the item again.");
+                }
+              } else {
+                toast.error(`Couldn't update cart. ${r.errorMessage}`);
+              }
+              return;
+            }
+            const r = await addLine(cartId, { ...item, lineId: null });
+            if (r.success) {
               set({
-                cartId: result.cartId,
-                checkoutUrl: result.checkoutUrl,
-                items: [{ ...item, lineId: result.lineId }],
+                items: [...get().items, { ...item, lineId: r.lineId ?? null }],
               });
+            } else if (r.cartNotFound) {
+              const created = await createCart({ ...item, lineId: null });
+              if (created.success) {
+                set({
+                  cartId: created.cartId,
+                  checkoutUrl: created.checkoutUrl,
+                  items: [{ ...item, lineId: created.lineId }],
+                });
+                toast.message("Your previous cart expired — item added to a fresh cart.");
+              } else {
+                set({ items: [], cartId: null, checkoutUrl: null });
+                toast.error("Your cart expired. Please add the item again.");
+              }
             } else {
-              toast.error(`Couldn't add to cart. ${result.errorMessage}`);
+              toast.error(`Couldn't add to cart. ${r.errorMessage}`);
             }
-          } else if (existing) {
-            const newQty = existing.quantity + item.quantity;
-            if (!existing.lineId) return;
-            const result = await updateLine(cartId, existing.lineId, newQty);
-            if (result.success) {
-              const cur = get().items;
-              set({
-                items: cur.map((i) =>
-                  i.variantId === item.variantId ? { ...i, quantity: newQty } : i,
-                ),
-              });
-            } else if (result.cartNotFound) {
-              clearCart();
-              toast.error("Your cart expired. Please add the item again.");
-            } else {
-              toast.error(`Couldn't update cart. ${result.errorMessage}`);
-            }
-          } else {
-            const result = await addLine(cartId, { ...item, lineId: null });
-            if (result.success) {
-              const cur = get().items;
-              set({ items: [...cur, { ...item, lineId: result.lineId ?? null }] });
-            } else if (result.cartNotFound) {
-              clearCart();
-              toast.error("Your cart expired. Please add the item again.");
-            } else {
-              toast.error(`Couldn't add to cart. ${result.errorMessage}`);
-            }
+          } catch (err) {
+            console.error("[cart] addItem failed", err);
+            toast.error("Couldn't add to cart. Please check your connection and try again.");
+          } finally {
+            endBusy();
           }
-        } catch (err) {
-          console.error("[cart] addItem failed", err);
-          toast.error("Couldn't add to cart. Please check your connection and try again.");
-        } finally {
-          set({ isLoading: false });
-        }
+        });
       },
 
       updateQuantity: async (variantId, quantity) => {
         if (quantity <= 0) return get().removeItem(variantId);
-        const { items, cartId, clearCart } = get();
-        const item = items.find((i) => i.variantId === variantId);
-        if (!item?.lineId || !cartId) return;
-        set({ isLoading: true });
-        try {
-          const r = await updateLine(cartId, item.lineId, quantity);
-          if (r.success) {
-            const cur = get().items;
-            set({ items: cur.map((i) => (i.variantId === variantId ? { ...i, quantity } : i)) });
-          } else if (r.cartNotFound) {
-            clearCart();
-            toast.error("Your cart expired.");
-          } else {
-            toast.error(`Couldn't update quantity. ${r.errorMessage}`);
+        await enqueueCartOp(async () => {
+          set((s) => ({
+            isLoading: true,
+            activeVariantIds: s.activeVariantIds.includes(variantId)
+              ? s.activeVariantIds
+              : [...s.activeVariantIds, variantId],
+          }));
+          try {
+            const { items, cartId, clearCart } = get();
+            const item = items.find((i) => i.variantId === variantId);
+            if (!item?.lineId || !cartId) return;
+            const r = await updateLine(cartId, item.lineId, quantity);
+            if (r.success) {
+              set({
+                items: get().items.map((i) => (i.variantId === variantId ? { ...i, quantity } : i)),
+              });
+            } else if (r.cartNotFound) {
+              clearCart();
+              toast.error("Your cart expired.");
+            } else {
+              toast.error(`Couldn't update quantity. ${r.errorMessage}`);
+            }
+          } catch (err) {
+            console.error("[cart] updateQuantity failed", err);
+            toast.error("Couldn't update quantity. Please try again.");
+          } finally {
+            set((s) => ({
+              isLoading: false,
+              activeVariantIds: s.activeVariantIds.filter((v) => v !== variantId),
+            }));
           }
-        } catch (err) {
-          console.error("[cart] updateQuantity failed", err);
-          toast.error("Couldn't update quantity. Please try again.");
-        } finally {
-          set({ isLoading: false });
-        }
+        });
       },
 
       removeItem: async (variantId) => {
-        const { items, cartId, clearCart } = get();
-        const item = items.find((i) => i.variantId === variantId);
-        if (!item?.lineId || !cartId) return;
-        set({ isLoading: true });
-        try {
-          const r = await removeLine(cartId, item.lineId);
-          if (r.success) {
-            const cur = get().items;
-            const next = cur.filter((i) => i.variantId !== variantId);
-            if (next.length === 0) clearCart();
-            else set({ items: next });
-          } else if (r.cartNotFound) {
-            clearCart();
-          } else {
-            toast.error(`Couldn't remove item. ${r.errorMessage}`);
+        await enqueueCartOp(async () => {
+          set((s) => ({
+            isLoading: true,
+            activeVariantIds: s.activeVariantIds.includes(variantId)
+              ? s.activeVariantIds
+              : [...s.activeVariantIds, variantId],
+          }));
+          try {
+            const { items, cartId, clearCart } = get();
+            const item = items.find((i) => i.variantId === variantId);
+            if (!item?.lineId || !cartId) return;
+            const r = await removeLine(cartId, item.lineId);
+            if (r.success) {
+              const next = get().items.filter((i) => i.variantId !== variantId);
+              if (next.length === 0) clearCart();
+              else set({ items: next });
+            } else if (r.cartNotFound) {
+              clearCart();
+            } else {
+              toast.error(`Couldn't remove item. ${r.errorMessage}`);
+            }
+          } catch (err) {
+            console.error("[cart] removeItem failed", err);
+            toast.error("Couldn't remove item. Please try again.");
+          } finally {
+            set((s) => ({
+              isLoading: false,
+              activeVariantIds: s.activeVariantIds.filter((v) => v !== variantId),
+            }));
           }
-        } catch (err) {
-          console.error("[cart] removeItem failed", err);
-          toast.error("Couldn't remove item. Please try again.");
-        } finally {
-          set({ isLoading: false });
-        }
+        });
       },
 
       clearCart: () => set({ items: [], cartId: null, checkoutUrl: null }),

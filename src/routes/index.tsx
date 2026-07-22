@@ -21,12 +21,23 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SectionHeading } from "@/components/SectionHeading";
 import { TrustedBrands } from "@/components/TrustedBrands";
 import { LifestyleSection } from "@/components/LifestyleSection";
+import { ProductCard } from "@/components/ProductCard";
 import logo from "@/assets/logo.png";
 import heroGear from "@/assets/lifestyle-journey.jpg";
 import { CATEGORIES, type CategorySlug } from "@/lib/categories";
 import { routeMeta } from "@/lib/seo";
+import { fetchFeaturedProducts } from "@/lib/shopify";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
+
+const featuredQuery = queryOptions({
+  queryKey: ["featured-products"],
+  queryFn: () => fetchFeaturedProducts(8),
+  staleTime: 5 * 60_000,
+  retry: 1,
+});
 
 export const Route = createFileRoute("/")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(featuredQuery),
   head: () =>
     routeMeta({
       path: "/",
@@ -202,6 +213,8 @@ function Index() {
 
         <TrustedBrands />
 
+        <FeaturedGear />
+
         <LifestyleSection />
 
         {/* WHY */}
@@ -227,5 +240,30 @@ function Index() {
       </main>
       <SiteFooter />
     </div>
+  );
+}
+
+function FeaturedGear() {
+  const { data } = useSuspenseQuery(featuredQuery);
+  if (!data || data.length === 0) return null;
+  return (
+    <section aria-labelledby="featured-heading" className="bg-background py-14">
+      <div className="mx-auto max-w-7xl px-4 lg:px-8">
+        <div className="flex items-end justify-between gap-4">
+          <SectionHeading>POPULAR GEAR</SectionHeading>
+          <Link
+            to="/shop"
+            className="hidden text-xs font-semibold tracking-[0.15em] text-rf-dark hover:text-rf-tan sm:inline"
+          >
+            SHOP ALL →
+          </Link>
+        </div>
+        <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4">
+          {data.slice(0, 8).map((p) => (
+            <ProductCard key={p.node.id} product={p} />
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
