@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -5,7 +6,9 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { SectionHeading } from "@/components/SectionHeading";
 import { ProductCard } from "@/components/ProductCard";
 import { EmptyProducts } from "@/components/EmptyProducts";
-import { fetchProducts } from "@/lib/shopify";
+import { fetchProductsPage, type ProductPage, type ShopifyProduct } from "@/lib/shopify";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 import { CATEGORY_MAP, isCategorySlug } from "@/lib/categories";
 import { canonicalFor, SITE_URL } from "@/lib/seo";
 
@@ -15,10 +18,12 @@ function toAbsoluteUrl(pathOrUrl: string): string {
   return `${SITE_URL}${path}`;
 }
 
+const PAGE_SIZE = 24;
+
 const categoryQuery = (slug: string, q: string) =>
   queryOptions({
     queryKey: ["products", "category", slug],
-    queryFn: () => fetchProducts(50, q),
+    queryFn: () => fetchProductsPage(PAGE_SIZE, q, null),
     staleTime: 60_000,
   });
 
@@ -38,7 +43,8 @@ export const Route = createFileRoute("/category/$slug")({
     const desc = cfg?.description ?? "Roamforge gear.";
     const url = canonicalFor(`/category/${params.slug}`);
     const absImage = cfg?.image ? toAbsoluteUrl(cfg.image) : undefined;
-    const products = (loaderData as Awaited<ReturnType<typeof fetchProducts>> | undefined) ?? [];
+    const page = loaderData as ProductPage | undefined;
+    const products = page?.products ?? [];
     return {
       meta: [
         { title },
@@ -131,44 +137,98 @@ export const Route = createFileRoute("/category/$slug")({
 function CategoryPage() {
   const { slug } = Route.useParams();
   const cfg = isCategorySlug(slug) ? CATEGORY_MAP[slug] : undefined;
-  const { data: products = [] } = useSuspenseQuery(categoryQuery(slug, cfg?.query ?? ""));
+  const { data: initial } = useSuspenseQuery(categoryQuery(slug, cfg?.query ?? ""));
+  const [extra, setExtra] = useState<ShopifyProduct[]>([]);
+  const [cursor, setCursor] = useState<string | null>(initial?.pageInfo.endCursor ?? null);
+  const [hasNext, setHasNext] = useState<boolean>(!!initial?.pageInfo.hasNextPage);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
   if (!cfg) return null;
+
+  const seen = new Set<string>();
+  const products = [...(initial?.products ?? []), ...extra].filter((p) => {
+    if (seen.has(p.node.id)) return false;
+    seen.add(p.node.id);
+    return true;
+  });
+
+  const onLoadMore = async () => {
+    if (loadingMore || !hasNext) return;
+    setLoadingMore(true);
+    setLoadMoreError(null);
+    try {
+      const next = await fetchProductsPage(PAGE_SIZE, cfg.query, cursor);
+      setExtra((cur) => [...cur, ...next.products]);
+      setCursor(next.pageInfo.endCursor);
+      setHasNext(next.pageInfo.hasNextPage);
+    } catch (err) {
+      console.error("[category] load more failed", err);
+      setLoadMoreError("Couldn't load more products. Please try again.");
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   return (
     <div className="min-h-dvh flex flex-col bg-background">
       <SiteHeader />
       <main className="flex-1 flex flex-col">
-      <section className="relative bg-rf-dark overflow-hidden">
-        {cfg.image && (
-          <img
-            src={cfg.image}
-            alt={cfg.label}
-            width={1600}
-            height={600}
-            fetchPriority="high"
-            sizes="(max-width: 640px) 100vw, 1600px"
-            className="absolute inset-0 h-full w-full object-cover opacity-45"
-          />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-r from-rf-dark via-rf-dark/70 to-rf-dark/30" />
-        <div className="relative mx-auto max-w-7xl px-4 lg:px-8 py-20 sm:py-24 text-rf-cream">
-          <p className="font-display tracking-[0.3em] text-rf-tan text-xs">CATEGORY</p>
-          <h1 className="mt-2 font-display text-5xl sm:text-6xl tracking-tight">{cfg.label}</h1>
-          <p className="mt-3 max-w-xl text-sm text-rf-cream/85">{cfg.description}</p>
-        </div>
-      </section>
-      <section className="bg-rf-cream py-14 flex-1">
-        <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <SectionHeading>{cfg.label}</SectionHeading>
-          <div className="mt-10 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {products.length === 0 ? (
-              <EmptyProducts />
-            ) : (
-              products.map((p) => <ProductCard key={p.node.id} product={p} />)
+        <section className="relative bg-rf-dark overflow-hidden">
+          {cfg.image && (
+            <img
+              src={cfg.image}
+              alt={cfg.label}
+              width={1600}
+              height={600}
+              fetchPriority="high"
+              sizes="(max-width: 640px) 100vw, 1600px"
+              className="absolute inset-0 h-full w-full object-cover opacity-45"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-r from-rf-dark via-rf-dark/70 to-rf-dark/30" />
+          <div className="relative mx-auto max-w-7xl px-4 lg:px-8 py-20 sm:py-24 text-rf-cream">
+            <p className="font-display tracking-[0.3em] text-rf-tan text-xs">CATEGORY</p>
+            <h1 className="mt-2 font-display text-5xl sm:text-6xl tracking-tight">{cfg.label}</h1>
+            <p className="mt-3 max-w-xl text-sm text-rf-cream/85">{cfg.description}</p>
+          </div>
+        </section>
+        <section className="bg-rf-cream py-14 flex-1">
+          <div className="mx-auto max-w-7xl px-4 lg:px-8">
+            <SectionHeading>{cfg.label}</SectionHeading>
+            <div className="mt-10 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {products.length === 0 ? (
+                <EmptyProducts />
+              ) : (
+                products.map((p) => <ProductCard key={p.node.id} product={p} />)
+              )}
+            </div>
+            {hasNext && products.length > 0 && (
+              <div className="mt-12 flex flex-col items-center gap-3">
+                {loadMoreError && (
+                  <p role="alert" className="text-sm text-destructive">
+                    {loadMoreError}
+                  </p>
+                )}
+                <Button
+                  onClick={onLoadMore}
+                  disabled={loadingMore}
+                  variant="outline"
+                  className="min-h-11 min-w-44 rounded-none border-rf-dark text-rf-dark hover:bg-rf-dark hover:text-rf-cream"
+                  aria-label="Load more products"
+                >
+                  {loadingMore ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                      Loading…
+                    </>
+                  ) : (
+                    "LOAD MORE"
+                  )}
+                </Button>
+              </div>
             )}
           </div>
-        </div>
-      </section>
+        </section>
       </main>
       <SiteFooter />
     </div>

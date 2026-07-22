@@ -111,9 +111,45 @@ export const PRODUCTS_QUERY = `
         node {
           id title handle vendor
           priceRange { minVariantPrice { amount currencyCode } }
+          compareAtPriceRange { minVariantPrice { amount currencyCode } }
           featuredImage { url altText }
-          variants(first: 1) {
-            edges { node { id title availableForSale price { amount currencyCode } selectedOptions { name value } } }
+          variants(first: 10) {
+            edges {
+              node {
+                id title sku availableForSale
+                price { amount currencyCode }
+                compareAtPrice { amount currencyCode }
+                selectedOptions { name value }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+// Grid query with cursor-based pagination for category pages.
+export const PRODUCTS_PAGE_QUERY = `
+  query GetProductsPage($first: Int!, $after: String, $query: String) {
+    products(first: $first, after: $after, query: $query) {
+      pageInfo { hasNextPage endCursor }
+      edges {
+        cursor
+        node {
+          id title handle vendor
+          priceRange { minVariantPrice { amount currencyCode } }
+          compareAtPriceRange { minVariantPrice { amount currencyCode } }
+          featuredImage { url altText }
+          variants(first: 10) {
+            edges {
+              node {
+                id title sku availableForSale
+                price { amount currencyCode }
+                compareAtPrice { amount currencyCode }
+                selectedOptions { name value }
+              }
+            }
           }
         }
       }
@@ -207,6 +243,49 @@ export async function fetchProducts(first = 20, query?: string): Promise<Shopify
     };
     return { node: withImages };
   });
+}
+
+export interface ProductPage {
+  products: ShopifyProduct[];
+  pageInfo: { hasNextPage: boolean; endCursor: string | null };
+}
+
+/**
+ * Cursor-paginated fetch for category grids. Returns products plus
+ * pageInfo so callers can render a Load More affordance.
+ */
+export async function fetchProductsPage(
+  first = 24,
+  query?: string,
+  after?: string | null,
+): Promise<ProductPage> {
+  const availabilityQuery = "available_for_sale:true";
+  const combinedQuery = query ? `(${query}) AND ${availabilityQuery}` : availabilityQuery;
+  const data = await storefrontApiRequest(PRODUCTS_PAGE_QUERY, {
+    first,
+    after: after ?? null,
+    query: combinedQuery,
+  });
+  const page = data?.data?.products;
+  const edges = page?.edges ?? [];
+  const products: ShopifyProduct[] = edges.map((e: { node: ShopifyProduct["node"] }) => {
+    const img = e.node.featuredImage;
+    return {
+      node: {
+        ...e.node,
+        description: e.node.description ?? "",
+        images: img ? { edges: [{ node: img }] } : { edges: [] },
+        options: e.node.options ?? [],
+      },
+    };
+  });
+  return {
+    products,
+    pageInfo: {
+      hasNextPage: !!page?.pageInfo?.hasNextPage,
+      endCursor: page?.pageInfo?.endCursor ?? null,
+    },
+  };
 }
 
 export async function fetchProductByHandle(handle: string) {
