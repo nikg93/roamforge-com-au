@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
+import { markNotFoundStatus } from "@/lib/not-found-status";
 
 export const Route = createFileRoute("/$")({
   // Signal a true HTTP 404 during SSR so crawlers see the correct status,
