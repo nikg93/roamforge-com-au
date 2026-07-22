@@ -6,13 +6,8 @@ export const Route = createFileRoute("/$")({
   // Signal a true HTTP 404 during SSR so crawlers see the correct status,
   // not a soft-200. `setResponseStatus` is only defined when a server
   // request context exists (SSR); harmless no-op on client navigation.
-  loader: async () => {
-    // Dynamic import keeps the server-only module out of the client bundle;
-    // the *.server.ts file is stripped from client-reachable graphs.
-    if (typeof window === "undefined") {
-      const { markNotFoundStatus } = await import("@/lib/not-found-status.server");
-      markNotFoundStatus();
-    }
+  loader: () => {
+    markNotFoundStatus();
     return null;
   },
   component: NotFoundPage,
