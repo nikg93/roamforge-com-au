@@ -71,7 +71,7 @@ export function CartDrawer() {
       <SheetContent className="w-full sm:max-w-lg flex flex-col h-full">
         <SheetHeader className="flex-shrink-0">
           <SheetTitle className="font-display tracking-wide">YOUR CART</SheetTitle>
-          <SheetDescription>
+          <SheetDescription aria-live="polite">
             {totalItems === 0
               ? "Your cart is empty"
               : `${totalItems} item${totalItems !== 1 ? "s" : ""}`}
@@ -164,8 +164,10 @@ export function CartDrawer() {
               <div className="flex-shrink-0 space-y-4 pt-4 border-t bg-background">
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold">Total</span>
-                  <span className="text-xl font-bold">
-                    ${totalPrice.toFixed(2)} {currency}
+                  <span className="text-xl font-bold" aria-live="polite">
+                    {mixedCurrency
+                      ? "See total at checkout"
+                      : `$${totalPrice.toFixed(2)} ${currency}`}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">Shipping calculated at checkout.</p>
