@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -168,6 +168,3 @@ function ShopPage() {
     </div>
   );
 }
-
-// Suppress unused import warning for useEffect; keep import available for future filters.
-void useEffect;
