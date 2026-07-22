@@ -67,7 +67,7 @@ function Index() {
   return (
     <div className="min-h-dvh flex flex-col bg-background">
       <SiteHeader />
-
+      <main className="flex-1">
       {/* HERO */}
       <section className="relative overflow-hidden bg-rf-cream">
         <div className="relative">
@@ -84,7 +84,7 @@ function Index() {
             <div className="mx-auto h-full max-w-7xl px-4 lg:px-8 flex items-center">
               <div className="max-w-xl text-rf-cream">
                 <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight">
-                  FORGED
+                  <span>FORGED</span>
                   <br />
                   <span className="text-rf-tan">FOR ADVENTURE</span>
                 </h1>
@@ -177,6 +177,7 @@ function Index() {
         </div>
       </section>
 
+      </main>
       <SiteFooter />
     </div>
   );
