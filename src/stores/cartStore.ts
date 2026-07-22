@@ -25,6 +25,13 @@ interface CartStore {
   isSyncing: boolean;
   /** Set of variant IDs currently being mutated. */
   activeVariantIds: string[];
+  /** Drawer visibility lives in the store so an add-to-cart from any
+   * component (grid card, PDP, sticky mobile bar) can pop the drawer
+   * open as visible confirmation without prop drilling. */
+  isDrawerOpen: boolean;
+  openDrawer: () => void;
+  closeDrawer: () => void;
+  setDrawerOpen: (open: boolean) => void;
   addItem: (item: Omit<CartItem, "lineId">) => Promise<void>;
   updateQuantity: (variantId: string, quantity: number) => Promise<void>;
   removeItem: (variantId: string) => Promise<void>;
@@ -60,6 +67,29 @@ function formatCheckoutUrl(url: string) {
     return u.toString();
   } catch {
     return url;
+  }
+}
+
+/**
+ * Guard against stale/tampered checkout URLs. A valid Shopify checkout URL
+ * is https and lives on the shop's own domain family (myshopify.com or a
+ * *.shopify.com checkout host). If anything else slipped into persisted
+ * storage, we treat it as invalid and let the UI surface the error.
+ */
+function isValidCheckoutUrl(url: string | null): url is string {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    if (u.protocol !== "https:") return false;
+    const h = u.hostname.toLowerCase();
+    return (
+      h.endsWith(".myshopify.com") ||
+      h.endsWith(".shopify.com") ||
+      // Custom checkout domains configured on the store.
+      h.includes("checkout")
+    );
+  } catch {
+    return false;
   }
 }
 
@@ -170,6 +200,10 @@ export const useCartStore = create<CartStore>()(
       isLoading: false,
       isSyncing: false,
       activeVariantIds: [],
+      isDrawerOpen: false,
+      openDrawer: () => set({ isDrawerOpen: true }),
+      closeDrawer: () => set({ isDrawerOpen: false }),
+      setDrawerOpen: (open) => set({ isDrawerOpen: open }),
 
       addItem: async (item) => {
         if (item.availableForSale === false) {
@@ -190,6 +224,7 @@ export const useCartStore = create<CartStore>()(
               activeVariantIds: s.activeVariantIds.filter((v) => v !== item.variantId),
             }));
           beginBusy();
+          let added = false;
           try {
             const { items, cartId } = get();
             const existing = items.find((i) => i.variantId === item.variantId);
@@ -201,6 +236,7 @@ export const useCartStore = create<CartStore>()(
                   checkoutUrl: r.checkoutUrl,
                   items: [{ ...item, lineId: r.lineId }],
                 });
+                added = true;
               } else {
                 toast.error(`Couldn't add to cart. ${r.errorMessage}`);
               }
@@ -216,6 +252,7 @@ export const useCartStore = create<CartStore>()(
                     i.variantId === item.variantId ? { ...i, quantity: newQty } : i,
                   ),
                 });
+                added = true;
               } else if (r.cartNotFound) {
                 // Safe expired-cart recovery: recreate cart with only the
                 // item the user just tried to add (no duplicate quantities
@@ -228,6 +265,7 @@ export const useCartStore = create<CartStore>()(
                     items: [{ ...item, lineId: created.lineId }],
                   });
                   toast.message("Your previous cart expired — item added to a fresh cart.");
+                  added = true;
                 } else {
                   set({ items: [], cartId: null, checkoutUrl: null });
                   toast.error("Your cart expired. Please add the item again.");
@@ -242,6 +280,7 @@ export const useCartStore = create<CartStore>()(
               set({
                 items: [...get().items, { ...item, lineId: r.lineId ?? null }],
               });
+              added = true;
             } else if (r.cartNotFound) {
               const created = await createCart({ ...item, lineId: null });
               if (created.success) {
@@ -251,6 +290,7 @@ export const useCartStore = create<CartStore>()(
                   items: [{ ...item, lineId: created.lineId }],
                 });
                 toast.message("Your previous cart expired — item added to a fresh cart.");
+                added = true;
               } else {
                 set({ items: [], cartId: null, checkoutUrl: null });
                 toast.error("Your cart expired. Please add the item again.");
@@ -263,6 +303,7 @@ export const useCartStore = create<CartStore>()(
             toast.error("Couldn't add to cart. Please check your connection and try again.");
           } finally {
             endBusy();
+            if (added) set({ isDrawerOpen: true });
           }
         });
       },
@@ -322,6 +363,7 @@ export const useCartStore = create<CartStore>()(
               else set({ items: next });
             } else if (r.cartNotFound) {
               clearCart();
+              toast.error("Your cart expired.");
             } else {
               toast.error(`Couldn't remove item. ${r.errorMessage}`);
             }
@@ -338,7 +380,10 @@ export const useCartStore = create<CartStore>()(
       },
 
       clearCart: () => set({ items: [], cartId: null, checkoutUrl: null }),
-      getCheckoutUrl: () => get().checkoutUrl,
+      getCheckoutUrl: () => {
+        const url = get().checkoutUrl;
+        return isValidCheckoutUrl(url) ? url : null;
+      },
 
       syncCart: async () => {
         const { cartId, isSyncing, isLoading, clearCart } = get();
@@ -365,7 +410,34 @@ export const useCartStore = create<CartStore>()(
     {
       name: "shopify-cart",
       storage: createJSONStorage(() => localStorage),
+      version: 2,
       partialize: (s) => ({ items: s.items, cartId: s.cartId, checkoutUrl: s.checkoutUrl }),
+      // Any older/corrupt shape from a previous release is dropped — a stale
+      // cartId or checkoutUrl that no longer maps to a real Shopify cart is
+      // worse than starting fresh.
+      migrate: (persisted, version) => {
+        if (version !== 2 || !persisted || typeof persisted !== "object") {
+          return { items: [], cartId: null, checkoutUrl: null } as Partial<CartStore>;
+        }
+        const p = persisted as Partial<CartStore>;
+        const items = Array.isArray(p.items)
+          ? p.items.filter(
+              (i): i is CartItem =>
+                !!i &&
+                typeof i === "object" &&
+                typeof (i as CartItem).variantId === "string" &&
+                typeof (i as CartItem).quantity === "number" &&
+                (i as CartItem).quantity > 0 &&
+                !!(i as CartItem).price?.amount,
+            )
+          : [];
+        const cartId = typeof p.cartId === "string" ? p.cartId : null;
+        const checkoutUrl =
+          typeof p.checkoutUrl === "string" && isValidCheckoutUrl(p.checkoutUrl)
+            ? p.checkoutUrl
+            : null;
+        return { items, cartId, checkoutUrl } as Partial<CartStore>;
+      },
     },
   ),
 );
