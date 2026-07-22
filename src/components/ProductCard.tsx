@@ -11,8 +11,7 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
 
   const variants = product.node.variants.edges;
   // Pick the first available variant so the card action buys something real.
-  const variant =
-    variants.find((e) => e.node.availableForSale)?.node ?? variants[0]?.node ?? null;
+  const variant = variants.find((e) => e.node.availableForSale)?.node ?? variants[0]?.node ?? null;
   const inStock = !!variant?.availableForSale;
 
   const img = product.node.images.edges[0]?.node;

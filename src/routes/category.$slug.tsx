@@ -173,62 +173,62 @@ function CategoryPage() {
     <div className="min-h-dvh flex flex-col bg-background">
       <SiteHeader />
       <main className="flex-1 flex flex-col">
-      <section className="relative bg-rf-dark overflow-hidden">
-        {cfg.image && (
-          <img
-            src={cfg.image}
-            alt={cfg.label}
-            width={1600}
-            height={600}
-            fetchPriority="high"
-            sizes="(max-width: 640px) 100vw, 1600px"
-            className="absolute inset-0 h-full w-full object-cover opacity-45"
-          />
-        )}
-        <div className="absolute inset-0 bg-gradient-to-r from-rf-dark via-rf-dark/70 to-rf-dark/30" />
-        <div className="relative mx-auto max-w-7xl px-4 lg:px-8 py-20 sm:py-24 text-rf-cream">
-          <p className="font-display tracking-[0.3em] text-rf-tan text-xs">CATEGORY</p>
-          <h1 className="mt-2 font-display text-5xl sm:text-6xl tracking-tight">{cfg.label}</h1>
-          <p className="mt-3 max-w-xl text-sm text-rf-cream/85">{cfg.description}</p>
-        </div>
-      </section>
-      <section className="bg-rf-cream py-14 flex-1">
-        <div className="mx-auto max-w-7xl px-4 lg:px-8">
-          <SectionHeading>{cfg.label}</SectionHeading>
-          <div className="mt-10 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {products.length === 0 ? (
-              <EmptyProducts />
-            ) : (
-              products.map((p) => <ProductCard key={p.node.id} product={p} />)
+        <section className="relative bg-rf-dark overflow-hidden">
+          {cfg.image && (
+            <img
+              src={cfg.image}
+              alt={cfg.label}
+              width={1600}
+              height={600}
+              fetchPriority="high"
+              sizes="(max-width: 640px) 100vw, 1600px"
+              className="absolute inset-0 h-full w-full object-cover opacity-45"
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-r from-rf-dark via-rf-dark/70 to-rf-dark/30" />
+          <div className="relative mx-auto max-w-7xl px-4 lg:px-8 py-20 sm:py-24 text-rf-cream">
+            <p className="font-display tracking-[0.3em] text-rf-tan text-xs">CATEGORY</p>
+            <h1 className="mt-2 font-display text-5xl sm:text-6xl tracking-tight">{cfg.label}</h1>
+            <p className="mt-3 max-w-xl text-sm text-rf-cream/85">{cfg.description}</p>
+          </div>
+        </section>
+        <section className="bg-rf-cream py-14 flex-1">
+          <div className="mx-auto max-w-7xl px-4 lg:px-8">
+            <SectionHeading>{cfg.label}</SectionHeading>
+            <div className="mt-10 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {products.length === 0 ? (
+                <EmptyProducts />
+              ) : (
+                products.map((p) => <ProductCard key={p.node.id} product={p} />)
+              )}
+            </div>
+            {hasNext && products.length > 0 && (
+              <div className="mt-12 flex flex-col items-center gap-3">
+                {loadMoreError && (
+                  <p role="alert" className="text-sm text-destructive">
+                    {loadMoreError}
+                  </p>
+                )}
+                <Button
+                  onClick={onLoadMore}
+                  disabled={loadingMore}
+                  variant="outline"
+                  className="min-h-11 min-w-44 rounded-none border-rf-dark text-rf-dark hover:bg-rf-dark hover:text-rf-cream"
+                  aria-label="Load more products"
+                >
+                  {loadingMore ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+                      Loading…
+                    </>
+                  ) : (
+                    "LOAD MORE"
+                  )}
+                </Button>
+              </div>
             )}
           </div>
-          {hasNext && products.length > 0 && (
-            <div className="mt-12 flex flex-col items-center gap-3">
-              {loadMoreError && (
-                <p role="alert" className="text-sm text-destructive">
-                  {loadMoreError}
-                </p>
-              )}
-              <Button
-                onClick={onLoadMore}
-                disabled={loadingMore}
-                variant="outline"
-                className="min-h-11 min-w-44 rounded-none border-rf-dark text-rf-dark hover:bg-rf-dark hover:text-rf-cream"
-                aria-label="Load more products"
-              >
-                {loadingMore ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                    Loading…
-                  </>
-                ) : (
-                  "LOAD MORE"
-                )}
-              </Button>
-            </div>
-          )}
-        </div>
-      </section>
+        </section>
       </main>
       <SiteFooter />
     </div>

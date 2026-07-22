@@ -138,7 +138,6 @@ async function removeLine(cartId: string, lineId: string) {
   return { success: true as const };
 }
 
-
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
