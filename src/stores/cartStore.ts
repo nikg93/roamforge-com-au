@@ -25,6 +25,13 @@ interface CartStore {
   isSyncing: boolean;
   /** Set of variant IDs currently being mutated. */
   activeVariantIds: string[];
+  /** Drawer visibility lives in the store so an add-to-cart from any
+   * component (grid card, PDP, sticky mobile bar) can pop the drawer
+   * open as visible confirmation without prop drilling. */
+  isDrawerOpen: boolean;
+  openDrawer: () => void;
+  closeDrawer: () => void;
+  setDrawerOpen: (open: boolean) => void;
   addItem: (item: Omit<CartItem, "lineId">) => Promise<void>;
   updateQuantity: (variantId: string, quantity: number) => Promise<void>;
   removeItem: (variantId: string) => Promise<void>;
@@ -60,6 +67,29 @@ function formatCheckoutUrl(url: string) {
     return u.toString();
   } catch {
     return url;
+  }
+}
+
+/**
+ * Guard against stale/tampered checkout URLs. A valid Shopify checkout URL
+ * is https and lives on the shop's own domain family (myshopify.com or a
+ * *.shopify.com checkout host). If anything else slipped into persisted
+ * storage, we treat it as invalid and let the UI surface the error.
+ */
+function isValidCheckoutUrl(url: string | null): url is string {
+  if (!url) return false;
+  try {
+    const u = new URL(url);
+    if (u.protocol !== "https:") return false;
+    const h = u.hostname.toLowerCase();
+    return (
+      h.endsWith(".myshopify.com") ||
+      h.endsWith(".shopify.com") ||
+      // Custom checkout domains configured on the store.
+      h.includes("checkout")
+    );
+  } catch {
+    return false;
   }
 }
 
