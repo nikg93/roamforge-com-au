@@ -361,6 +361,100 @@ export async function fetchProductByHandle(handle: string) {
   return { node: product } as ShopifyProduct;
 }
 
+// Best-selling / featured product query for the homepage. Storefront API
+// supports the BEST_SELLING sortKey out of the box — we do not invent
+// popularity signals. If Shopify returns an empty list (e.g. store has no
+// sales history) the caller falls back to a neutral "Featured Gear" heading.
+export const FEATURED_PRODUCTS_QUERY = `
+  query FeaturedProducts($first: Int!) {
+    products(first: $first, sortKey: BEST_SELLING, query: "available_for_sale:true") {
+      edges {
+        node {
+          id title handle vendor availableForSale
+          priceRange { minVariantPrice { amount currencyCode } }
+          compareAtPriceRange { minVariantPrice { amount currencyCode } }
+          featuredImage { url altText }
+          selectedOrFirstAvailableVariant {
+            id title sku availableForSale
+            price { amount currencyCode }
+            compareAtPrice { amount currencyCode }
+            selectedOptions { name value }
+          }
+          variants(first: 4) {
+            edges {
+              node {
+                id title sku availableForSale
+                price { amount currencyCode }
+                compareAtPrice { amount currencyCode }
+                selectedOptions { name value }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+export async function fetchFeaturedProducts(first = 8): Promise<ShopifyProduct[]> {
+  const data = await storefrontApiRequest(FEATURED_PRODUCTS_QUERY, { first });
+  const edges = data?.data?.products?.edges ?? [];
+  return edges.map((e: { node: ShopifyProduct["node"] }) => {
+    const img = e.node.featuredImage;
+    return {
+      node: {
+        ...e.node,
+        description: e.node.description ?? "",
+        images: img ? { edges: [{ node: img }] } : { edges: [] },
+        options: e.node.options ?? [],
+      },
+    };
+  });
+}
+
+/**
+ * Related-product search. Uses vendor/productType/tags to build a
+ * Storefront `query` predicate, excluding the current product and any that
+ * come back unavailable. Returns up to `limit` products, or an empty list
+ * if Shopify can't find a good match — never fabricates.
+ */
+export async function fetchRelatedProducts(
+  currentHandle: string,
+  opts: { vendor?: string; productType?: string; tags?: string[] },
+  limit = 4,
+): Promise<ShopifyProduct[]> {
+  const clauses: string[] = [];
+  const safe = (s: string) => s.replace(/["\\]/g, "").trim();
+  if (opts.vendor && opts.vendor.trim()) clauses.push(`vendor:"${safe(opts.vendor)}"`);
+  if (opts.productType && opts.productType.trim())
+    clauses.push(`product_type:"${safe(opts.productType)}"`);
+  const catTag = (opts.tags ?? []).find((t) => /^cat-/i.test(t));
+  if (catTag) clauses.push(`tag:"${safe(catTag)}"`);
+  if (clauses.length === 0) return [];
+  const query = `(${clauses.join(" OR ")}) AND available_for_sale:true`;
+  const data = await storefrontApiRequest(PRODUCTS_QUERY, {
+    first: limit + 4,
+    query,
+  });
+  const edges: Array<{ node: ShopifyProduct["node"] }> = data?.data?.products?.edges ?? [];
+  const out: ShopifyProduct[] = [];
+  for (const e of edges) {
+    if (e.node.handle === currentHandle) continue;
+    if (e.node.availableForSale === false) continue;
+    const img = e.node.featuredImage;
+    out.push({
+      node: {
+        ...e.node,
+        description: e.node.description ?? "",
+        images: img ? { edges: [{ node: img }] } : { edges: [] },
+        options: e.node.options ?? [],
+      },
+    });
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
 /**
  * Paginate every published product handle. Used by the sitemap; kept as its
  * own tiny query so we don't ship the full product payload just to build URLs.
