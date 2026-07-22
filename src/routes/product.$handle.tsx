@@ -561,6 +561,11 @@ function ProductPageInner() {
             <p className="text-sm font-semibold text-rf-dark">
               ${priceNum.toFixed(2)} {displayPrice.currencyCode}
             </p>
+            <p
+              className={`text-[11px] ${canAdd ? "text-emerald-700" : "text-destructive"}`}
+            >
+              {canAdd ? "In stock" : "Sold out"}
+            </p>
           </div>
           <Button
             onClick={doAdd}
