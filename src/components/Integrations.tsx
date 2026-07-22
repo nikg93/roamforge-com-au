@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { CONSENT_UPDATED_EVENT, readConsent } from "@/lib/consent";
 
 /**
  * Third-party app integrations. Each one activates only when its VITE_ env var is set.
@@ -12,8 +13,6 @@ import { useEffect } from "react";
  */
 export function Integrations() {
   useEffect(() => {
-    // Only accept real-looking IDs so a stray placeholder in .env doesn't
-    // inject broken scripts at runtime. Never fabricate defaults.
     const raw = (v: unknown) => (typeof v === "string" ? v.trim() : "");
     const ga4Raw = raw(import.meta.env.VITE_GA4_MEASUREMENT_ID);
     const klaviyoRaw = raw(import.meta.env.VITE_KLAVIYO_COMPANY_ID);
@@ -22,47 +21,59 @@ export function Integrations() {
     const klaviyo = /^[A-Z0-9]{4,}$/i.test(klaviyoRaw) ? klaviyoRaw : "";
     const tidio = /^[A-Za-z0-9]{6,}$/.test(tidioRaw) ? tidioRaw : "";
 
-    const loaded = new Set<string>();
     const injected: HTMLScriptElement[] = [];
 
-    const inject = (id: string, src: string, extra?: (s: HTMLScriptElement) => void) => {
-      if (loaded.has(id) || document.getElementById(id)) return;
+    const inject = (id: string, src: string) => {
+      if (document.getElementById(id)) return;
       const s = document.createElement("script");
       s.id = id;
       s.src = src;
       s.async = true;
-      extra?.(s);
       document.head.appendChild(s);
       injected.push(s);
-      loaded.add(id);
+    };
+    const removeById = (id: string) => {
+      const el = document.getElementById(id);
+      if (el) el.parentNode?.removeChild(el);
     };
 
-    // Google Analytics 4
-    if (ga4) {
-      inject("ga4-loader", `https://www.googletagmanager.com/gtag/js?id=${ga4}`);
-      const cfg = document.createElement("script");
-      cfg.id = "ga4-config";
-      cfg.innerHTML = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${ga4}');`;
-      document.head.appendChild(cfg);
-      injected.push(cfg);
-    }
+    // Idempotent — recomputes what should be loaded based on the current
+    // consent state and inserts/removes tags accordingly.
+    const apply = () => {
+      const c = readConsent();
+      if (ga4 && c.analytics) {
+        inject("ga4-loader", `https://www.googletagmanager.com/gtag/js?id=${ga4}`);
+        if (!document.getElementById("ga4-config")) {
+          const cfg = document.createElement("script");
+          cfg.id = "ga4-config";
+          cfg.innerHTML = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${ga4}');`;
+          document.head.appendChild(cfg);
+          injected.push(cfg);
+        }
+      } else {
+        removeById("ga4-loader");
+        removeById("ga4-config");
+      }
+      if (klaviyo && c.marketing) {
+        inject(
+          "klaviyo-loader",
+          `https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=${klaviyo}`,
+        );
+      } else {
+        removeById("klaviyo-loader");
+      }
+      if (tidio && c.marketing) {
+        inject("tidio-loader", `//code.tidio.co/${tidio}.js`);
+      } else {
+        removeById("tidio-loader");
+      }
+    };
 
-    // Klaviyo
-    if (klaviyo) {
-      inject(
-        "klaviyo-loader",
-        `https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=${klaviyo}`,
-      );
-    }
-
-    // Tidio live chat
-    if (tidio) {
-      inject("tidio-loader", `//code.tidio.co/${tidio}.js`);
-    }
-
+    apply();
+    window.addEventListener(CONSENT_UPDATED_EVENT, apply);
     return () => {
+      window.removeEventListener(CONSENT_UPDATED_EVENT, apply);
       injected.forEach((s) => s.parentNode?.removeChild(s));
-      loaded.clear();
     };
   }, []);
 
