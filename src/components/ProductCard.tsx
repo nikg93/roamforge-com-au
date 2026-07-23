@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { shopifySrcSet, type ShopifyProduct } from "@/lib/shopify";
+import { normalizeProductTitle } from "@/lib/product-title";
 import { useCartStore } from "@/stores/cartStore";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
@@ -37,8 +38,9 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
   // Avoid duplicated brand prefixes like "Ultimate9 Ultimate9 EVCX ..." — if the
   // product title already begins with the vendor name, suppress the eyebrow.
   const vendor = product.node.vendor?.trim() ?? "";
+  const displayTitle = normalizeProductTitle(product.node.title, vendor);
   const titleStartsWithVendor =
-    vendor.length > 0 && product.node.title.trim().toLowerCase().startsWith(vendor.toLowerCase());
+    vendor.length > 0 && displayTitle.toLowerCase().startsWith(vendor.toLowerCase());
   const showVendorEyebrow = vendor.length > 0 && !titleStartsWithVendor;
 
   const onAdd = async () => {
@@ -71,7 +73,7 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
             <img
               src={img.url}
               srcSet={shopifySrcSet(img.url, [300, 450, 600, 900])}
-              alt={img.altText ?? product.node.title}
+              alt={img.altText ?? displayTitle}
               width={600}
               height={600}
               loading="lazy"
@@ -88,7 +90,7 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
             </p>
           )}
           <h3 className="mt-1 text-sm font-medium text-rf-dark line-clamp-2 min-h-[2.5em]">
-            {product.node.title}
+            {displayTitle}
           </h3>
           <p className="mt-2 text-sm font-semibold text-rf-dark">
             <span>
@@ -121,9 +123,7 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
         onClick={onAdd}
         disabled={!inStock || busy}
         variant="outline"
-        aria-label={
-          inStock ? `Add ${product.node.title} to cart` : `${product.node.title} is sold out`
-        }
+        aria-label={inStock ? `Add ${displayTitle} to cart` : `${displayTitle} is sold out`}
         className="mt-3 w-full rounded-none border-rf-dark text-rf-dark hover:bg-rf-dark hover:text-rf-cream disabled:opacity-60"
       >
         {busy ? (

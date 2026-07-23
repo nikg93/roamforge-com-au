@@ -14,6 +14,7 @@ import { Loader2, ShieldCheck, Truck, Undo2, Mail, Lock } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ProductCard } from "@/components/ProductCard";
 import { sanitizeProductHtml, textFromHtml } from "@/lib/sanitize";
+import { normalizeProductTitle } from "@/lib/product-title";
 import { canonicalFor } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
@@ -48,12 +49,13 @@ export const Route = createFileRoute("/product/$handle")({
     }
     const p = (loaderData as ShopifyProduct).node;
 
-    const rawTitle = p.seo?.title || p.title;
+    const displayTitle = normalizeProductTitle(p.title, p.vendor);
+    const rawTitle = p.seo?.title || displayTitle;
     const title = /roamforge/i.test(rawTitle) ? rawTitle : `${rawTitle} | Roamforge`;
     const rawDescription =
       p.seo?.description ||
       textFromHtml(p.descriptionHtml || p.description, 160) ||
-      `${p.title} — available at Roamforge.`;
+      `${displayTitle} — available at Roamforge.`;
     // Cap at ~200 chars so Google/Twitter don't truncate mid-sentence.
     const description =
       rawDescription.length > 200 ? textFromHtml(rawDescription, 200) : rawDescription;
@@ -68,8 +70,8 @@ export const Route = createFileRoute("/product/$handle")({
     const productSchema: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "Product",
-      name: p.title,
-      description: textFromHtml(p.descriptionHtml || p.description, 300) || p.title,
+      name: displayTitle,
+      description: textFromHtml(p.descriptionHtml || p.description, 300) || displayTitle,
       image: p.images.edges.map((e) => e.node.url).slice(0, 5),
       url,
       offers: {
@@ -121,7 +123,7 @@ export const Route = createFileRoute("/product/$handle")({
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
               { "@type": "ListItem", position: 2, name: "Shop", item: `${SITE.url}/shop` },
-              { "@type": "ListItem", position: 3, name: p.title, item: url },
+              { "@type": "ListItem", position: 3, name: displayTitle, item: url },
             ],
           }),
         },
@@ -190,6 +192,9 @@ function ProductPageInner() {
   const { data } = useSuspenseQuery(productQuery(handle));
   const addItem = useCartStore((s) => s.addItem);
   const p = data.node;
+  const displayTitle = normalizeProductTitle(p.title, p.vendor);
+  const vendorAlreadyInTitle =
+    !!p.vendor && displayTitle.toLowerCase().startsWith(p.vendor.trim().toLowerCase());
 
   const descriptionHtml = sanitizeProductHtml(p.descriptionHtml || p.description);
 
@@ -309,7 +314,7 @@ function ProductPageInner() {
             <span className="mx-2" aria-hidden>
               /
             </span>
-            <span className="text-rf-dark">{p.title}</span>
+            <span className="text-rf-dark">{displayTitle}</span>
           </nav>
           <div className="grid gap-12 lg:grid-cols-2">
             <div>
@@ -320,7 +325,7 @@ function ProductPageInner() {
                     src={activeImage.url}
                     srcSet={shopifySrcSet(activeImage.url)}
                     sizes="(max-width: 1024px) 100vw, 600px"
-                    alt={activeImage.altText ?? p.title}
+                    alt={activeImage.altText ?? displayTitle}
                     width={800}
                     height={800}
                     fetchPriority="high"
@@ -393,8 +398,8 @@ function ProductPageInner() {
               )}
             </div>
             <div>
-              <h1 className="font-display text-4xl tracking-wide text-rf-dark">{p.title}</h1>
-              {p.vendor ? (
+              <h1 className="font-display text-4xl tracking-wide text-rf-dark">{displayTitle}</h1>
+              {p.vendor && !vendorAlreadyInTitle ? (
                 <p className="mt-1 text-xs font-semibold tracking-widest text-rf-tan uppercase">
                   {p.vendor}
                 </p>
@@ -570,7 +575,7 @@ function ProductPageInner() {
       >
         <div className="mx-auto flex max-w-6xl items-center gap-3">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs text-muted-foreground">{p.title}</p>
+            <p className="truncate text-xs text-muted-foreground">{displayTitle}</p>
             <p className="text-sm font-semibold text-rf-dark">
               ${priceNum.toFixed(2)} {displayPrice.currencyCode}
             </p>
