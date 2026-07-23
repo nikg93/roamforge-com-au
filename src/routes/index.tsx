@@ -45,9 +45,9 @@ export const Route = createFileRoute("/")({
   head: () =>
     routeMeta({
       path: "/",
-      title: "Roamforge — Forged for Adventure | 4WD, Camping & Touring Gear",
+      title: "4WD Accessories Australia | Touring & Recovery Gear | Roamforge",
       description:
-        "Premium 4WD, camping and touring gear selected for Australian adventures. Recovery, electrical, camping and Roamforge merch.",
+        "Shop premium 4WD accessories, recovery gear, vehicle monitoring, performance and touring equipment from trusted brands at Roamforge.",
     }),
   component: Index,
 });
@@ -97,10 +97,11 @@ function Index() {
             <div className="absolute inset-0">
               <div className="mx-auto h-full max-w-7xl px-4 lg:px-8 flex items-center">
                 <div className="max-w-xl text-rf-cream">
-                  <h1
-                    aria-label="Forged for adventure"
-                    className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight"
-                  >
+                  <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight">
+                    <span className="sr-only">
+                      Premium 4WD accessories, recovery and touring gear in Australia — Forged for
+                      Adventure
+                    </span>
                     <span aria-hidden="true">FORGED</span>
                     <br aria-hidden="true" />
                     <span aria-hidden="true" className="text-rf-tan">
@@ -131,7 +132,8 @@ function Index() {
             {/* Floating watermark logo */}
             <img
               src={logo}
-              alt="Roamforge logo"
+              alt=""
+              aria-hidden="true"
               className="hidden md:block absolute bottom-6 right-6 h-24 opacity-90"
             />
           </div>
