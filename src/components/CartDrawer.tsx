@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -83,6 +84,13 @@ export function CartDrawer() {
               <div className="text-center">
                 <ShoppingCart className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">Your cart is empty</p>
+                <Link
+                  to="/shop"
+                  onClick={() => setDrawerOpen(false)}
+                  className="mt-6 min-h-11 inline-flex items-center justify-center bg-rf-dark px-5 py-3 text-sm font-semibold tracking-[0.14em] text-rf-cream hover:bg-rf-dark-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2"
+                >
+                  SHOP ALL
+                </Link>
               </div>
             </div>
           ) : (

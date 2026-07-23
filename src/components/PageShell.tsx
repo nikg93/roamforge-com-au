@@ -22,7 +22,7 @@ export function PageShell({
           <h1 className="font-display text-4xl lg:text-5xl tracking-wide">{title}</h1>
         </div>
       </section>
-      <main className="mx-auto max-w-4xl px-4 py-14 lg:px-8 lg:py-20">
+      <main id="main-content" className="mx-auto max-w-4xl px-4 py-14 lg:px-8 lg:py-20">
         <article className="prose-rf space-y-6 text-rf-dark/85 leading-relaxed">{children}</article>
       </main>
       <SiteFooter />

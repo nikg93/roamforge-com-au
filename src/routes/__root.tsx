@@ -31,7 +31,7 @@ function NotFoundComponent() {
       />
       <SiteHeader />
       <main
-        role="main"
+        id="main-content"
         className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center px-4 py-20 text-center"
       >
         <p className="font-display text-7xl tracking-widest text-rf-dark">404</p>
@@ -96,7 +96,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
     <div className="flex min-h-dvh flex-col bg-background">
       <SiteHeader />
       <main
-        role="main"
+        id="main-content"
         className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center px-4 py-20 text-center"
       >
         <h1 className="font-display text-2xl tracking-widest text-rf-dark">
