@@ -45,9 +45,9 @@ export const Route = createFileRoute("/")({
   head: () =>
     routeMeta({
       path: "/",
-      title: "Roamforge — Forged for Adventure | 4WD, Camping & Touring Gear",
+      title: "4WD Accessories Australia | Touring & Recovery Gear | Roamforge",
       description:
-        "Premium 4WD, camping and touring gear selected for Australian adventures. Recovery, electrical, camping and Roamforge merch.",
+        "Shop premium 4WD accessories, recovery gear, vehicle monitoring, performance and touring equipment from trusted brands at Roamforge.",
     }),
   component: Index,
 });
@@ -101,6 +101,10 @@ function Index() {
                     aria-label="Forged for adventure"
                     className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight"
                   >
+                    <span className="sr-only">
+                      Premium 4WD accessories, recovery and touring gear in Australia — Forged for
+                      Adventure
+                    </span>
                     <span aria-hidden="true">FORGED</span>
                     <br aria-hidden="true" />
                     <span aria-hidden="true" className="text-rf-tan">
