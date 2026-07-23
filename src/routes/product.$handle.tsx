@@ -56,9 +56,7 @@ export const Route = createFileRoute("/product/$handle")({
       `${p.title} — available at Roamforge.`;
     // Cap at ~200 chars so Google/Twitter don't truncate mid-sentence.
     const description =
-      rawDescription.length > 200
-        ? textFromHtml(rawDescription, 200)
-        : rawDescription;
+      rawDescription.length > 200 ? textFromHtml(rawDescription, 200) : rawDescription;
     const image = p.featuredImage?.url ?? p.images.edges[0]?.node?.url;
 
     const available = firstAvailableVariant(p);

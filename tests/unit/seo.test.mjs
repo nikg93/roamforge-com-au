@@ -32,7 +32,9 @@ export default {
     assert.match(root, /<title>Page not found — Roamforge<\/title>/);
     assert.match(root, /content="noindex, follow"/);
     // Root JSON-LD graph is present and valid.
-    const m = root.match(/JSON\.stringify\(\{\s*"@context":\s*"https:\/\/schema\.org"[\s\S]*?"@graph"[\s\S]*?\}\)/);
+    const m = root.match(
+      /JSON\.stringify\(\{\s*"@context":\s*"https:\/\/schema\.org"[\s\S]*?"@graph"[\s\S]*?\}\)/,
+    );
     assert.ok(m, "root JSON-LD @graph block missing");
   },
   "seo helper: routeMeta emits canonical, og and twitter tags on custom domain"() {
