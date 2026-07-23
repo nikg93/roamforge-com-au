@@ -102,6 +102,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "author", content: "Roamforge" },
       { name: "google-site-verification", content: "mu2c75c6izPtXaUYCdNONswlHXEdBPLNSKjSY_nLPGQ" },
       { property: "og:site_name", content: "Roamforge" },
+      { property: "og:locale", content: "en_AU" },
+      { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
