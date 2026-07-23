@@ -192,6 +192,9 @@ function ProductPageInner() {
   const { data } = useSuspenseQuery(productQuery(handle));
   const addItem = useCartStore((s) => s.addItem);
   const p = data.node;
+  const displayTitle = normalizeProductTitle(p.title, p.vendor);
+  const vendorAlreadyInTitle =
+    !!p.vendor && displayTitle.toLowerCase().startsWith(p.vendor.trim().toLowerCase());
 
   const descriptionHtml = sanitizeProductHtml(p.descriptionHtml || p.description);
 
@@ -311,7 +314,7 @@ function ProductPageInner() {
             <span className="mx-2" aria-hidden>
               /
             </span>
-            <span className="text-rf-dark">{p.title}</span>
+            <span className="text-rf-dark">{displayTitle}</span>
           </nav>
           <div className="grid gap-12 lg:grid-cols-2">
             <div>
@@ -322,7 +325,7 @@ function ProductPageInner() {
                     src={activeImage.url}
                     srcSet={shopifySrcSet(activeImage.url)}
                     sizes="(max-width: 1024px) 100vw, 600px"
-                    alt={activeImage.altText ?? p.title}
+                    alt={activeImage.altText ?? displayTitle}
                     width={800}
                     height={800}
                     fetchPriority="high"
@@ -395,8 +398,8 @@ function ProductPageInner() {
               )}
             </div>
             <div>
-              <h1 className="font-display text-4xl tracking-wide text-rf-dark">{p.title}</h1>
-              {p.vendor ? (
+              <h1 className="font-display text-4xl tracking-wide text-rf-dark">{displayTitle}</h1>
+              {p.vendor && !vendorAlreadyInTitle ? (
                 <p className="mt-1 text-xs font-semibold tracking-widest text-rf-tan uppercase">
                   {p.vendor}
                 </p>
@@ -572,7 +575,7 @@ function ProductPageInner() {
       >
         <div className="mx-auto flex max-w-6xl items-center gap-3">
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs text-muted-foreground">{p.title}</p>
+            <p className="truncate text-xs text-muted-foreground">{displayTitle}</p>
             <p className="text-sm font-semibold text-rf-dark">
               ${priceNum.toFixed(2)} {displayPrice.currencyCode}
             </p>
