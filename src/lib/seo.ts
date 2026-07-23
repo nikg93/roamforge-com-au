@@ -44,8 +44,7 @@ export function routeMeta(input: RouteMetaInput) {
   // Prefer a page-specific absolute image; otherwise fall back to a
   // branded default hosted on our own domain so shared links never rely on
   // an auto-generated preview screenshot.
-  const image =
-    input.image && /^https?:\/\//i.test(input.image) ? input.image : DEFAULT_OG_IMAGE;
+  const image = input.image && /^https?:\/\//i.test(input.image) ? input.image : DEFAULT_OG_IMAGE;
   meta.push({ property: "og:image", content: image });
   meta.push({ name: "twitter:image", content: image });
   if (input.noindex) meta.push({ name: "robots", content: "noindex, follow" });

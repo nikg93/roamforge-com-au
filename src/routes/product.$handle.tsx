@@ -54,7 +54,9 @@ export const Route = createFileRoute("/product/$handle")({
       p.seo?.description ||
       textFromHtml(p.descriptionHtml || p.description, 160) ||
       `${p.title} — available at Roamforge.`;
-    const description = rawDescription.slice(0, 300);
+    // Cap at ~200 chars so Google/Twitter don't truncate mid-sentence.
+    const description =
+      rawDescription.length > 200 ? textFromHtml(rawDescription, 200) : rawDescription;
     const image = p.featuredImage?.url ?? p.images.edges[0]?.node?.url;
 
     const available = firstAvailableVariant(p);
@@ -118,7 +120,8 @@ export const Route = createFileRoute("/product/$handle")({
             "@type": "BreadcrumbList",
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
-              { "@type": "ListItem", position: 2, name: p.title, item: url },
+              { "@type": "ListItem", position: 2, name: "Shop", item: `${SITE.url}/shop` },
+              { "@type": "ListItem", position: 3, name: p.title, item: url },
             ],
           }),
         },

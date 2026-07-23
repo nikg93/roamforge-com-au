@@ -67,17 +67,20 @@ function normaliseWhitespace(input: string): string {
 }
 
 function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function plainTextToHtml(text: string): string {
-  const blocks = text.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
+  const blocks = text
+    .split(/\n{2,}/)
+    .map((b) => b.trim())
+    .filter(Boolean);
   return blocks
     .map((block) => {
-      const lines = block.split(/\n/).map((l) => l.trim()).filter(Boolean);
+      const lines = block
+        .split(/\n/)
+        .map((l) => l.trim())
+        .filter(Boolean);
       const isBulletBlock = lines.length > 0 && lines.every((l) => /^[-*•]\s+/.test(l));
       if (isBulletBlock) {
         const items = lines
