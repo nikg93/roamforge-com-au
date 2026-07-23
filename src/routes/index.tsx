@@ -97,10 +97,7 @@ function Index() {
             <div className="absolute inset-0">
               <div className="mx-auto h-full max-w-7xl px-4 lg:px-8 flex items-center">
                 <div className="max-w-xl text-rf-cream">
-                  <h1
-                    aria-label="Forged for adventure"
-                    className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight"
-                  >
+                  <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight">
                     <span className="sr-only">
                       Premium 4WD accessories, recovery and touring gear in Australia — Forged for
                       Adventure
