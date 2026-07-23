@@ -14,6 +14,7 @@ import { Loader2, ShieldCheck, Truck, Undo2, Mail, Lock } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { ProductCard } from "@/components/ProductCard";
 import { sanitizeProductHtml, textFromHtml } from "@/lib/sanitize";
+import { normalizeProductTitle } from "@/lib/product-title";
 import { canonicalFor } from "@/lib/seo";
 import { SITE } from "@/lib/site";
 
@@ -48,12 +49,13 @@ export const Route = createFileRoute("/product/$handle")({
     }
     const p = (loaderData as ShopifyProduct).node;
 
-    const rawTitle = p.seo?.title || p.title;
+    const displayTitle = normalizeProductTitle(p.title, p.vendor);
+    const rawTitle = p.seo?.title || displayTitle;
     const title = /roamforge/i.test(rawTitle) ? rawTitle : `${rawTitle} | Roamforge`;
     const rawDescription =
       p.seo?.description ||
       textFromHtml(p.descriptionHtml || p.description, 160) ||
-      `${p.title} — available at Roamforge.`;
+      `${displayTitle} — available at Roamforge.`;
     // Cap at ~200 chars so Google/Twitter don't truncate mid-sentence.
     const description =
       rawDescription.length > 200 ? textFromHtml(rawDescription, 200) : rawDescription;
@@ -68,8 +70,8 @@ export const Route = createFileRoute("/product/$handle")({
     const productSchema: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "Product",
-      name: p.title,
-      description: textFromHtml(p.descriptionHtml || p.description, 300) || p.title,
+      name: displayTitle,
+      description: textFromHtml(p.descriptionHtml || p.description, 300) || displayTitle,
       image: p.images.edges.map((e) => e.node.url).slice(0, 5),
       url,
       offers: {
@@ -121,7 +123,7 @@ export const Route = createFileRoute("/product/$handle")({
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
               { "@type": "ListItem", position: 2, name: "Shop", item: `${SITE.url}/shop` },
-              { "@type": "ListItem", position: 3, name: p.title, item: url },
+              { "@type": "ListItem", position: 3, name: displayTitle, item: url },
             ],
           }),
         },
