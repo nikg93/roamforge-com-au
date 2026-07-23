@@ -20,7 +20,7 @@ export function normalizeProductTitle(rawTitle: string, vendor?: string | null):
   const v = (vendor ?? "").trim();
   if (v) {
     // Match "Vendor Vendor …" (case-insensitive, one or more spaces between).
-    const escaped = v.replace(/[.*+?^${}()|[\]\\]/g, "\\$1");
+    const escaped = v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const re = new RegExp(`^(${escaped})\\s+${escaped}(\\s+|$)`, "i");
     const m = title.match(re);
     if (m) {
