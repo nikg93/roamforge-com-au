@@ -9,10 +9,7 @@ export default {
     );
   },
   "collapses duplicated vendor prefix case-insensitively"() {
-    assert.equal(
-      normalizeProductTitle("ULTIMATE9 ultimate9 evcX", "Ultimate9"),
-      "ULTIMATE9 evcX",
-    );
+    assert.equal(normalizeProductTitle("ULTIMATE9 ultimate9 evcX", "Ultimate9"), "ULTIMATE9 evcX");
   },
   "collapses generic duplicated first token when vendor absent"() {
     assert.equal(normalizeProductTitle("Redarc Redarc Tow Pro"), "Redarc Tow Pro");

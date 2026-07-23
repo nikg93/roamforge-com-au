@@ -123,9 +123,7 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
         onClick={onAdd}
         disabled={!inStock || busy}
         variant="outline"
-        aria-label={
-          inStock ? `Add ${displayTitle} to cart` : `${displayTitle} is sold out`
-        }
+        aria-label={inStock ? `Add ${displayTitle} to cart` : `${displayTitle} is sold out`}
         className="mt-3 w-full rounded-none border-rf-dark text-rf-dark hover:bg-rf-dark hover:text-rf-cream disabled:opacity-60"
       >
         {busy ? (
