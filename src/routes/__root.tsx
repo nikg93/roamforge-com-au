@@ -39,12 +39,46 @@ function NotFoundComponent() {
         <p className="mt-3 text-sm text-muted-foreground">
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
-        <Link
-          to="/"
-          className="mt-6 inline-flex items-center justify-center bg-rf-dark px-5 py-3 text-sm font-medium tracking-widest text-rf-cream hover:bg-rf-dark-2"
-        >
-          GO HOME
-        </Link>
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            to="/shop"
+            className="min-h-11 inline-flex items-center justify-center bg-rf-dark px-5 py-3 text-sm font-semibold tracking-[0.14em] text-rf-cream hover:bg-rf-dark-2"
+          >
+            SHOP ALL
+          </Link>
+          <Link
+            to="/"
+            className="min-h-11 inline-flex items-center justify-center border border-rf-dark px-5 py-3 text-sm font-semibold tracking-[0.14em] text-rf-dark hover:bg-rf-dark hover:text-rf-cream"
+          >
+            GO HOME
+          </Link>
+        </div>
+        <div className="mt-10 w-full">
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            Popular categories
+          </p>
+          <ul className="mt-4 flex flex-wrap justify-center gap-2 text-sm">
+            {(
+              [
+                { slug: "recovery", label: "Recovery Gear" },
+                { slug: "performance", label: "Performance" },
+                { slug: "monitoring", label: "Vehicle Monitoring" },
+                { slug: "touring", label: "Touring & Camping" },
+                { slug: "lighting", label: "Lighting" },
+              ] as const
+            ).map((c) => (
+              <li key={c.slug}>
+                <Link
+                  to="/category/$slug"
+                  params={{ slug: c.slug }}
+                  className="min-h-11 inline-flex items-center border border-rf-dark/30 px-4 py-2 text-rf-dark hover:border-rf-dark hover:bg-rf-dark hover:text-rf-cream"
+                >
+                  {c.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </main>
       <SiteFooter />
     </div>

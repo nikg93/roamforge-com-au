@@ -75,7 +75,13 @@ export const Route = createFileRoute("/category/$slug")({
                 "@type": "BreadcrumbList",
                 itemListElement: [
                   { "@type": "ListItem", position: 1, name: "Home", item: SITE_URL },
-                  { "@type": "ListItem", position: 2, name: cfg.label, item: url },
+                  {
+                    "@type": "ListItem",
+                    position: 2,
+                    name: "Shop",
+                    item: `${SITE_URL}/shop`,
+                  },
+                  { "@type": "ListItem", position: 3, name: cfg.label, item: url },
                 ],
               }),
             },
@@ -220,11 +226,35 @@ function CategoryPage() {
             <p className="font-display tracking-[0.3em] text-rf-tan text-xs">CATEGORY</p>
             <h1 className="mt-2 font-display text-5xl sm:text-6xl tracking-tight">{cfg.label}</h1>
             <p className="mt-3 max-w-xl text-sm text-rf-cream/85">{cfg.description}</p>
+            <nav aria-label="Breadcrumb" className="mt-4 text-xs text-rf-cream/75">
+              <Link to="/" className="hover:text-rf-tan">
+                Home
+              </Link>
+              <span className="mx-2" aria-hidden>
+                /
+              </span>
+              <Link to="/shop" className="hover:text-rf-tan">
+                Shop
+              </Link>
+              <span className="mx-2" aria-hidden>
+                /
+              </span>
+              <span className="text-rf-cream">{cfg.label}</span>
+            </nav>
           </div>
         </section>
         <section className="bg-rf-cream py-14 flex-1">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <SectionHeading>{cfg.label}</SectionHeading>
+            {products.length > 0 && (
+              <p
+                className="mt-4 text-xs uppercase tracking-[0.18em] text-muted-foreground"
+                aria-live="polite"
+              >
+                Showing {products.length} {products.length === 1 ? "product" : "products"}
+                {hasNext ? " — load more below" : ""}
+              </p>
+            )}
             <div className="mt-10 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {products.length === 0 ? (
                 <EmptyProducts />
