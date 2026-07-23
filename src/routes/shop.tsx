@@ -153,6 +153,15 @@ function ShopPage() {
         <section className="bg-rf-cream py-14 flex-1">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <SectionHeading>ALL PRODUCTS</SectionHeading>
+            {products.length > 0 && (
+              <p
+                className="mt-4 text-xs uppercase tracking-[0.18em] text-muted-foreground"
+                aria-live="polite"
+              >
+                Showing {products.length} {products.length === 1 ? "product" : "products"}
+                {hasNext ? " — load more below" : ""}
+              </p>
+            )}
             <div className="mt-10 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {products.length === 0 ? (
                 <EmptyProducts />
