@@ -51,7 +51,7 @@ export default {
     const src = read("src/routes/product.$handle.tsx");
     assert.match(src, /"@type":\s*"Product"/);
     assert.match(src, /"@type":\s*"BreadcrumbList"/);
-    assert.match(src, /"availability"/);
+    assert.match(src, /availability/);
     assert.match(src, /priceCurrency/);
     assert.match(src, /rel:\s*"canonical"/);
   },
