@@ -34,6 +34,14 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
   const savingsPct = hasSavings ? Math.round(((compareNum - priceNum) / compareNum) * 100) : 0;
   const savingsAmount = hasSavings ? (compareNum - priceNum).toFixed(2) : "0";
 
+  // Avoid duplicated brand prefixes like "Ultimate9 Ultimate9 EVCX ..." — if the
+  // product title already begins with the vendor name, suppress the eyebrow.
+  const vendor = product.node.vendor?.trim() ?? "";
+  const titleStartsWithVendor =
+    vendor.length > 0 &&
+    product.node.title.trim().toLowerCase().startsWith(vendor.toLowerCase());
+  const showVendorEyebrow = vendor.length > 0 && !titleStartsWithVendor;
+
   const onAdd = async () => {
     if (!variant || !inStock || busy) return;
     setBusy(true);
@@ -75,7 +83,7 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
           )}
         </div>
         <div className="pt-3 text-center">
-          {product.node.vendor && (
+          {showVendorEyebrow && (
             <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
               {product.node.vendor}
             </p>
