@@ -294,11 +294,17 @@ function ProductPageInner() {
   return (
     <div className="min-h-dvh flex flex-col pb-24 lg:pb-0">
       <SiteHeader />
-      <main className="flex-1 bg-background">
+      <main id="main-content" className="flex-1 bg-background">
         <div className="mx-auto max-w-6xl px-4 py-12 lg:px-8">
           <nav aria-label="Breadcrumb" className="mb-6 text-xs text-muted-foreground">
             <Link to="/" className="hover:text-rf-dark">
               Home
+            </Link>
+            <span className="mx-2" aria-hidden>
+              /
+            </span>
+            <Link to="/shop" className="hover:text-rf-dark">
+              Shop
             </Link>
             <span className="mx-2" aria-hidden>
               /

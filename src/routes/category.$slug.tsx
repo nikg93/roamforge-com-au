@@ -208,12 +208,13 @@ function CategoryPage() {
   return (
     <div className="min-h-dvh flex flex-col bg-background">
       <SiteHeader />
-      <main className="flex-1 flex flex-col">
+      <main id="main-content" className="flex-1 flex flex-col">
         <section className="relative bg-rf-dark overflow-hidden">
           {cfg.image && (
             <img
               src={cfg.image}
-              alt={cfg.label}
+              alt=""
+              aria-hidden="true"
               width={1600}
               height={600}
               fetchPriority="high"
