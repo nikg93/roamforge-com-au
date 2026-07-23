@@ -38,8 +38,7 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
   // product title already begins with the vendor name, suppress the eyebrow.
   const vendor = product.node.vendor?.trim() ?? "";
   const titleStartsWithVendor =
-    vendor.length > 0 &&
-    product.node.title.trim().toLowerCase().startsWith(vendor.toLowerCase());
+    vendor.length > 0 && product.node.title.trim().toLowerCase().startsWith(vendor.toLowerCase());
   const showVendorEyebrow = vendor.length > 0 && !titleStartsWithVendor;
 
   const onAdd = async () => {
