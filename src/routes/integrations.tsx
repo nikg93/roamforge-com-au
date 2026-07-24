@@ -11,13 +11,15 @@ export const Route = createFileRoute("/integrations")({
       { title: "Integrations Status | Roamforge" },
       {
         name: "description",
-        content: "Live status of Roamforge third-party integrations, including the connected Shopify storefront.",
+        content:
+          "Live status of Roamforge third-party integrations, including the connected Shopify storefront.",
       },
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "Integrations Status | Roamforge" },
       {
         property: "og:description",
-        content: "Live status of Roamforge third-party integrations, including the connected Shopify storefront.",
+        content:
+          "Live status of Roamforge third-party integrations, including the connected Shopify storefront.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -56,11 +58,7 @@ function IntegrationsPage() {
   }, []);
 
   const dot =
-    status === "connected"
-      ? "bg-emerald-500"
-      : status === "error"
-        ? "bg-red-500"
-        : "bg-amber-400";
+    status === "connected" ? "bg-emerald-500" : status === "error" ? "bg-red-500" : "bg-amber-400";
   const label =
     status === "connected" ? "Connected" : status === "error" ? "Unreachable" : "Checking…";
 

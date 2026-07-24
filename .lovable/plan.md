@@ -1,65 +1,60 @@
-# Roamforge storefront repair — phased plan
+## Context found during inspection
 
-The full scope is 10 workstreams. Attempting all at once is high-risk. I'll ship it in 4 phases, running format/lint/typecheck/build after each and a Playwright smoke sweep after phases 2 and 4.
+- Klaviyo, GA4, Tidio, Judge.me, Meta Pixel — **no `VITE_*` identifiers are configured** in project secrets. Only Shopify + Lovable + Google Search Console keys exist. All UI will be built, but network activation for Klaviyo/GA4/Judge.me/Meta requires the user to add public IDs.
+- Existing `Integrations.tsx` already consent-gates GA4/Klaviyo/Tidio script loaders.
+- `cartStore.ts` has a serialised mutation queue + drawer state — good hook point for analytics.
+- Homepage already has a "WHY" section with 5 tiles; I'll add a slimmer trust strip below the hero.
+- No newsletter form, no popup, no recommendations, no recently-viewed, no analytics events, no shipping bar exist yet.
 
-## Phase 1 — Homepage, Shop All, nav (highest visible impact)
+## Deliverables
 
-- Replace `/` hero: remove all TROLL3N/Patrol copy + `troll3n-real.jpg`. Neutral product-led hero using an existing category/lifestyle image; keep palette + typography.
-- Add "SHOP THE RANGE" CTA linking to new `/shop` route.
-- Add `src/routes/shop.tsx` — server-rendered first page of all Shopify products, cursor pagination, dedupe, visible load errors (reuse category page's loader shape).
-- Add "Popular Gear" homepage section — real Shopify products (first N from a `query` like `available_for_sale:true` sorted by `BEST_SELLING`).
-- Compact mobile category strip (horizontal scroll on `<md`, keep grid on `md+`).
-- `SiteHeader`: add "Shop All" link; hide full nav until `xl:`, use hamburger + "More" collapse below. Enforce `min-h-11 min-w-11`, `focus-visible:ring` tokens sitewide.
-- `SiteFooter`: audit links; only verified contact + Instagram; remove unsupported claims.
-- Remove unsupported claims ("tested for…", delivery-time promises, payment guarantees) across home + footer copy.
+### 1. Email capture
 
-## Phase 2 — Product cards + PDP
+- `src/lib/klaviyo.ts` — thin client-side subscribe helper hitting Klaviyo's public `client/subscriptions` endpoint using `VITE_KLAVIYO_COMPANY_ID` + `VITE_KLAVIYO_NEWSLETTER_LIST_ID`. If either is missing → returns `{ ok: false, reason: "not-configured" }`; form shows an honest "Signups aren't wired up yet" error and never fakes success.
+- `src/components/NewsletterForm.tsx` — branded form with email input, consent microcopy, aria-live success/error states, honeypot, marketing-consent gating.
+- Add footer signup block in `SiteFooter.tsx`.
+- `src/components/WelcomePopup.tsx` — mobile-first modal offering 10% off, shown once per visitor (localStorage flag), 12s delay + exit intent on desktop, dismissible, respects consent + Escape/focus trap via existing shadcn Dialog.
 
-- `ProductCard`: already close; verify availability logic uses selected/first-available variant OR product-level `availableForSale`; ensure no nested `<button>` inside `<Link>`; add per-card busy state (already present); add responsive Shopify CDN `srcset`/`sizes`.
-- `product.$handle.tsx`:
-  - Multi-image gallery with thumbnail rail + arrow/swipe controls (keyboard-accessible).
-  - Show compare-at strikethrough + savings.
-  - Selected variant title + SKU + availability.
-  - Fitment guidance derived ONLY from tags/description (no fabrication).
-  - Sticky mobile add-to-cart bar (`md:hidden` bottom bar).
-  - Related products (same first tag / vendor, exclude self).
-  - No reviews UI.
+### 2. Trust & social proof
 
-## Phase 3 — Cart + Categories/Shop All hardening
+- `src/components/TrustStrip.tsx` — compact strip (Australian owned · Secure checkout · Trusted 4WD brands) rendered below hero.
+- `src/components/MiniTrustRow.tsx` — smaller version near PDP Add-to-Cart.
+- Judge.me: add `src/components/JudgeMeBadge.tsx` + `JudgeMeReviews.tsx` mount points guarded by `VITE_JUDGEME_SHOP_DOMAIN`+`VITE_JUDGEME_PUBLIC_TOKEN`. If missing, the component renders `null` (no fake empty stars).
 
-- `cartStore`: wrap every mutation in try/catch with `sonner` toasts; on 404/expired-cart clear and recreate; add a simple in-store mutex (promise queue) so quantity spam serializes; surface currency; note "shipping calculated at checkout" in drawer.
-- `CartDrawer`: `aria-live` region for errors; qty buttons 44×44; input labelled.
-- `category.$slug.tsx` + new `/shop`: SSR initial page via loader (already ✓ for category), reset pagination on slug change (`useEffect` on slug resets `extra`/`cursor`/`hasNext`), dedupe by id (already ✓), visible load error (already ✓).
+### 3. Cart & AOV
 
-## Phase 4 — SEO, a11y, perf, privacy, QA
+- `src/lib/recommendations.ts` — pure ranking utility. Given a source product + candidate list, scores by shared `cat-*` tag, product type, then vendor. Never surface a "compatible with" claim unless the target's title/tags/desc references the source vendor or model token. Unit-tested.
+- `src/components/CompleteTheKit.tsx` — rail rendering top 4 recommendations. Mounted in `CartDrawer.tsx` (recommendations for last-added item) and in `product.$handle.tsx`.
+- `src/lib/recently-viewed.ts` — localStorage list (dedup, cap 12), SSR-safe.
+- `src/components/RecentlyViewedRail.tsx` — mounted on PDP + shop + cart drawer when list non-empty.
+- `src/components/FreeShippingBar.tsx` — progress bar; reads threshold from `VITE_FREE_SHIPPING_THRESHOLD_AUD`. If unset → renders `null`. Reported to user as a required business decision.
 
-- SEO
-  - Verify unique per-route metadata; absolute OG images already ✓ for categories — extend helper to PDP + shop.
-  - JSON-LD: Organization + WebSite on `__root`, Product on PDP (omit `brand` when vendor empty), Breadcrumb on PDP + category, CollectionPage on category + `/shop`.
-  - Sitemap: include `/shop` and all product handles (already paginated ✓); verify.
-  - 404 route noindex (already ✓).
-- A11y
-  - Skip link in `__root`.
-  - Confirm exactly one `<main>` per template (already ✓ on most; audit legal pages).
-  - FAQ page H2 hierarchy check.
-  - Global `@media (prefers-reduced-motion: reduce)` block in `styles.css`.
-- Perf/privacy
-  - Replace Google Fonts `<link>` with `@fontsource/*` local packages; drop remote font requests.
-  - Consent gate: add a lightweight banner + `localStorage` `rf-consent` flag; only render `Integrations` (GA4/Klaviyo/Tidio scripts) when granted; add "Privacy preferences" link in footer opening the banner.
-- QA infra
-  - `package.json` scripts: `format:check`, `typecheck`, `qa:static` (format+lint+types), `qa:unit` (vitest run if config present; else no-op with message), `qa` (all).
-  - `.github/workflows/quality.yml` running `bun install` + `bun run qa` + `bun run build`.
+### 4. Analytics
 
-## Validation after each phase
+- `src/lib/analytics.ts` — consent-aware event dispatcher: reads consent, buffers, pushes `gtag('event', ...)` for GA4, and `fbq('track', ...)` for Meta if `VITE_META_PIXEL_ID` is configured. Exports typed helpers: `trackViewItem`, `trackViewItemList`, `trackSelectItem`, `trackAddToCart`, `trackRemoveFromCart`, `trackViewCart`, `trackBeginCheckout`, `trackSearch`, `trackSignUp`.
+- Wire into `ProductCard`, `product.$handle.tsx`, `shop.tsx`, `category.$slug.tsx`, `cartStore.ts`, `CartDrawer.tsx` (view + checkout), `SearchDialog.tsx`, `NewsletterForm.tsx`.
+- Meta Pixel loader added to `Integrations.tsx` (marketing-consent gated), only when `VITE_META_PIXEL_ID` set.
+- Purchase event: NOT tracked client-side (checkout is on Shopify). Documented — user must enable GA4 + Meta Pixel from Shopify admin (Online Store → Preferences / customer events).
 
-`bun run format`, `bun run lint`, `bunx tsgo --noEmit`, `bun run build`. Playwright smoke sweep at desktop + 390px after phases 2 and 4 covering: home, search, `/shop`, `/category/performance`, one PDP (gallery + variant + add to cart), cart drawer open + qty + remove, checkout URL handoff (no order placed).
+### 5. Tests
 
-## Deferred / out of scope this pass
+- `tests/unit/recommendations.test.mjs` — scoring, tie-breaking, no cross-category leakage.
+- `tests/unit/recently-viewed.test.mjs` — add, dedupe, cap.
+- `tests/unit/analytics.test.mjs` — no fire when analytics consent denied, payload shape for each event.
+- `tests/unit/newsletter.test.mjs` — Klaviyo helper reports `not-configured` when env missing; success payload shape when configured.
+- Wire into `scripts/qa-unit.mjs`. Run `bun run qa`.
 
-- Any product data changes in Shopify (Admin-only).
-- Real review integration (needs an app — not fabricating).
-- Custom-domain / DNS work.
+### Explicitly NOT doing
 
-## Approval
+- No Shopify product edits.
+- No publish.
+- No fake reviews, fake stars, fake stock, fake shipping promises.
+- No visual redesign — reuses existing rf-\* tokens.
 
-This is ~15–25 files across 4 phases. Please confirm you want me to execute all phases, or trim scope (e.g. Phase 1+2 only, or skip QA workflow if repo permissions block it).
+## What will need user input at completion
+
+- `VITE_KLAVIYO_COMPANY_ID` + `VITE_KLAVIYO_NEWSLETTER_LIST_ID` — enable newsletter.
+- `VITE_GA4_MEASUREMENT_ID` — enable GA4 events (already scaffolded).
+- `VITE_META_PIXEL_ID` — optional, enables Meta Pixel.
+- `VITE_JUDGEME_SHOP_DOMAIN` + `VITE_JUDGEME_PUBLIC_TOKEN` — enable reviews.
+- `VITE_FREE_SHIPPING_THRESHOLD_AUD` — business decision from user before shipping bar shows.

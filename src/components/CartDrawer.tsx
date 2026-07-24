@@ -13,6 +13,9 @@ import {
 import { ShoppingCart, Minus, Plus, Trash2, ExternalLink, Loader2 } from "lucide-react";
 import { useCartStore } from "@/stores/cartStore";
 import { toast } from "sonner";
+import { FreeShippingBar } from "@/components/FreeShippingBar";
+import { CompleteTheKit } from "@/components/CompleteTheKit";
+import { trackViewCart, trackBeginCheckout, toAnalyticsItem } from "@/lib/analytics";
 
 export function CartDrawer() {
   const {
@@ -42,12 +45,47 @@ export function CartDrawer() {
     if (isDrawerOpen) syncCart();
   }, [isDrawerOpen, syncCart]);
 
+  useEffect(() => {
+    if (!isDrawerOpen || items.length === 0) return;
+    trackViewCart(
+      items.map((i) =>
+        toAnalyticsItem({
+          id: i.product.node.id,
+          title: i.product.node.title,
+          vendor: i.product.node.vendor,
+          productType: i.product.node.productType,
+          variantTitle: i.variantTitle,
+          price: i.price.amount,
+          quantity: i.quantity,
+          currency: i.price.currencyCode,
+        }),
+      ),
+      currency,
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isDrawerOpen]);
+
   const handleCheckout = () => {
     const url = getCheckoutUrl();
     if (!url) {
       toast.error("Checkout is not available right now. Please refresh and try again.");
       return;
     }
+    trackBeginCheckout(
+      items.map((i) =>
+        toAnalyticsItem({
+          id: i.product.node.id,
+          title: i.product.node.title,
+          vendor: i.product.node.vendor,
+          productType: i.product.node.productType,
+          variantTitle: i.variantTitle,
+          price: i.price.amount,
+          quantity: i.quantity,
+          currency: i.price.currencyCode,
+        }),
+      ),
+      currency,
+    );
     setDrawerOpen(false);
     // Synchronous navigation inside the click handler avoids Safari/iOS popup blockers
     // that reject window.open called from async callbacks.
@@ -170,6 +208,7 @@ export function CartDrawer() {
                 </div>
               </div>
               <div className="flex-shrink-0 space-y-4 pt-4 border-t bg-background">
+                <FreeShippingBar subtotal={mixedCurrency ? 0 : totalPrice} currency={currency} />
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold">Total</span>
                   <span className="text-xl font-bold" aria-live="polite">
@@ -194,6 +233,9 @@ export function CartDrawer() {
                     </>
                   )}
                 </Button>
+                {items[0] && (
+                  <CompleteTheKit source={items[items.length - 1].product.node} compact />
+                )}
               </div>
             </>
           )}

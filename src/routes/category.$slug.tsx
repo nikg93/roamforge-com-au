@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { CATEGORY_MAP, isCategorySlug } from "@/lib/categories";
 import { canonicalFor, SITE_URL } from "@/lib/seo";
+import { trackViewItemList, toAnalyticsItem } from "@/lib/analytics";
 
 function toAbsoluteUrl(pathOrUrl: string): string {
   if (/^https?:\/\//i.test(pathOrUrl)) return pathOrUrl;
@@ -178,6 +179,23 @@ function CategoryPage() {
     setCursor(initial?.pageInfo.endCursor ?? null);
     setHasNext(!!initial?.pageInfo.hasNextPage);
     setLoadMoreError(null);
+  }, [slug, initial]);
+  useEffect(() => {
+    const list = initial?.products ?? [];
+    if (list.length === 0) return;
+    trackViewItemList(
+      list.slice(0, 24).map((p) =>
+        toAnalyticsItem({
+          id: p.node.id,
+          title: p.node.title,
+          vendor: p.node.vendor,
+          productType: p.node.productType,
+          price: p.node.priceRange.minVariantPrice.amount,
+          currency: p.node.priceRange.minVariantPrice.currencyCode,
+        }),
+      ),
+      `category_${slug}`,
+    );
   }, [slug, initial]);
   if (!cfg) return null;
 

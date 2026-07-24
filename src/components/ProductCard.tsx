@@ -5,6 +5,8 @@ import { normalizeProductTitle } from "@/lib/product-title";
 import { useCartStore } from "@/stores/cartStore";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { JudgeMeBadge } from "@/components/JudgeMe";
+import { trackSelectItem, toAnalyticsItem } from "@/lib/analytics";
 
 export function ProductCard({ product }: { product: ShopifyProduct }) {
   const addItem = useCartStore((s) => s.addItem);
@@ -61,11 +63,26 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
     }
   };
 
+  const onSelect = () => {
+    trackSelectItem(
+      toAnalyticsItem({
+        id: product.node.id,
+        title: displayTitle,
+        vendor: product.node.vendor,
+        productType: product.node.productType,
+        price: price.amount,
+        currency: price.currencyCode,
+      }),
+      "product_grid",
+    );
+  };
+
   return (
     <div className="group flex flex-col">
       <Link
         to="/product/$handle"
         params={{ handle: product.node.handle }}
+        onClick={onSelect}
         className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
       >
         <div className="aspect-square overflow-hidden bg-secondary border border-border">
@@ -92,6 +109,7 @@ export function ProductCard({ product }: { product: ShopifyProduct }) {
           <h3 className="mt-1 text-sm font-medium text-rf-dark line-clamp-2 min-h-[2.5em]">
             {displayTitle}
           </h3>
+          <JudgeMeBadge productId={product.node.id} />
           <p className="mt-2 text-sm font-semibold text-rf-dark">
             <span>
               ${priceNum.toFixed(2)} {price.currencyCode}

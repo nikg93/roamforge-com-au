@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -10,6 +10,7 @@ import { fetchProductsPage, type ShopifyProduct } from "@/lib/shopify";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { routeMeta, SITE_URL } from "@/lib/seo";
+import { trackViewItemList, toAnalyticsItem } from "@/lib/analytics";
 
 const PAGE_SIZE = 24;
 
@@ -108,6 +109,24 @@ function ShopPage() {
     seen.add(p.node.id);
     return true;
   });
+
+  useEffect(() => {
+    if (products.length === 0) return;
+    trackViewItemList(
+      products.slice(0, 24).map((p) =>
+        toAnalyticsItem({
+          id: p.node.id,
+          title: p.node.title,
+          vendor: p.node.vendor,
+          productType: p.node.productType,
+          price: p.node.priceRange.minVariantPrice.amount,
+          currency: p.node.priceRange.minVariantPrice.currencyCode,
+        }),
+      ),
+      "shop_all",
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const onLoadMore = async () => {
     if (loadingMore || !hasNext) return;
