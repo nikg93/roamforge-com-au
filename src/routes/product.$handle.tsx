@@ -17,6 +17,12 @@ import { sanitizeProductHtml, textFromHtml } from "@/lib/sanitize";
 import { normalizeProductTitle } from "@/lib/product-title";
 import { canonicalFor } from "@/lib/seo";
 import { SITE } from "@/lib/site";
+import { MiniTrustRow } from "@/components/TrustStrip";
+import { JudgeMeReviews } from "@/components/JudgeMe";
+import { CompleteTheKit } from "@/components/CompleteTheKit";
+import { RecentlyViewedRail } from "@/components/RecentlyViewedRail";
+import { addRecentlyViewed } from "@/lib/recently-viewed";
+import { trackViewItem, toAnalyticsItem } from "@/lib/analytics";
 
 const productQuery = (handle: string) =>
   queryOptions({
@@ -275,6 +281,34 @@ function ProductPageInner() {
       availableForSale: selectedVariant.availableForSale,
     });
   };
+  // Analytics + recently-viewed on mount / when the product changes.
+  useEffect(() => {
+    trackViewItem(
+      toAnalyticsItem({
+        id: p.id,
+        title: displayTitle,
+        vendor: p.vendor,
+        productType: p.productType,
+        variantTitle: selectedVariant?.title,
+        price: displayPrice.amount,
+        currency: displayPrice.currencyCode,
+      }),
+      displayPrice.currencyCode,
+    );
+    const heroImg =
+      selectedVariant?.image?.url ??
+      p.featuredImage?.url ??
+      p.images.edges[0]?.node.url ??
+      undefined;
+    addRecentlyViewed({
+      handle: p.handle,
+      title: displayTitle,
+      image: heroImg,
+      price: displayPrice.amount,
+      currencyCode: displayPrice.currencyCode,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [p.id, selectedVariant?.id]);
   const adding = useCartStore((s) =>
     selectedVariant ? s.activeVariantIds.includes(selectedVariant.id) : false,
   );
@@ -500,6 +534,7 @@ function ProductPageInner() {
                 <Lock className="h-3.5 w-3.5 text-rf-tan" aria-hidden />
                 Secure checkout powered by Shopify
               </p>
+              <MiniTrustRow />
               {fitment && (
                 <section
                   aria-labelledby="fitment-heading"
@@ -564,6 +599,9 @@ function ProductPageInner() {
               </div>
             </section>
           )}
+          <CompleteTheKit source={p} />
+          <JudgeMeReviews productId={p.id} />
+          <RecentlyViewedRail excludeHandle={p.handle} />
         </div>
       </main>
       <SiteFooter />

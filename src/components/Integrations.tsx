@@ -17,9 +17,17 @@ export function Integrations() {
     const ga4Raw = raw(import.meta.env.VITE_GA4_MEASUREMENT_ID);
     const klaviyoRaw = raw(import.meta.env.VITE_KLAVIYO_COMPANY_ID);
     const tidioRaw = raw(import.meta.env.VITE_TIDIO_PUBLIC_KEY);
+    const judgeMeDomain = raw(import.meta.env.VITE_JUDGEME_SHOP_DOMAIN);
+    const judgeMeTokenRaw = raw(import.meta.env.VITE_JUDGEME_PUBLIC_TOKEN);
+    const metaPixelRaw = raw(import.meta.env.VITE_META_PIXEL_ID);
     const ga4 = /^G-[A-Z0-9]{4,}$/i.test(ga4Raw) ? ga4Raw : "";
     const klaviyo = /^[A-Z0-9]{4,}$/i.test(klaviyoRaw) ? klaviyoRaw : "";
     const tidio = /^[A-Za-z0-9]{6,}$/.test(tidioRaw) ? tidioRaw : "";
+    const judgeMe =
+      /^[a-z0-9.-]+\.myshopify\.com$/i.test(judgeMeDomain) && judgeMeTokenRaw
+        ? { domain: judgeMeDomain, token: judgeMeTokenRaw }
+        : null;
+    const metaPixel = /^\d{6,}$/.test(metaPixelRaw) ? metaPixelRaw : "";
 
     const injected: HTMLScriptElement[] = [];
 
@@ -66,6 +74,31 @@ export function Integrations() {
         inject("tidio-loader", `//code.tidio.co/${tidio}.js`);
       } else {
         removeById("tidio-loader");
+      }
+      if (judgeMe && c.marketing) {
+        // Judge.me widget script. Requires shop domain + public token.
+        inject("judgeme-loader", `https://cdn.judge.me/widget_preloader.js`);
+        if (!document.getElementById("judgeme-config")) {
+          const cfg = document.createElement("script");
+          cfg.id = "judgeme-config";
+          cfg.innerHTML = `window.jdgm=window.jdgm||{};jdgm.SHOP_DOMAIN='${judgeMe.domain}';jdgm.PLATFORM='shopify';jdgm.PUBLIC_TOKEN='${judgeMe.token}';`;
+          document.head.appendChild(cfg);
+          injected.push(cfg);
+        }
+      } else {
+        removeById("judgeme-loader");
+        removeById("judgeme-config");
+      }
+      if (metaPixel && c.marketing) {
+        if (!document.getElementById("meta-pixel-init")) {
+          const s = document.createElement("script");
+          s.id = "meta-pixel-init";
+          s.innerHTML = `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${metaPixel}');fbq('track','PageView');`;
+          document.head.appendChild(s);
+          injected.push(s);
+        }
+      } else {
+        removeById("meta-pixel-init");
       }
     };
 

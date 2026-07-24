@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Search as SearchIcon, Loader2 } from "lucide-react";
 import { predictiveSearchProducts, type ShopifyProduct } from "@/lib/shopify";
+import { trackSearch } from "@/lib/analytics";
 import {
   Dialog,
   DialogContent,
@@ -65,6 +66,7 @@ export function SearchDialog({ open, onOpenChange, triggerRef }: SearchDialogPro
         clearTimeout(timeoutId);
         setResults(rows);
         setStatus("done");
+        trackSearch(q);
       })
       .catch((err) => {
         if (cancelled) return;

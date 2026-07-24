@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { storefrontApiRequest, type ShopifyProduct } from "@/lib/shopify";
 import { toast } from "sonner";
+import { trackAddToCart, trackRemoveFromCart, toAnalyticsItem } from "@/lib/analytics";
 
 export interface CartItem {
   lineId: string | null;
@@ -304,6 +305,21 @@ export const useCartStore = create<CartStore>()(
           } finally {
             endBusy();
             if (added) set({ isDrawerOpen: true });
+            if (added) {
+              trackAddToCart(
+                toAnalyticsItem({
+                  id: item.product.node.id,
+                  title: item.product.node.title,
+                  vendor: item.product.node.vendor,
+                  productType: item.product.node.productType,
+                  variantTitle: item.variantTitle,
+                  price: item.price.amount,
+                  quantity: item.quantity,
+                  currency: item.price.currencyCode,
+                }),
+                item.price.currencyCode,
+              );
+            }
           }
         });
       },
@@ -346,6 +362,7 @@ export const useCartStore = create<CartStore>()(
 
       removeItem: async (variantId) => {
         await enqueueCartOp(async () => {
+          const removingItem = get().items.find((i) => i.variantId === variantId);
           set((s) => ({
             isLoading: true,
             activeVariantIds: s.activeVariantIds.includes(variantId)
@@ -361,6 +378,21 @@ export const useCartStore = create<CartStore>()(
               const next = get().items.filter((i) => i.variantId !== variantId);
               if (next.length === 0) clearCart();
               else set({ items: next });
+              if (removingItem) {
+                trackRemoveFromCart(
+                  toAnalyticsItem({
+                    id: removingItem.product.node.id,
+                    title: removingItem.product.node.title,
+                    vendor: removingItem.product.node.vendor,
+                    productType: removingItem.product.node.productType,
+                    variantTitle: removingItem.variantTitle,
+                    price: removingItem.price.amount,
+                    quantity: removingItem.quantity,
+                    currency: removingItem.price.currencyCode,
+                  }),
+                  removingItem.price.currencyCode,
+                );
+              }
             } else if (r.cartNotFound) {
               clearCart();
               toast.error("Your cart expired.");

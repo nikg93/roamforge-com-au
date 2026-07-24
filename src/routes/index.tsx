@@ -22,6 +22,7 @@ import { SectionHeading } from "@/components/SectionHeading";
 import { TrustedBrands } from "@/components/TrustedBrands";
 import { LifestyleSection } from "@/components/LifestyleSection";
 import { ProductCard } from "@/components/ProductCard";
+import { TrustStrip } from "@/components/TrustStrip";
 import logo from "@/assets/logo.png";
 import heroGear from "@/assets/lifestyle-journey.jpg";
 import { CATEGORIES, type CategorySlug } from "@/lib/categories";
@@ -138,6 +139,8 @@ function Index() {
             />
           </div>
         </section>
+
+        <TrustStrip />
 
         {/* CATEGORIES */}
         <section id="categories" className="bg-rf-cream py-14">
