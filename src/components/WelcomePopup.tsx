@@ -55,11 +55,11 @@ export function WelcomePopup() {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl tracking-widest text-rf-dark">
-            10% OFF YOUR FIRST ORDER
+            5% OFF YOUR FIRST ORDER
           </DialogTitle>
           <DialogDescription>
             Join the Roamforge list for early access to new gear, tour-tested drops, and a welcome
-            code for 10% off your first order.
+            code for 5% off your first order.
           </DialogDescription>
         </DialogHeader>
         <NewsletterForm variant="popup" source="welcome-popup" onSuccess={() => setOpen(false)} />
