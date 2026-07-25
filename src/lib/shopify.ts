@@ -412,7 +412,7 @@ export const FEATURED_PRODUCTS_QUERY = `
     products(first: $first, sortKey: BEST_SELLING, query: "available_for_sale:true") {
       edges {
         node {
-          id title handle vendor availableForSale
+          id title handle vendor productType tags availableForSale
           priceRange { minVariantPrice { amount currencyCode } }
           compareAtPriceRange { minVariantPrice { amount currencyCode } }
           featuredImage { url altText }
@@ -431,6 +431,50 @@ export const FEATURED_PRODUCTS_QUERY = `
 
 export async function fetchFeaturedProducts(first = 8): Promise<ShopifyProduct[]> {
   return fetchFeaturedProductsImpl(first);
+}
+
+/**
+ * Return `count` best-selling products with at most one per primary
+ * category (`cat-*` tag, falling back to product type). Guarantees the
+ * Featured Gear rail spans multiple categories instead of surfacing four
+ * variants of the same product line. Never fabricates — if the pool is
+ * genuinely single-category, callers get whatever the pool contains.
+ */
+export async function fetchDiverseFeatured(
+  count = 4,
+  poolSize = 24,
+): Promise<ShopifyProduct[]> {
+  const pool = await fetchFeaturedProductsImpl(Math.max(poolSize, count * 4));
+  return diversifyByCategory(pool, count);
+}
+
+export function diversifyByCategory(
+  pool: ShopifyProduct[],
+  count: number,
+): ShopifyProduct[] {
+  const primaryCat = (p: ShopifyProduct): string => {
+    const tag = (p.node.tags ?? []).find((t) => /^cat-/i.test(t));
+    if (tag) return tag.toLowerCase();
+    if (p.node.productType && p.node.productType.trim())
+      return `type:${p.node.productType.trim().toLowerCase()}`;
+    return `handle:${p.node.handle}`;
+  };
+  const out: ShopifyProduct[] = [];
+  const used = new Set<string>();
+  for (const p of pool) {
+    const cat = primaryCat(p);
+    if (used.has(cat)) continue;
+    used.add(cat);
+    out.push(p);
+    if (out.length >= count) return out;
+  }
+  // Fill remaining slots with any leftover so the rail always renders
+  // `count` items when the pool has enough products.
+  for (const p of pool) {
+    if (out.length >= count) break;
+    if (!out.includes(p)) out.push(p);
+  }
+  return out;
 }
 
 // Shopify's own recommendation graph — same shape as the grid query.
