@@ -1,4 +1,3 @@
-
 # Roamforge — Read-Only Audit Report
 
 Audit only. No code changes proposed for execution; recommended fixes are described so you can approve a separate build-mode pass.
@@ -44,29 +43,30 @@ No P0. Two P1s.
 
 ## D. Prioritized Action Plan
 
-| Priority | Item | Category | Effort |
-|---|---|---|---|
-| P1 | Redeploy HEAD `d260c86` so branded 404 og:image ships | SEO / BRAND | S |
-| P1 | Build legacy-handle → current-handle 301 map | SEO / BUG | M |
-| P2 | Homepage `<h1>` uses `sr-only` + `aria-hidden` split — SR-only text and visible text combine in `textContent`. SR behavior is correct (visible is aria-hidden), but Google's rendered snapshot indexes the concatenated string as the H1. Split into a single truthful visible H1 + separate visual treatment, or move brand tagline into `<p>`. | SEO | S |
-| P2 | Drop hardcoded Klaviyo (`UwaEws`) and Meta Pixel (`1043681748196165`) fallbacks in `src/components/Integrations.tsx`; require env vars. Consent gating is correct, but fallbacks risk cross-project attribution if a fork/preview loads them. | PRIVACY | S |
-| P2 | `/shop` and category pages: add visible sort control (Featured / Price ↑ / Price ↓ / Newest) — currently server-side merch-first only. | CRO / UX | M |
-| P2 | Category pages: no visible product count above grid (e.g. "24 products"). Reduces perceived selection depth. | CRO | S |
-| P2 | PDP: no "Free shipping over $X" badge on the ATC area. `FreeShippingBar` lives in cart drawer only. Move progress hint into PDP price block to raise AOV. | CRO | S |
-| P2 | PDP: no visible review count/stars in product card even after Judge.me gating fix. Add empty-state "Be the first to review" instead of hiding entirely. | CRO / TRUST | S |
-| P2 | Trust bar copy is generic ("Fast dispatch", etc.) — no concrete numbers, no icons. Adding "1–2 day dispatch from Melbourne" + "30-day returns" specifics raises trust. | CRO | S |
-| P2 | Add `Product` structured-data `aggregateRating` only when real reviews exist; ensure `availability` maps correctly to `https://schema.org/InStock` / `OutOfStock` per selected variant. Currently the "min 100 in stock" UI override is client-only — check that JSON-LD `availability` reflects real Shopify `availableForSale`, not the UI override. | SEO | M |
-| P3 | Sitemap has no `<lastmod>` at all. Adding real per-product `updatedAt` from Shopify (not build time) would help crawl prioritization. Do NOT set to build time. | SEO | M |
-| P3 | Category OG images use hashed asset filenames (e.g. `cat-performance-new-DgVuqt5q.jpg`). Fine, but each is ~a full-bleed hero — verify all ≥1200×630 for X large-card previews. | SEO | S |
-| P3 | Homepage hero `h-[420px] sm:h-[520px] lg:h-[620px]` with `object-cover` crops most of the vehicle scene on 360–430 widths. Consider `object-position: 30% center` on mobile. | UX | S |
-| P3 | Sticky mobile ATC + consent banner + Tidio launcher stack in the same bottom-right corner on 360×800. Verify Tidio z-index and position don't cover the ATC on first-visit devices where consent granted Tidio. | UX / A11Y | S |
-| P3 | No breadcrumb visible on `/shop` (only JSON-LD). Adding a visible `Home / Shop` crumb helps orientation on mobile. | SEO / UX | S |
-| P3 | Return-focus on cart drawer close and search dialog close — verify with keyboard-only pass; shadcn primitives should handle this, but confirm after `NewsletterForm` autofocus in `WelcomePopup`. | A11Y | S |
-| P3 | Font strategy: local fonts good. Verify `font-display: swap` and preload of the primary display face used in hero for LCP. | PERF | S |
+| Priority | Item                                                                                                                                                                                                                                                                                                                                                   | Category    | Effort |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- | ------ |
+| P1       | Redeploy HEAD `d260c86` so branded 404 og:image ships                                                                                                                                                                                                                                                                                                  | SEO / BRAND | S      |
+| P1       | Build legacy-handle → current-handle 301 map                                                                                                                                                                                                                                                                                                           | SEO / BUG   | M      |
+| P2       | Homepage `<h1>` uses `sr-only` + `aria-hidden` split — SR-only text and visible text combine in `textContent`. SR behavior is correct (visible is aria-hidden), but Google's rendered snapshot indexes the concatenated string as the H1. Split into a single truthful visible H1 + separate visual treatment, or move brand tagline into `<p>`.       | SEO         | S      |
+| P2       | Drop hardcoded Klaviyo (`UwaEws`) and Meta Pixel (`1043681748196165`) fallbacks in `src/components/Integrations.tsx`; require env vars. Consent gating is correct, but fallbacks risk cross-project attribution if a fork/preview loads them.                                                                                                          | PRIVACY     | S      |
+| P2       | `/shop` and category pages: add visible sort control (Featured / Price ↑ / Price ↓ / Newest) — currently server-side merch-first only.                                                                                                                                                                                                                 | CRO / UX    | M      |
+| P2       | Category pages: no visible product count above grid (e.g. "24 products"). Reduces perceived selection depth.                                                                                                                                                                                                                                           | CRO         | S      |
+| P2       | PDP: no "Free shipping over $X" badge on the ATC area. `FreeShippingBar` lives in cart drawer only. Move progress hint into PDP price block to raise AOV.                                                                                                                                                                                              | CRO         | S      |
+| P2       | PDP: no visible review count/stars in product card even after Judge.me gating fix. Add empty-state "Be the first to review" instead of hiding entirely.                                                                                                                                                                                                | CRO / TRUST | S      |
+| P2       | Trust bar copy is generic ("Fast dispatch", etc.) — no concrete numbers, no icons. Adding "1–2 day dispatch from Melbourne" + "30-day returns" specifics raises trust.                                                                                                                                                                                 | CRO         | S      |
+| P2       | Add `Product` structured-data `aggregateRating` only when real reviews exist; ensure `availability` maps correctly to `https://schema.org/InStock` / `OutOfStock` per selected variant. Currently the "min 100 in stock" UI override is client-only — check that JSON-LD `availability` reflects real Shopify `availableForSale`, not the UI override. | SEO         | M      |
+| P3       | Sitemap has no `<lastmod>` at all. Adding real per-product `updatedAt` from Shopify (not build time) would help crawl prioritization. Do NOT set to build time.                                                                                                                                                                                        | SEO         | M      |
+| P3       | Category OG images use hashed asset filenames (e.g. `cat-performance-new-DgVuqt5q.jpg`). Fine, but each is ~a full-bleed hero — verify all ≥1200×630 for X large-card previews.                                                                                                                                                                        | SEO         | S      |
+| P3       | Homepage hero `h-[420px] sm:h-[520px] lg:h-[620px]` with `object-cover` crops most of the vehicle scene on 360–430 widths. Consider `object-position: 30% center` on mobile.                                                                                                                                                                           | UX          | S      |
+| P3       | Sticky mobile ATC + consent banner + Tidio launcher stack in the same bottom-right corner on 360×800. Verify Tidio z-index and position don't cover the ATC on first-visit devices where consent granted Tidio.                                                                                                                                        | UX / A11Y   | S      |
+| P3       | No breadcrumb visible on `/shop` (only JSON-LD). Adding a visible `Home / Shop` crumb helps orientation on mobile.                                                                                                                                                                                                                                     | SEO / UX    | S      |
+| P3       | Return-focus on cart drawer close and search dialog close — verify with keyboard-only pass; shadcn primitives should handle this, but confirm after `NewsletterForm` autofocus in `WelcomePopup`.                                                                                                                                                      | A11Y        | S      |
+| P3       | Font strategy: local fonts good. Verify `font-display: swap` and preload of the primary display face used in hero for LCP.                                                                                                                                                                                                                             | PERF        | S      |
 
 ## E. UI/UX & Conversion Findings
 
 **Working well**
+
 - Consistent Roamforge palette (`rf-dark`, `rf-cream`, `rf-tan`), display font on headings, generous whitespace, product cards uniform.
 - Sticky mobile ATC lives at `bottom-[calc(96px+env(safe-area-inset-bottom))]` — respects notch and clears consent banner. Verified 360, 390, 430.
 - Cart drawer has SHOP ALL CTA when empty; shipping bar present; live-region for busy state.
@@ -75,6 +75,7 @@ No P0. Two P1s.
 - Contrast: `rf-cream` on `rf-dark` and vice versa comfortably above WCAG AA at tested sizes.
 
 **Opportunities (CRO)**
+
 - No visible sort/filter on `/shop` — 60+ SKUs in a single scrolling grid depresses PDP CTR on mobile.
 - No "recently viewed" surface on PDP even though `RecentlyViewedRail` exists — verify it's mounted on PDP, not just homepage.
 - Newsletter popup timing/frequency not audited from a cold session; confirm 3–5s delay + 30-day suppression cookie, and that it doesn't fire on `/cart` or during checkout handoff.
@@ -82,12 +83,14 @@ No P0. Two P1s.
 - No "Complete the Kit" cross-sell visible on the audited PDP even though `CompleteTheKit` component exists — verify it's rendering on the PDPs that have `related-*` tags.
 
 **Defects (UX)**
+
 - None confirmed. No overflow, no dead controls, no broken images across the audited surface.
 
 ## F. SEO Findings
 
 **Working well**
-- Per-route unique `<title>` and `<meta name="description">` on /, /shop, /category/*, /faq.
+
+- Per-route unique `<title>` and `<meta name="description">` on /, /shop, /category/\*, /faq.
 - Canonical present and self-referential on all indexable routes.
 - `og:image` per category = the category hero image (correct, absolute, on-domain).
 - `robots: index, follow` on category pages, `noindex, follow` on 404s.
@@ -96,6 +99,7 @@ No P0. Two P1s.
 - Localised for `.com.au` — Australian domain, Australian copy, AUD pricing on Shopify.
 
 **Issues**
+
 - (P1) 404 og:image = Lovable R2 preview (see §C).
 - (P2) Homepage `<h1>` splits SR text from visible text via `aria-hidden`. Google reads the concatenation `Premium 4WD accessories, recovery and touring gear in Australia — Forged for AdventureFORGEDFOR ADVENTURE` as the H1. Fine for SR users, ugly for indexed snippet.
 - (P2) FAQ has FAQPage JSON-LD (added recently) — validate live via Rich Results Test once redeployed.
@@ -106,6 +110,7 @@ No P0. Two P1s.
 ## G. Code / Performance / Accessibility Findings
 
 **Code / Architecture**
+
 - TanStack Start routing is idiomatic: `createFileRoute` paths match filenames, per-route `head()`, notFound handled at both route and root levels.
 - Shopify client (`src/lib/shopify.ts`) filters queries with `available_for_sale:true` and has diversified featured logic — good.
 - Cart store (`src/lib/cartStore.ts`) uses mutex + versioned persistence — resilient.
@@ -113,17 +118,20 @@ No P0. Two P1s.
 - QA scripts (`bun run qa`) chain format · lint · typecheck · unit · static · catalogue · build.
 
 **Risks**
+
 - Hardcoded ID fallbacks in `Integrations.tsx` — see §D P2.
 - No middleware/301 layer for renamed Shopify handles.
 - "Min 100 in stock" UI override in `ProductCard.tsx` / `product.$handle.tsx` deliberately diverges from real inventory. Verify JSON-LD `availability` uses real Shopify data, not the UI override, or Merchant Center will flag mismatches.
 
 **Performance**
+
 - Hero image marked `fetchPriority="high"` with `decoding="async"` — good LCP posture.
 - Category images `object-cover`, sized responsively — no layout shift observed.
 - Third-party scripts (GA4, Klaviyo, Meta, Tidio) gated on consent → CWV protected for first-visit bots.
 - Suggest verifying total JS payload with `bun run build && du -sh dist/client/assets`.
 
 **Accessibility**
+
 - Landmarks: 1 `<main>` per route. `<nav>` count = 1–2 (header + footer where applicable).
 - No unnamed anchors, no unnamed buttons, no missing `alt` on any audited page.
 - Skip link / `main-content` id present per earlier commits.
