@@ -30,6 +30,8 @@ function NotFoundComponent() {
         name="description"
         content="The page you're looking for doesn't exist or has been moved."
       />
+      <meta property="og:image" content="https://roamforge.com.au/og-default.jpg" />
+      <meta name="twitter:image" content="https://roamforge.com.au/og-default.jpg" />
       <SiteHeader />
       <main
         id="main-content"

@@ -22,6 +22,7 @@ export function TrustedBrands() {
               key={b.name}
               to="/category/$slug"
               params={{ slug: b.slug }}
+              aria-label={`${b.name} — shop ${b.name} products`}
               className="group grid place-items-center bg-white border border-rf-dark/10 py-10 px-6 transition-all hover:border-rf-dark hover:shadow-md"
             >
               <img
