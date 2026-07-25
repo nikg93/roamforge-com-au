@@ -1,4 +1,11 @@
-import { createFileRoute, Link, useParams, notFound, useRouter } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  useParams,
+  notFound,
+  redirect,
+  useRouter,
+} from "@tanstack/react-router";
 import { useSuspenseQuery, useQuery, queryOptions } from "@tanstack/react-query";
 import {
   fetchProductByHandle,
@@ -6,6 +13,7 @@ import {
   shopifySrcSet,
   type ShopifyProduct,
 } from "@/lib/shopify";
+import { resolveLegacyProductHandle } from "@/lib/redirects";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useCartStore } from "@/stores/cartStore";
@@ -42,6 +50,12 @@ function firstAvailableVariant(p: ShopifyProduct["node"]) {
 }
 
 export const Route = createFileRoute("/product/$handle")({
+  beforeLoad: ({ params }) => {
+    const next = resolveLegacyProductHandle(params.handle);
+    if (next) {
+      throw redirect({ to: "/product/$handle", params: { handle: next }, replace: true });
+    }
+  },
   loader: ({ params, context }) => context.queryClient.ensureQueryData(productQuery(params.handle)),
   head: ({ params, loaderData }) => {
     const url = canonicalFor(`/product/${params.handle}`);
