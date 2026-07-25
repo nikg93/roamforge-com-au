@@ -2,9 +2,9 @@ import { useEffect } from "react";
 
 function judgeMeConfigured(): boolean {
   const domain =
-    typeof import.meta !== "undefined" ? import.meta.env?.VITE_JUDGEME_SHOP_DOMAIN : undefined;
+    typeof import.meta !== "undefined"\n      ? import.meta.env?.VITE_JUDGEME_SHOP_DOMAIN || "xmszfz-pj.myshopify.com"\n      : undefined;
   const token =
-    typeof import.meta !== "undefined" ? import.meta.env?.VITE_JUDGEME_PUBLIC_TOKEN : undefined;
+    typeof import.meta !== "undefined"\n      ? import.meta.env?.VITE_JUDGEME_PUBLIC_TOKEN || "s6uhJF5-bDPNZXFlMVSuJKpsYeI"\n      : undefined;
   return (
     typeof domain === "string" && !!domain.trim() && typeof token === "string" && !!token.trim()
   );
