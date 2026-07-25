@@ -1,5 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useLocation } from "@tanstack/react-router";
 import { CONSENT_UPDATED_EVENT, readConsent } from "@/lib/consent";
+import { trackGa4, trackMeta } from "@/lib/analytics";
 
 /**
  * Third-party app integrations. Each one activates only when its VITE_ env var is set.
@@ -12,6 +14,9 @@ import { CONSENT_UPDATED_EVENT, readConsent } from "@/lib/consent";
  *   VITE_JUDGEME_PUBLIC_TOKEN   Judge.me public token
  */
 export function Integrations() {
+  const location = useLocation();
+  const initialPageView = useRef(true);
+
   useEffect(() => {
     const raw = (v: unknown) => (typeof v === "string" ? v.trim() : "");
     const ga4Raw = raw(import.meta.env.VITE_GA4_MEASUREMENT_ID || "G-QGGYL7FRLG");
@@ -144,6 +149,19 @@ export function Integrations() {
       injected.forEach((s) => s.parentNode?.removeChild(s));
     };
   }, []);
+
+  useEffect(() => {
+    if (initialPageView.current) {
+      initialPageView.current = false;
+      return;
+    }
+    trackGa4("page_view", {
+      page_location: window.location.href,
+      page_path: `${location.pathname}${location.searchStr || ""}`,
+      page_title: document.title,
+    });
+    trackMeta("PageView");
+  }, [location.pathname, location.searchStr]);
 
   return null;
 }
