@@ -14,9 +14,16 @@ import { trackViewItemList, toAnalyticsItem } from "@/lib/analytics";
 
 const PAGE_SIZE = 24;
 
+// Merchandising rule: surface core 4WD gear first, put Roamforge merch
+// (apparel / caps) at the end of the flat Shop All list. We paginate
+// through the non-merch catalogue first, then switch to merch — cursors
+// stay valid because each phase uses a stable Storefront query string.
+const SHOP_CORE_QUERY = "-tag:cat-merch";
+const SHOP_MERCH_QUERY = "tag:cat-merch";
+
 const shopQuery = queryOptions({
-  queryKey: ["products", "shop", "all"],
-  queryFn: () => fetchProductsPage(PAGE_SIZE, undefined, null),
+  queryKey: ["products", "shop", "core"],
+  queryFn: () => fetchProductsPage(PAGE_SIZE, SHOP_CORE_QUERY, null),
   staleTime: 60_000,
   retry: 1,
   retryDelay: 500,
@@ -99,7 +106,9 @@ function ShopPage() {
   const { data: initial } = useSuspenseQuery(shopQuery);
   const [extra, setExtra] = useState<ShopifyProduct[]>([]);
   const [cursor, setCursor] = useState<string | null>(initial?.pageInfo.endCursor ?? null);
-  const [hasNext, setHasNext] = useState<boolean>(!!initial?.pageInfo.hasNextPage);
+  const [phase, setPhase] = useState<"core" | "merch" | "done">(
+    initial?.pageInfo.hasNextPage ? "core" : "merch",
+  );
   const [loadingMore, setLoadingMore] = useState(false);
   const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
 
@@ -109,6 +118,8 @@ function ShopPage() {
     seen.add(p.node.id);
     return true;
   });
+
+  const hasNext = phase !== "done";
 
   useEffect(() => {
     if (products.length === 0) return;
@@ -129,14 +140,23 @@ function ShopPage() {
   }, []);
 
   const onLoadMore = async () => {
-    if (loadingMore || !hasNext) return;
+    if (loadingMore || phase === "done") return;
     setLoadingMore(true);
     setLoadMoreError(null);
     try {
-      const next = await fetchProductsPage(PAGE_SIZE, undefined, cursor);
+      const query = phase === "core" ? SHOP_CORE_QUERY : SHOP_MERCH_QUERY;
+      const next = await fetchProductsPage(PAGE_SIZE, query, cursor);
       setExtra((cur) => [...cur, ...next.products]);
-      setCursor(next.pageInfo.endCursor);
-      setHasNext(next.pageInfo.hasNextPage);
+      if (next.pageInfo.hasNextPage) {
+        setCursor(next.pageInfo.endCursor);
+      } else if (phase === "core") {
+        // Core catalogue exhausted — start paginating merch from the top.
+        setPhase("merch");
+        setCursor(null);
+      } else {
+        setPhase("done");
+        setCursor(null);
+      }
     } catch (err) {
       console.error("[shop] load more failed", err);
       setLoadMoreError("Couldn't load more products. Please try again.");

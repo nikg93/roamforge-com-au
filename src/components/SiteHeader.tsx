@@ -127,13 +127,16 @@ export function SiteHeader() {
           </Link>
         </div>
 
+        {/* Single accessible desktop nav — all categories exposed with
+            compact, wrap-friendly styling so nothing hides behind a
+            dropdown at lg and up. */}
         <nav
           aria-label="Primary"
-          className="hidden xl:flex items-center gap-4 xl:gap-5 text-[11px] font-semibold tracking-[0.12em]"
+          className="hidden lg:flex flex-1 flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10.5px] font-semibold uppercase tracking-[0.14em]"
         >
           <Link
             to="/shop"
-            className="text-rf-tan hover:text-rf-tan-bright transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2 focus-visible:ring-offset-rf-dark"
+            className="whitespace-nowrap text-rf-tan hover:text-rf-tan-bright transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2 focus-visible:ring-offset-rf-dark"
             activeProps={{ className: "text-rf-tan-bright" }}
           >
             SHOP ALL
@@ -143,23 +146,13 @@ export function SiteHeader() {
               key={c.slug}
               to="/category/$slug"
               params={{ slug: c.slug }}
-              className="text-rf-cream/90 hover:text-rf-tan transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2 focus-visible:ring-offset-rf-dark"
+              className="whitespace-nowrap text-rf-cream/90 hover:text-rf-tan transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2 focus-visible:ring-offset-rf-dark"
               activeProps={{ className: "text-rf-tan" }}
             >
               {c.navLabel}
             </Link>
           ))}
         </nav>
-
-        {/* Compact CTA between lg and xl to avoid crowding the full nav. */}
-        <div className="hidden lg:flex xl:hidden items-center gap-4 text-[11px] font-semibold tracking-[0.12em]">
-          <Link
-            to="/shop"
-            className="text-rf-tan hover:text-rf-tan-bright transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
-          >
-            SHOP ALL
-          </Link>
-        </div>
 
         <div className="flex items-center gap-1">
           <button
