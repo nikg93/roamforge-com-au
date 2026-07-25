@@ -34,23 +34,14 @@ export default {
     assert.deepEqual(cats.slice(0, 3), ["cat-performance", "cat-recovery", "cat-touring"]);
   },
   "falls back to productType when cat tag missing"() {
-    const pool = [
-      mk("1", [], "Snorkel"),
-      mk("2", [], "Snorkel"),
-      mk("3", [], "LightBar"),
-    ];
+    const pool = [mk("1", [], "Snorkel"), mk("2", [], "Snorkel"), mk("3", [], "LightBar")];
     const out = diversifyByCategory(pool, 2);
     assert.equal(out.length, 2);
     assert.equal(out[0].node.productType, "Snorkel");
     assert.equal(out[1].node.productType, "LightBar");
   },
   "guarantees count when pool has enough leftovers"() {
-    const pool = [
-      mk("1", ["cat-a"]),
-      mk("2", ["cat-a"]),
-      mk("3", ["cat-a"]),
-      mk("4", ["cat-a"]),
-    ];
+    const pool = [mk("1", ["cat-a"]), mk("2", ["cat-a"]), mk("3", ["cat-a"]), mk("4", ["cat-a"])];
     const out = diversifyByCategory(pool, 3);
     assert.equal(out.length, 3);
   },

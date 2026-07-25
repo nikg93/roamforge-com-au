@@ -440,18 +440,12 @@ export async function fetchFeaturedProducts(first = 8): Promise<ShopifyProduct[]
  * variants of the same product line. Never fabricates — if the pool is
  * genuinely single-category, callers get whatever the pool contains.
  */
-export async function fetchDiverseFeatured(
-  count = 4,
-  poolSize = 24,
-): Promise<ShopifyProduct[]> {
+export async function fetchDiverseFeatured(count = 4, poolSize = 24): Promise<ShopifyProduct[]> {
   const pool = await fetchFeaturedProductsImpl(Math.max(poolSize, count * 4));
   return diversifyByCategory(pool, count);
 }
 
-export function diversifyByCategory(
-  pool: ShopifyProduct[],
-  count: number,
-): ShopifyProduct[] {
+export function diversifyByCategory(pool: ShopifyProduct[], count: number): ShopifyProduct[] {
   const primaryCat = (p: ShopifyProduct): string => {
     const tag = (p.node.tags ?? []).find((t) => /^cat-/i.test(t));
     if (tag) return tag.toLowerCase();

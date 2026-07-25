@@ -138,17 +138,11 @@ check(
 // 12. Homepage uses the diversified featured helper so the rail spans
 // multiple categories instead of surfacing four near-identical products.
 const indexRoute = read("src/routes/index.tsx");
-check(
-  "homepage featured uses fetchDiverseFeatured",
-  /fetchDiverseFeatured\s*\(/.test(indexRoute),
-);
+check("homepage featured uses fetchDiverseFeatured", /fetchDiverseFeatured\s*\(/.test(indexRoute));
 
 // 13. Shop All merchandising: core catalogue is served before merch.
 const shopRoute = read("src/routes/shop.tsx");
-check(
-  "shop all filters merch out of the first page",
-  /-tag:cat-merch/.test(shopRoute),
-);
+check("shop all filters merch out of the first page", /-tag:cat-merch/.test(shopRoute));
 check(
   "shop all still paginates merch at the end",
   /tag:cat-merch/.test(shopRoute) && /phase/.test(shopRoute),
@@ -158,8 +152,7 @@ check(
 const rootRoute = read("src/routes/__root.tsx");
 check(
   "root exposes DEFAULT_OG_IMAGE fallback",
-  /DEFAULT_OG_IMAGE/.test(rootRoute) &&
-    /og:image[\s\S]{0,120}DEFAULT_OG_IMAGE/.test(rootRoute),
+  /DEFAULT_OG_IMAGE/.test(rootRoute) && /og:image[\s\S]{0,120}DEFAULT_OG_IMAGE/.test(rootRoute),
 );
 
 // 15. Judge.me reviews hide when the widget renders empty.

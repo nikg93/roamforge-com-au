@@ -27,7 +27,7 @@ export function JudgeMeBadge({ productId }: { productId: string }) {
 export function JudgeMeReviews({ productId }: { productId: string }) {
   const containerRef = useRef<HTMLDivElement>(null);
   // Default hidden. Only reveal if Judge.me actually renders a non-empty
- // review widget so PDPs with zero reviews don't show an empty heading.
+  // review widget so PDPs with zero reviews don't show an empty heading.
   const [hasReviews, setHasReviews] = useState(false);
   useEffect(() => {
     setHasReviews(false);
@@ -68,11 +68,7 @@ export function JudgeMeReviews({ productId }: { productId: string }) {
       <h2 id="reviews-heading" className="font-display text-xl tracking-widest text-rf-dark">
         CUSTOMER REVIEWS
       </h2>
-      <div
-        ref={containerRef}
-        className="jdgm-widget jdgm-review-widget mt-4"
-        data-id={id}
-      />
+      <div ref={containerRef} className="jdgm-widget jdgm-review-widget mt-4" data-id={id} />
     </section>
   );
 }
