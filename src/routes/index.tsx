@@ -27,7 +27,7 @@ import logo from "@/assets/logo.png";
 import heroGear from "@/assets/lifestyle-journey.jpg";
 import { CATEGORIES, type CategorySlug } from "@/lib/categories";
 import { routeMeta } from "@/lib/seo";
-import { fetchFeaturedProducts, type ShopifyProduct } from "@/lib/shopify";
+import { fetchDiverseFeatured, type ShopifyProduct } from "@/lib/shopify";
 
 export const Route = createFileRoute("/")({
   // Server-render featured products. The loader is bounded: any Shopify
@@ -37,7 +37,9 @@ export const Route = createFileRoute("/")({
   // hydration mismatch.
   loader: async () => {
     try {
-      const featured = await fetchFeaturedProducts(4);
+      // Diversified across primary categories so the rail spans the
+      // catalogue instead of surfacing four variants of one product.
+      const featured = await fetchDiverseFeatured(4);
       return { featured };
     } catch {
       return { featured: [] as ShopifyProduct[] };
@@ -90,8 +92,10 @@ function Index() {
               src={heroGear}
               alt="Roamforge 4WD, camping and touring gear"
               width={1920}
-              height={620}
+              height={1080}
               fetchPriority="high"
+              decoding="async"
+              sizes="100vw"
               className="h-[420px] w-full object-cover object-center sm:h-[520px] lg:h-[620px]"
             />
             <div className="absolute inset-0 bg-gradient-to-r from-rf-dark/85 via-rf-dark/55 to-rf-dark/10" />
@@ -146,35 +150,9 @@ function Index() {
         <section id="categories" className="bg-rf-cream py-14">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
             <SectionHeading>SHOP BY CATEGORY</SectionHeading>
-            {/* Mobile: horizontal scroll strip for compact browsing. md+: full grid. */}
-            <div className="mt-8 -mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:hidden">
-              {CATEGORIES.map((c) => {
-                const Icon = CATEGORY_ICONS[c.slug];
-                return (
-                  <Link
-                    key={c.slug}
-                    to="/category/$slug"
-                    params={{ slug: c.slug }}
-                    className="group relative flex-none w-40 snap-start overflow-hidden bg-rf-dark aspect-[4/5] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
-                  >
-                    <img
-                      src={c.image}
-                      alt=""
-                      loading="lazy"
-                      className="h-full w-full object-cover opacity-75"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-rf-dark via-rf-dark/40 to-transparent" />
-                    <div className="absolute top-2 right-2 grid h-9 w-9 place-items-center rounded-full border border-rf-cream/60 bg-rf-dark/40 backdrop-blur-sm">
-                      <Icon className="h-4 w-4 text-rf-cream" aria-hidden />
-                    </div>
-                    <span className="absolute bottom-3 left-3 right-3 font-display text-xs tracking-[0.18em] text-rf-cream">
-                      {c.label}
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-            <div className="mt-8 hidden gap-5 sm:grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
+            {/* Single responsive category grid — one image structure across
+                every breakpoint, no mobile/desktop duplication. */}
+            <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 md:grid-cols-4 lg:grid-cols-5">
               {CATEGORIES.map((c) => {
                 const Icon = CATEGORY_ICONS[c.slug];
                 return (
@@ -188,16 +166,16 @@ function Index() {
                       src={c.image}
                       alt={c.label}
                       loading="lazy"
-                      className="h-full w-full object-cover opacity-75 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:scale-110"
+                      decoding="async"
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                      className="h-full w-full object-cover opacity-75 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-rf-dark via-rf-dark/40 to-transparent transition-opacity duration-500 group-hover:from-rf-dark/95" />
-                    <div className="absolute top-4 right-4">
-                      <div className="grid h-10 w-10 place-items-center rounded-full border border-rf-cream/60 bg-rf-dark/40 backdrop-blur-sm">
-                        <Icon className="h-4 w-4 text-rf-cream" />
-                      </div>
+                    <div className="absolute top-3 right-3 grid h-9 w-9 place-items-center rounded-full border border-rf-cream/60 bg-rf-dark/40 backdrop-blur-sm sm:top-4 sm:right-4 sm:h-10 sm:w-10">
+                      <Icon className="h-4 w-4 text-rf-cream" aria-hidden />
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 p-5">
-                      <span className="block font-display tracking-[0.18em] text-rf-cream text-sm leading-tight">
+                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5">
+                      <span className="block font-display text-xs sm:text-sm leading-tight tracking-[0.18em] text-rf-cream">
                         {c.label}
                       </span>
                       <span className="mt-1 inline-block text-[10px] font-semibold tracking-[0.25em] text-rf-tan opacity-0 -translate-y-1 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">

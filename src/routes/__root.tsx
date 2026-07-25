@@ -17,7 +17,7 @@ import { Integrations } from "@/components/Integrations";
 import { ConsentBanner } from "@/components/ConsentBanner";
 import { WelcomePopup } from "@/components/WelcomePopup";
 import { useCartSync } from "@/hooks/useCartSync";
-import { SITE_URL } from "@/lib/seo";
+import { SITE_URL, DEFAULT_OG_IMAGE } from "@/lib/seo";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 
@@ -140,6 +140,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:locale", content: "en_AU" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      // Global fallback share preview. Per-route `og:image` / `twitter:image`
+      // in routeMeta() override this by property/name via TanStack Router's
+      // meta dedupe — so pages with their own hero image still win.
+      { property: "og:image", content: DEFAULT_OG_IMAGE },
+      { name: "twitter:image", content: DEFAULT_OG_IMAGE },
     ],
     links: [
       {

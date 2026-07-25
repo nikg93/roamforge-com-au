@@ -8,6 +8,10 @@ export function LifestyleSection() {
         src={lifestyleImg}
         alt="Premium Australian touring campsite at dusk"
         loading="lazy"
+        decoding="async"
+        width={1920}
+        height={1080}
+        sizes="100vw"
         className="absolute inset-0 h-full w-full object-cover opacity-60"
       />
       <div className="absolute inset-0 bg-gradient-to-r from-rf-dark/90 via-rf-dark/60 to-transparent" />
