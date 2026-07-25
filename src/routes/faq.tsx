@@ -59,9 +59,9 @@ export const Route = createFileRoute("/faq")({
         "Answers to common Roamforge questions on shipping, returns, warranty and product support.",
     });
     return {
-      ...base,
+      meta: base.meta,
+      links: base.links,
       scripts: [
-        ...(base.scripts ?? []),
         {
           type: "application/ld+json",
           children: JSON.stringify(FAQ_JSONLD),
