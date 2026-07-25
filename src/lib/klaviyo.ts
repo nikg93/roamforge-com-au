@@ -27,10 +27,12 @@ const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
 
 export function getKlaviyoConfig(): KlaviyoConfig | null {
   const rawCompany =
-    typeof import.meta !== "undefined"\n      ? import.meta.env?.VITE_KLAVIYO_COMPANY_ID || "UwaEws"\n      : undefined;
+    typeof import.meta !== "undefined"
+      ? import.meta.env?.VITE_KLAVIYO_COMPANY_ID || "UwaEws"
+      : undefined;
   const rawList =
     typeof import.meta !== "undefined"
-      ? import.meta.env?.VITE_KLAVIYO_NEWSLETTER_LIST_ID
+      ? import.meta.env?.VITE_KLAVIYO_NEWSLETTER_LIST_ID || "TP7BAM"
       : undefined;
   const companyId = typeof rawCompany === "string" ? rawCompany.trim() : "";
   const listId = typeof rawList === "string" ? rawList.trim() : "";
