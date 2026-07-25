@@ -113,6 +113,42 @@ check(
   missingMain.join(", "),
 );
 
+// 10. Storefront query availability contract — grid, search and sitemap
+// must all filter on available_for_sale:true so anything they surface
+// resolves through the PDP loader. Regressing this splits the catalogue.
+const shopifyLib = read("src/lib/shopify.ts");
+check(
+  "fetchProducts enforces available_for_sale:true",
+  /fetchProducts[\s\S]{0,400}available_for_sale:true/.test(shopifyLib),
+);
+check(
+  "fetchProductsPage enforces available_for_sale:true",
+  /fetchProductsPage[\s\S]{0,600}available_for_sale:true/.test(shopifyLib),
+);
+check(
+  "sitemap handle query enforces available_for_sale:true",
+  /PRODUCT_HANDLES_QUERY[\s\S]{0,800}available_for_sale:true/.test(shopifyLib) ||
+    /fetchAllProductHandles[\s\S]{0,600}available_for_sale:true/.test(shopifyLib),
+);
+check(
+  "predictive search filters unavailable products",
+  /predictiveSearch[\s\S]{0,1200}availableForSale\s*!==\s*false/.test(shopifyLib),
+);
+
+// 11. Product PDP not-found must emit noindex and no canonical.
+const pdp = read("src/routes/product.$handle.tsx");
+check(
+  "PDP notFound head emits noindex",
+  /!loaderData[\s\S]{0,400}robots[\s\S]{0,120}noindex/.test(pdp),
+);
+check(
+  "PDP notFound head omits canonical link",
+  (() => {
+    const m = pdp.match(/!loaderData[\s\S]{0,600}?return\s*\{[\s\S]*?\};/);
+    return m ? !/rel:\s*["']canonical["']/.test(m[0]) : false;
+  })(),
+);
+
 console.log(
   `\n[qa:checks] ${failures.length === 0 ? "PASS" : `FAIL — ${failures.length} issue(s)`}`,
 );
