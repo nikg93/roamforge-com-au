@@ -19,16 +19,16 @@ export function Integrations() {
 
   useEffect(() => {
     const raw = (v: unknown) => (typeof v === "string" ? v.trim() : "");
-    const ga4Raw = raw(import.meta.env.VITE_GA4_MEASUREMENT_ID || "G-QGGYL7FRLG");
-    const klaviyoRaw = raw(import.meta.env.VITE_KLAVIYO_COMPANY_ID || "UwaEws");
+    // No hardcoded fallbacks — every third-party ID MUST come from env.
+    // This avoids cross-project attribution when a fork / preview loads
+    // the bundle without its own env configured. In dev, warn once when
+    // an integration is left unconfigured so it is obvious to operators.
+    const ga4Raw = raw(import.meta.env.VITE_GA4_MEASUREMENT_ID);
+    const klaviyoRaw = raw(import.meta.env.VITE_KLAVIYO_COMPANY_ID);
     const tidioRaw = raw(import.meta.env.VITE_TIDIO_PUBLIC_KEY);
-    const judgeMeDomain = raw(
-      import.meta.env.VITE_JUDGEME_SHOP_DOMAIN || "xmszfz-pj.myshopify.com",
-    );
-    const judgeMeTokenRaw = raw(
-      import.meta.env.VITE_JUDGEME_PUBLIC_TOKEN || "s6uhJF5-bDPNZXFlMVSuJKpsYeI",
-    );
-    const metaPixelRaw = raw(import.meta.env.VITE_META_PIXEL_ID || "1043681748196165");
+    const judgeMeDomain = raw(import.meta.env.VITE_JUDGEME_SHOP_DOMAIN);
+    const judgeMeTokenRaw = raw(import.meta.env.VITE_JUDGEME_PUBLIC_TOKEN);
+    const metaPixelRaw = raw(import.meta.env.VITE_META_PIXEL_ID);
     const ga4 = /^G-[A-Z0-9]{4,}$/i.test(ga4Raw) ? ga4Raw : "";
     const klaviyo = /^[A-Z0-9]{4,}$/i.test(klaviyoRaw) ? klaviyoRaw : "";
     const tidio = /^[A-Za-z0-9]{6,}$/.test(tidioRaw) ? tidioRaw : "";
@@ -37,6 +37,19 @@ export function Integrations() {
         ? { domain: judgeMeDomain, token: judgeMeTokenRaw }
         : null;
     const metaPixel = /^\d{6,}$/.test(metaPixelRaw) ? metaPixelRaw : "";
+
+    if (import.meta.env.DEV) {
+      const missing: string[] = [];
+      if (!ga4) missing.push("VITE_GA4_MEASUREMENT_ID");
+      if (!klaviyo) missing.push("VITE_KLAVIYO_COMPANY_ID");
+      if (!tidio) missing.push("VITE_TIDIO_PUBLIC_KEY");
+      if (!judgeMe) missing.push("VITE_JUDGEME_SHOP_DOMAIN + VITE_JUDGEME_PUBLIC_TOKEN");
+      if (!metaPixel) missing.push("VITE_META_PIXEL_ID");
+      if (missing.length) {
+        // eslint-disable-next-line no-console
+        console.info("[Integrations] not configured:", missing.join(", "));
+      }
+    }
 
     const injected: HTMLScriptElement[] = [];
     let gaConfigured = false;
