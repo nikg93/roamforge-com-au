@@ -34,6 +34,25 @@ export function Integrations() {
     const metaPixel = /^\d{6,}$/.test(metaPixelRaw) ? metaPixelRaw : "";
 
     const injected: HTMLScriptElement[] = [];
+    let gaConfigured = false;
+    let metaConfigured = false;
+
+    type Gtag = (...args: unknown[]) => void;
+    type Fbq = ((...args: unknown[]) => void) & {
+      callMethod?: (...args: unknown[]) => void;
+      queue: unknown[][];
+      push: (...args: unknown[]) => void;
+      loaded: boolean;
+      version: string;
+    };
+    type IntegrationWindow = Window & {
+      dataLayer?: unknown[];
+      gtag?: Gtag;
+      fbq?: Fbq;
+      _fbq?: Fbq;
+      jdgm?: Record<string, unknown>;
+    };
+    const w = window as IntegrationWindow;
 
     const inject = (id: string, src: string) => {
       if (document.getElementById(id)) return;
@@ -54,17 +73,21 @@ export function Integrations() {
     const apply = () => {
       const c = readConsent();
       if (ga4 && c.analytics) {
-        inject("ga4-loader", `https://www.googletagmanager.com/gtag/js?id=${ga4}`);
-        if (!document.getElementById("ga4-config")) {
-          const cfg = document.createElement("script");
-          cfg.id = "ga4-config";
-          cfg.innerHTML = `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${ga4}');`;
-          document.head.appendChild(cfg);
-          injected.push(cfg);
+        w.dataLayer = Array.isArray(w.dataLayer) ? w.dataLayer : [];
+        w.gtag =
+          w.gtag ||
+          ((...args: unknown[]) => {
+            w.dataLayer?.push(args);
+          });
+        if (!gaConfigured) {
+          w.gtag("js", new Date());
+          w.gtag("config", ga4);
+          gaConfigured = true;
         }
+        inject("ga4-loader", `https://www.googletagmanager.com/gtag/js?id=${ga4}`);
       } else {
+        w.gtag?.("consent", "update", { analytics_storage: "denied" });
         removeById("ga4-loader");
-        removeById("ga4-config");
       }
       if (klaviyo && c.marketing) {
         inject(
@@ -80,29 +103,37 @@ export function Integrations() {
         removeById("tidio-loader");
       }
       if (judgeMe && c.marketing) {
-        // Judge.me widget script. Requires shop domain + public token.
-        inject("judgeme-loader", `https://cdn.judge.me/widget_preloader.js`);
-        if (!document.getElementById("judgeme-config")) {
-          const cfg = document.createElement("script");
-          cfg.id = "judgeme-config";
-          cfg.innerHTML = `window.jdgm=window.jdgm||{};jdgm.SHOP_DOMAIN='${judgeMe.domain}';jdgm.PLATFORM='shopify';jdgm.PUBLIC_TOKEN='${judgeMe.token}';`;
-          document.head.appendChild(cfg);
-          injected.push(cfg);
-        }
+        w.jdgm = {
+          ...(w.jdgm || {}),
+          SHOP_DOMAIN: judgeMe.domain,
+          PLATFORM: "shopify",
+          PUBLIC_TOKEN: judgeMe.token,
+        };
+        inject("judgeme-loader", "https://cdn.judge.me/widget_preloader.js");
       } else {
         removeById("judgeme-loader");
-        removeById("judgeme-config");
       }
       if (metaPixel && c.marketing) {
-        if (!document.getElementById("meta-pixel-init")) {
-          const s = document.createElement("script");
-          s.id = "meta-pixel-init";
-          s.innerHTML = `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${metaPixel}');fbq('track','PageView');`;
-          document.head.appendChild(s);
-          injected.push(s);
+        if (!w.fbq) {
+          const fbq = ((...args: unknown[]) => {
+            if (fbq.callMethod) fbq.callMethod(...args);
+            else fbq.queue.push(args);
+          }) as Fbq;
+          fbq.push = fbq;
+          fbq.loaded = true;
+          fbq.version = "2.0";
+          fbq.queue = [];
+          w.fbq = fbq;
+          w._fbq = fbq;
+        }
+        inject("meta-pixel-loader", "https://connect.facebook.net/en_US/fbevents.js");
+        if (!metaConfigured) {
+          w.fbq("init", metaPixel);
+          w.fbq("track", "PageView");
+          metaConfigured = true;
         }
       } else {
-        removeById("meta-pixel-init");
+        removeById("meta-pixel-loader");
       }
     };
 
