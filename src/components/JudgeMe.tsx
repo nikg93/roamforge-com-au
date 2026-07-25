@@ -14,11 +14,14 @@ function judgeMeConfigured(): boolean {
   );
 }
 
+function judgeMeProductId(productId: string): string {
+  return productId.split("/").filter(Boolean).pop() || productId;
+}
+
 export function JudgeMeBadge({ productId }: { productId: string }) {
   if (!judgeMeConfigured()) return null;
-  return (
-    <div className="jdgm-widget jdgm-preview-badge" data-id={productId} data-template="badge" />
-  );
+  const id = judgeMeProductId(productId);
+  return <div className="jdgm-widget jdgm-preview-badge" data-id={id} data-template="badge" />;
 }
 
 export function JudgeMeReviews({ productId }: { productId: string }) {
@@ -32,12 +35,13 @@ export function JudgeMeReviews({ productId }: { productId: string }) {
     }
   }, [productId]);
   if (!judgeMeConfigured()) return null;
+  const id = judgeMeProductId(productId);
   return (
     <section aria-labelledby="reviews-heading" className="mt-16 border-t border-border pt-8">
       <h2 id="reviews-heading" className="font-display text-xl tracking-widest text-rf-dark">
         CUSTOMER REVIEWS
       </h2>
-      <div className="jdgm-widget jdgm-review-widget mt-4" data-id={productId} />
+      <div className="jdgm-widget jdgm-review-widget mt-4" data-id={id} />
     </section>
   );
 }
