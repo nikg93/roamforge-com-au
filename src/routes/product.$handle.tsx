@@ -50,6 +50,8 @@ export const Route = createFileRoute("/product/$handle")({
         meta: [
           { title: "Product not found — Roamforge" },
           { name: "robots", content: "noindex, follow" },
+          { property: "og:image", content: "https://roamforge.com.au/og-default.jpg" },
+          { name: "twitter:image", content: "https://roamforge.com.au/og-default.jpg" },
         ],
       };
     }

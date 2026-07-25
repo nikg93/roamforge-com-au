@@ -104,8 +104,7 @@ function Index() {
                 <div className="max-w-xl text-rf-cream">
                   <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight">
                     <span className="sr-only">
-                      Premium 4WD accessories, recovery and touring gear in Australia — Forged for
-                      Adventure
+                      Roamforge — premium 4WD, recovery and touring gear in Australia.
                     </span>
                     <span aria-hidden="true">FORGED</span>
                     <br aria-hidden="true" />
@@ -160,6 +159,7 @@ function Index() {
                     key={c.slug}
                     to="/category/$slug"
                     params={{ slug: c.slug }}
+                    aria-label={c.label}
                     className="group relative block aspect-[4/5] overflow-hidden bg-rf-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
                   >
                     <img
