@@ -14,12 +14,12 @@ import { CONSENT_UPDATED_EVENT, readConsent } from "@/lib/consent";
 export function Integrations() {
   useEffect(() => {
     const raw = (v: unknown) => (typeof v === "string" ? v.trim() : "");
-    const ga4Raw = raw(import.meta.env.VITE_GA4_MEASUREMENT_ID);
-    const klaviyoRaw = raw(import.meta.env.VITE_KLAVIYO_COMPANY_ID);
+    const ga4Raw = raw(import.meta.env.VITE_GA4_MEASUREMENT_ID || "G-QGGYL7FRLG");
+    const klaviyoRaw = raw(import.meta.env.VITE_KLAVIYO_COMPANY_ID || "UwaEws");
     const tidioRaw = raw(import.meta.env.VITE_TIDIO_PUBLIC_KEY);
-    const judgeMeDomain = raw(import.meta.env.VITE_JUDGEME_SHOP_DOMAIN);
-    const judgeMeTokenRaw = raw(import.meta.env.VITE_JUDGEME_PUBLIC_TOKEN);
-    const metaPixelRaw = raw(import.meta.env.VITE_META_PIXEL_ID);
+    const judgeMeDomain = raw(\n      import.meta.env.VITE_JUDGEME_SHOP_DOMAIN || "xmszfz-pj.myshopify.com",\n    );
+    const judgeMeTokenRaw = raw(\n      import.meta.env.VITE_JUDGEME_PUBLIC_TOKEN || "s6uhJF5-bDPNZXFlMVSuJKpsYeI",\n    );
+    const metaPixelRaw = raw(import.meta.env.VITE_META_PIXEL_ID || "1043681748196165");
     const ga4 = /^G-[A-Z0-9]{4,}$/i.test(ga4Raw) ? ga4Raw : "";
     const klaviyo = /^[A-Z0-9]{4,}$/i.test(klaviyoRaw) ? klaviyoRaw : "";
     const tidio = /^[A-Za-z0-9]{6,}$/.test(tidioRaw) ? tidioRaw : "";
