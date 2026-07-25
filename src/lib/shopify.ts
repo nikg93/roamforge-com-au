@@ -253,8 +253,8 @@ export const PRODUCT_BY_HANDLE_QUERY = `
 
 // Handle-only pagination query for the sitemap. Kept tiny to minimise cost.
 const PRODUCT_HANDLES_QUERY = `
-  query ProductHandles($first: Int!, $after: String) {
-    products(first: $first, after: $after) {
+  query ProductHandles($first: Int!, $after: String, $query: String) {
+    products(first: $first, after: $after, query: $query) {
       edges { cursor node { handle } }
       pageInfo { hasNextPage endCursor }
     }
@@ -308,7 +308,11 @@ export async function predictiveSearchProducts(
       limit: safeLimit,
     });
     const rows = data?.data?.predictiveSearch?.products ?? [];
-    if (rows.length > 0) return shape(rows);
+    // Predictive search returns archived / unavailable items. Enforce the
+    // storefront availability contract so anything the PDP loader would 404
+    // never surfaces in autocomplete.
+    const available = rows.filter((n: ShopifyProduct["node"]) => n.availableForSale !== false);
+    if (available.length > 0) return shape(available);
     // Fall through to products(query:) fallback when predictiveSearch is empty.
   } catch (err) {
     console.warn("[shopify] predictiveSearch failed, falling back to products()", err);
@@ -558,7 +562,13 @@ export async function fetchAllProductHandles(pageSize = 100, maxPages = 50): Pro
           pageInfo: { hasNextPage: boolean; endCursor: string | null };
         };
       };
-    } = await storefrontApiRequest(PRODUCT_HANDLES_QUERY, { first: pageSize, after });
+      // Same availability predicate as grid/search — keeps sitemap URLs
+      // in lockstep with what the PDP loader can actually resolve.
+    } = await storefrontApiRequest(PRODUCT_HANDLES_QUERY, {
+      first: pageSize,
+      after,
+      query: "available_for_sale:true",
+    });
     const page = data?.data?.products;
     if (!page) break;
     for (const e of page.edges) handles.push(e.node.handle);
