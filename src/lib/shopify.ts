@@ -311,9 +311,7 @@ export async function predictiveSearchProducts(
     // Predictive search returns archived / unavailable items. Enforce the
     // storefront availability contract so anything the PDP loader would 404
     // never surfaces in autocomplete.
-    const available = rows.filter(
-      (n: ShopifyProduct["node"]) => n.availableForSale !== false,
-    );
+    const available = rows.filter((n: ShopifyProduct["node"]) => n.availableForSale !== false);
     if (available.length > 0) return shape(available);
     // Fall through to products(query:) fallback when predictiveSearch is empty.
   } catch (err) {
