@@ -1,4 +1,11 @@
-import { createFileRoute, Link, useParams, notFound, redirect, useRouter } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  useParams,
+  notFound,
+  redirect,
+  useRouter,
+} from "@tanstack/react-router";
 import { useSuspenseQuery, useQuery, queryOptions } from "@tanstack/react-query";
 import {
   fetchProductByHandle,
