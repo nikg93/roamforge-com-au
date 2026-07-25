@@ -1,60 +1,71 @@
-## Context found during inspection
+# Roamforge — Read-Only Audit
+**Scope:** HEAD `3e99698` + live `https://roamforge.com.au`. Chromium at 1440×900, 768×1024, 390×844, 360×780. Homepage, /shop, /category/recovery, /product/gq-patrol-airbox, invalid PDP, /faq, random 404. Cart drawer opened (no order placed).
 
-- Klaviyo, GA4, Tidio, Judge.me, Meta Pixel — **no `VITE_*` identifiers are configured** in project secrets. Only Shopify + Lovable + Google Search Console keys exist. All UI will be built, but network activation for Klaviyo/GA4/Judge.me/Meta requires the user to add public IDs.
-- Existing `Integrations.tsx` already consent-gates GA4/Klaviyo/Tidio script loaders.
-- `cartStore.ts` has a serialised mutation queue + drawer state — good hook point for analytics.
-- Homepage already has a "WHY" section with 5 tiles; I'll add a slimmer trust strip below the hero.
-- No newsletter form, no popup, no recommendations, no recently-viewed, no analytics events, no shipping bar exist yet.
+**Overall:** Site is production-solid. Correct 404 HTTP status + `noindex` on `/nonexistent-*` and `/product/gu-patrol-airbox`; sitemap serves 95 URLs; robots.txt allows GPTBot/OAI/ChatGPT; HSTS + strict-origin referrer + X-Content-Type-Options set at the edge; PDP has Product + BreadcrumbList JSON-LD; category has CollectionPage + BreadcrumbList; homepage has Organization graph; no horizontal overflow at any viewport; single `<main>`, one H1 per page, no console/pageerror on valid routes; cart drawer opens; canonical + og:url self-reference correctly on indexable pages.
 
-## Deliverables
+---
 
-### 1. Email capture
+## Confirmed defects
 
-- `src/lib/klaviyo.ts` — thin client-side subscribe helper hitting Klaviyo's public `client/subscriptions` endpoint using `VITE_KLAVIYO_COMPANY_ID` + `VITE_KLAVIYO_NEWSLETTER_LIST_ID`. If either is missing → returns `{ ok: false, reason: "not-configured" }`; form shows an honest "Signups aren't wired up yet" error and never fakes success.
-- `src/components/NewsletterForm.tsx` — branded form with email input, consent microcopy, aria-live success/error states, honeypot, marketing-consent gating.
-- Add footer signup block in `SiteFooter.tsx`.
-- `src/components/WelcomePopup.tsx` — mobile-first modal offering 10% off, shown once per visitor (localStorage flag), 12s delay + exit intent on desktop, dismissible, respects consent + Escape/focus trap via existing shadcn Dialog.
+### P1 — Homepage category tiles have no accessible name
+- **Where:** `src/routes/index.tsx` "SHOP BY CATEGORY" grid (tiles rendered by `CATEGORIES.map` around lines 130–170).
+- **Evidence:** Three `<a href="/category/performance">`, `/air-compressors`, `/vehicle-protection` returned by Playwright as anchors with no text and no `aria-label`. Their only child is a Lucide icon (SVG with no `<title>`) and the label text lives elsewhere in the DOM, not inside the anchor.
+- **Impact:** Screen readers announce "link" with no destination; keyboard users tabbing the tiles hear nothing; VoiceOver rotor list is unusable. Also a Lighthouse "Links do not have a discernible name" fail.
+- **Fix:** Add `aria-label={cat.title}` to each category `<Link>`, or move the visible title text inside the anchor. Prefer moving the text inside the anchor so the click target and label are one node.
 
-### 2. Trust & social proof
+### P1 — 404 / product-not-found pages serve a preview R2 URL as `og:image`
+- **Where:** `src/routes/product.$handle.tsx` (notFoundComponent) and the root splat 404. `src/routes/__root.tsx` sets `og-default.jpg`, but the leaf notFound `head()` returns no `og:image`, and hosting overwrites the missing tag with the latest preview screenshot: `https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/…/id-preview-3e99698c--…lovable.app-…png`.
+- **Evidence:** Every 404 across all four viewports shows the preview R2 URL in `<meta property="og:image">`; `og:url` is empty; `canonical` correctly absent (noindex).
+- **Impact:** Any 404 link shared to Slack/Discord/WhatsApp/LinkedIn previews with a *Lovable preview screenshot* branded URL, not Roamforge. Brand and trust hit.
+- **Fix:** In the notFoundComponent's `head()` (leaf) and the splat route, explicitly return `{ property: "og:image", content: "https://roamforge.com.au/og-default.jpg" }` + matching `twitter:image`. Keep the existing `noindex, follow`.
 
-- `src/components/TrustStrip.tsx` — compact strip (Australian owned · Secure checkout · Trusted 4WD brands) rendered below hero.
-- `src/components/MiniTrustRow.tsx` — smaller version near PDP Add-to-Cart.
-- Judge.me: add `src/components/JudgeMeBadge.tsx` + `JudgeMeReviews.tsx` mount points guarded by `VITE_JUDGEME_SHOP_DOMAIN`+`VITE_JUDGEME_PUBLIC_TOKEN`. If missing, the component renders `null` (no fake empty stars).
+### P2 — Klaviyo + Meta Pixel IDs hardcoded as fallbacks
+- **Where:** `src/components/Integrations.tsx` — `import.meta.env.VITE_KLAVIYO_COMPANY_ID || "UwaEws"` and `VITE_META_PIXEL_ID || "1043681748196165"`.
+- **Impact if these are not Roamforge's real IDs:** signup events, pageviews and ad-attribution flow into a stranger's Klaviyo/Meta account, and WelcomePopup stays permanently suppressed (it's Klaviyo-gated). If they *are* correct real IDs, they still bypass the consent gate you built and load unconditionally.
+- **Ask:** Confirm whether `UwaEws` and `1043681748196165` are the real Roamforge accounts.
+- **Fix:** Drop the hardcoded fallbacks; require env vars; leave the component idle if unset. Popup will then render when Klaviyo is intentionally absent, matching the Section 4 spec.
 
-### 3. Cart & AOV
+### P3 — Homepage H1 puts the whole marketing sentence in `sr-only`
+- **Where:** `src/routes/index.tsx` line 105–115. Visible text is "FORGED / FOR ADVENTURE"; screen readers hear a 90-char paragraph.
+- **Impact:** Minor. Splitting keyword-rich copy from visible H1 is a common CRO pattern; it works but reads awkwardly aloud ("Premium 4WD accessories, recovery and touring gear in Australia — Forged for Adventure").
+- **Fix (optional):** Trim sr-only to ~50 chars: "Roamforge — premium 4WD, recovery and touring gear in Australia."
 
-- `src/lib/recommendations.ts` — pure ranking utility. Given a source product + candidate list, scores by shared `cat-*` tag, product type, then vendor. Never surface a "compatible with" claim unless the target's title/tags/desc references the source vendor or model token. Unit-tested.
-- `src/components/CompleteTheKit.tsx` — rail rendering top 4 recommendations. Mounted in `CartDrawer.tsx` (recommendations for last-added item) and in `product.$handle.tsx`.
-- `src/lib/recently-viewed.ts` — localStorage list (dedup, cap 12), SSR-safe.
-- `src/components/RecentlyViewedRail.tsx` — mounted on PDP + shop + cart drawer when list non-empty.
-- `src/components/FreeShippingBar.tsx` — progress bar; reads threshold from `VITE_FREE_SHIPPING_THRESHOLD_AUD`. If unset → renders `null`. Reported to user as a required business decision.
+### P3 — Homepage decorative images: 11 with empty alt vs 32 total
+- **Where:** Category tile icons + why-us icons.
+- **Impact:** Correct per spec (decorative). Non-issue; flagged only so it isn't re-raised in a future scan.
 
-### 4. Analytics
+---
 
-- `src/lib/analytics.ts` — consent-aware event dispatcher: reads consent, buffers, pushes `gtag('event', ...)` for GA4, and `fbq('track', ...)` for Meta if `VITE_META_PIXEL_ID` is configured. Exports typed helpers: `trackViewItem`, `trackViewItemList`, `trackSelectItem`, `trackAddToCart`, `trackRemoveFromCart`, `trackViewCart`, `trackBeginCheckout`, `trackSearch`, `trackSignUp`.
-- Wire into `ProductCard`, `product.$handle.tsx`, `shop.tsx`, `category.$slug.tsx`, `cartStore.ts`, `CartDrawer.tsx` (view + checkout), `SearchDialog.tsx`, `NewsletterForm.tsx`.
-- Meta Pixel loader added to `Integrations.tsx` (marketing-consent gated), only when `VITE_META_PIXEL_ID` set.
-- Purchase event: NOT tracked client-side (checkout is on Shopify). Documented — user must enable GA4 + Meta Pixel from Shopify admin (Online Store → Preferences / customer events).
+## Risks / assumptions (not defects, need confirmation)
 
-### 5. Tests
+- **Second `<nav>` on /shop, /category, /PDP** is the breadcrumb (`aria-label="Breadcrumb"`) — correct, not a defect.
+- **"Failed to load resource: 404" console log on invalid PDPs** is the Shopify fetch returning 404 that *drives* the notFound render — expected, not user-visible; no pageerror, no unhandled rejection.
+- **Homepage empty-links finding is unrelated to LifestyleSection**; that "BUILT FOR / THE JOURNEY" heading appeared merged in evaluate output because the `<br>` was stripped when I read `.textContent`. Not a real defect.
+- **No GA4 measurement ID observable** — either not deployed or consent-gated denied by default. Verify `VITE_GA_MEASUREMENT_ID` is set in production if analytics is expected.
+- **No FAQPage JSON-LD on /faq** despite Q&A markup. Not a defect, but a straightforward SEO win if Roamforge wants rich-result eligibility.
+- **Sitemap `<lastmod>` absent** on every entry — acceptable per policy (no authoritative page timestamp), no action.
 
-- `tests/unit/recommendations.test.mjs` — scoring, tie-breaking, no cross-category leakage.
-- `tests/unit/recently-viewed.test.mjs` — add, dedupe, cap.
-- `tests/unit/analytics.test.mjs` — no fire when analytics consent denied, payload shape for each event.
-- `tests/unit/newsletter.test.mjs` — Klaviyo helper reports `not-configured` when env missing; success payload shape when configured.
-- Wire into `scripts/qa-unit.mjs`. Run `bun run qa`.
+---
 
-### Explicitly NOT doing
+## Executive summary
 
-- No Shopify product edits.
-- No publish.
-- No fake reviews, fake stars, fake stock, fake shipping promises.
-- No visual redesign — reuses existing rf-\* tokens.
+Roamforge's storefront is release-quality. Two evidence-based defects need action before further scale — one accessibility (homepage tile links), one brand (404 og:image leaking the preview URL). One config question needs an owner decision (hardcoded Klaviyo/Meta IDs). Everything else is polish.
 
-## What will need user input at completion
+## Critical bugs
+1. Homepage category-tile anchors have no accessible name. **(P1, a11y)**
+2. 404 / product-not-found pages surface a Lovable preview screenshot as their social share image. **(P1, brand/SEO)**
 
-- `VITE_KLAVIYO_COMPANY_ID` + `VITE_KLAVIYO_NEWSLETTER_LIST_ID` — enable newsletter.
-- `VITE_GA4_MEASUREMENT_ID` — enable GA4 events (already scaffolded).
-- `VITE_META_PIXEL_ID` — optional, enables Meta Pixel.
-- `VITE_JUDGEME_SHOP_DOMAIN` + `VITE_JUDGEME_PUBLIC_TOKEN` — enable reviews.
-- `VITE_FREE_SHIPPING_THRESHOLD_AUD` — business decision from user before shipping bar shows.
+## Quick wins (≤15 min each)
+- Add `aria-label` to the three homepage category tiles.
+- Add explicit `og:image` + `twitter:image` = `https://roamforge.com.au/og-default.jpg` in the two notFoundComponent `head()` returns.
+- Trim the sr-only H1 on homepage.
+- Add FAQPage JSON-LD on `/faq`.
+
+## 30-day prioritised action plan
+- **Week 1** — Ship the two P1s + the four quick wins above.
+- **Week 1** — Confirm/replace hardcoded Klaviyo `UwaEws` and Meta Pixel `1043681748196165`; if real, still remove the fallback so consent gating actually applies.
+- **Week 2** — Add `Product.aggregateRating`/`review` schema only if genuine Judge.me reviews exist (schema without real reviews is a Google policy violation). Add `Product.brand` + `Product.sku` if not already emitted per variant (verify in Rich Results Test).
+- **Week 3** — Wire GA4 in production behind consent; verify `add_to_cart` and `view_item` events fire once, not twice.
+- **Week 4** — Add editorial "buying guide" content on the two thinnest category pages (recovery, air-compressors) for keyword coverage; add internal links from PDPs back to their category.
+
+Nothing else in the audit warrants a code change. No P0s found.
