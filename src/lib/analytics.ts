@@ -182,7 +182,9 @@ export function trackViewCart(items: AnalyticsItem[], currency = AUD) {
 export function trackBeginCheckout(items: AnalyticsItem[], currency = AUD) {
   // Never emit a phantom checkout: no line items means no genuine handoff.
   if (items.length === 0) return;
-  if (!shouldEmit(`begin_checkout:${items.map((i) => `${i.item_id}x${i.quantity ?? 1}`).join(",")}`))
+  if (
+    !shouldEmit(`begin_checkout:${items.map((i) => `${i.item_id}x${i.quantity ?? 1}`).join(",")}`)
+  )
     return;
   const value = items.reduce((s, i) => s + (i.price ?? 0) * (i.quantity ?? 1), 0);
   trackGa4("begin_checkout", { currency, value, items });
