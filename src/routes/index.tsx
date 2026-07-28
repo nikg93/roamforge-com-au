@@ -27,7 +27,7 @@ import logo from "@/assets/logo.png";
 import heroGear from "@/assets/lifestyle-journey.jpg";
 import { CATEGORIES, type CategorySlug } from "@/lib/categories";
 import { routeMeta } from "@/lib/seo";
-import { fetchDiverseFeatured, type ShopifyProduct } from "@/lib/shopify";
+import { fetchHomepageFeatured, type ShopifyProduct } from "@/lib/shopify";
 
 export const Route = createFileRoute("/")({
   // Server-render featured products. The loader is bounded: any Shopify
@@ -37,9 +37,9 @@ export const Route = createFileRoute("/")({
   // hydration mismatch.
   loader: async () => {
     try {
-      // Diversified across primary categories so the rail spans the
-      // catalogue instead of surfacing four variants of one product.
-      const featured = await fetchDiverseFeatured(4);
+      // Lightforce dealer stock first, then category-diverse best sellers,
+      // so the first product-led section spans the catalogue.
+      const featured = await fetchHomepageFeatured(8);
       return { featured };
     } catch {
       return { featured: [] as ShopifyProduct[] };
@@ -112,18 +112,19 @@ function Index() {
                     adventures.
                   </p>
                   <div className="mt-7 flex flex-wrap gap-3">
-                    <Link
-                      to="/shop"
+                    <a
+                      href="#featured-gear"
+                      onClick={scrollToFeatured}
                       className="min-h-11 inline-flex items-center bg-rf-tan text-rf-dark font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-tan-bright transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-cream focus-visible:ring-offset-2 focus-visible:ring-offset-rf-dark"
                     >
-                      SHOP THE RANGE
-                    </Link>
+                      SHOP FEATURED GEAR
+                    </a>
                     <Link
                       to="/category/$slug"
-                      params={{ slug: "recovery" }}
+                      params={{ slug: "lighting" }}
                       className="min-h-11 inline-flex items-center border border-rf-cream/80 text-rf-cream font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-cream hover:text-rf-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
                     >
-                      SHOP RECOVERY
+                      SHOP LIGHTFORCE
                     </Link>
                   </div>
                 </div>
@@ -140,6 +141,8 @@ function Index() {
         </section>
 
         <TrustStrip />
+
+        <FeaturedGear />
 
         {/* CATEGORIES */}
         <section id="categories" className="bg-rf-cream py-14">
@@ -192,8 +195,6 @@ function Index() {
             </div>
           </div>
         </section>
-
-        <FeaturedGear />
 
         <TrustedBrands />
 
