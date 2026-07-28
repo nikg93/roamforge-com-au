@@ -644,7 +644,7 @@ export function prioritiseFeatured(
   // catalogue rather than becoming a single-brand wall.
   const leadVendors = new Set(lead.map((p) => (p.node.vendor || "").toLowerCase()));
   const rest = core.filter((p) => !leadVendors.has((p.node.vendor || "").toLowerCase()));
-  for (const p of diversifyByCategory(rest.length >= count ? rest : core, count)) push(p);
+  for (const p of diversifyByCategory(rest, count)) push(p);
   // Backfill from the raw core pool if diversification came up short.
   for (const p of core) push(p);
   return out.slice(0, count);
