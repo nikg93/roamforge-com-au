@@ -615,3 +615,54 @@ export async function fetchAllProductHandles(pageSize = 100, maxPages = 50): Pro
   }
   return handles;
 }
+
+/**
+ * Homepage merchandising pool. Blends currently-available Lightforce dealer
+ * stock with best-selling core gear so the first product-led section a
+ * visitor sees spans the catalogue instead of one product family.
+ *
+ * Pure function so it can be unit-tested without hitting Shopify.
+ */
+export function prioritiseFeatured(
+  lightforce: ShopifyProduct[],
+  core: ShopifyProduct[],
+  count: number,
+  maxLightforce = 4,
+): ShopifyProduct[] {
+  const out: ShopifyProduct[] = [];
+  const seen = new Set<string>();
+  const push = (p: ShopifyProduct) => {
+    if (out.length >= count) return;
+    if (p.node.availableForSale === false) return;
+    if (seen.has(p.node.handle)) return;
+    seen.add(p.node.handle);
+    out.push(p);
+  };
+  for (const p of lightforce.slice(0, Math.max(0, maxLightforce))) push(p);
+  for (const p of diversifyByCategory(core, count)) push(p);
+  // Backfill from the raw core pool if diversification came up short.
+  for (const p of core) push(p);
+  return out.slice(0, count);
+}
+
+/** Available Lightforce products (dealer range) for homepage merchandising. */
+export async function fetchLightforceProducts(first = 8): Promise<ShopifyProduct[]> {
+  try {
+    return await fetchProducts(first, "vendor:Lightforce");
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * The homepage "Featured 4WD Gear" rail: Lightforce dealer stock first,
+ * then category-diverse best sellers. Never fabricates — any Shopify
+ * failure degrades to whatever pool succeeded.
+ */
+export async function fetchHomepageFeatured(count = 8): Promise<ShopifyProduct[]> {
+  const [lightforce, core] = await Promise.all([
+    fetchLightforceProducts(4),
+    fetchFeaturedProducts(Math.max(24, count * 3)).catch(() => [] as ShopifyProduct[]),
+  ]);
+  return prioritiseFeatured(lightforce, core, count);
+}
