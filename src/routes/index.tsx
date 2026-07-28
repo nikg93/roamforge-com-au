@@ -81,6 +81,16 @@ const WHY = [
 ];
 
 function Index() {
+  // Progressive enhancement: the anchor works without JS; this just adds
+  // smooth scrolling and moves focus for keyboard/AT users.
+  const scrollToFeatured = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const target = document.getElementById("featured-gear");
+    if (!target) return;
+    e.preventDefault();
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    target.focus({ preventScroll: true });
+  };
+
   return (
     <div className="min-h-dvh flex flex-col bg-background">
       <SiteHeader />
