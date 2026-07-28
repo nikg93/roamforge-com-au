@@ -5,6 +5,8 @@ import {
   trackViewItem,
   trackSearch,
   toAnalyticsItem,
+  trackBeginCheckout,
+  __resetAnalyticsDedupe,
 } from "../../src/lib/analytics.ts";
 import { CONSENT_STORAGE_KEY, CONSENT_VERSION } from "../../src/lib/consent.ts";
 
@@ -35,6 +37,7 @@ function installFakeWindow(consent) {
 
 function cleanup() {
   delete globalThis.window;
+  __resetAnalyticsDedupe();
 }
 
 export default {
@@ -43,6 +46,31 @@ export default {
     try {
       assert.equal(trackGa4("view_item", { foo: 1 }), false);
       assert.equal(gtagCalls.length, 0);
+    } finally {
+      cleanup();
+    }
+  },
+  "view_item fires once per product within the dedupe window"() {
+    const { gtagCalls } = installFakeWindow({ analytics: true });
+    try {
+      trackViewItem({ item_id: "p1", item_name: "N", price: 10 });
+      trackViewItem({ item_id: "p1", item_name: "N", price: 10 });
+      assert.equal(gtagCalls.length, 1);
+      trackViewItem({ item_id: "p2", item_name: "M", price: 10 });
+      assert.equal(gtagCalls.length, 2);
+    } finally {
+      cleanup();
+    }
+  },
+  "begin_checkout never fires with an empty cart"() {
+    const { gtagCalls } = installFakeWindow({ analytics: true });
+    try {
+      trackBeginCheckout([]);
+      assert.equal(gtagCalls.length, 0);
+      trackBeginCheckout([{ item_id: "p1", item_name: "N", price: 10, quantity: 1 }]);
+      trackBeginCheckout([{ item_id: "p1", item_name: "N", price: 10, quantity: 1 }]);
+      assert.equal(gtagCalls.length, 1);
+      assert.equal(gtagCalls[0][1], "begin_checkout");
     } finally {
       cleanup();
     }

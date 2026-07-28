@@ -27,7 +27,7 @@ import logo from "@/assets/logo.png";
 import heroGear from "@/assets/lifestyle-journey.jpg";
 import { CATEGORIES, type CategorySlug } from "@/lib/categories";
 import { routeMeta } from "@/lib/seo";
-import { fetchDiverseFeatured, type ShopifyProduct } from "@/lib/shopify";
+import { fetchHomepageFeatured, type ShopifyProduct } from "@/lib/shopify";
 
 export const Route = createFileRoute("/")({
   // Server-render featured products. The loader is bounded: any Shopify
@@ -37,9 +37,9 @@ export const Route = createFileRoute("/")({
   // hydration mismatch.
   loader: async () => {
     try {
-      // Diversified across primary categories so the rail spans the
-      // catalogue instead of surfacing four variants of one product.
-      const featured = await fetchDiverseFeatured(4);
+      // Lightforce dealer stock first, then category-diverse best sellers,
+      // so the first product-led section spans the catalogue.
+      const featured = await fetchHomepageFeatured(8);
       return { featured };
     } catch {
       return { featured: [] as ShopifyProduct[] };
@@ -81,6 +81,16 @@ const WHY = [
 ];
 
 function Index() {
+  // Progressive enhancement: the anchor works without JS; this just adds
+  // smooth scrolling and moves focus for keyboard/AT users.
+  const scrollToFeatured = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const target = document.getElementById("featured-gear");
+    if (!target) return;
+    e.preventDefault();
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    target.focus({ preventScroll: true });
+  };
+
   return (
     <div className="min-h-dvh flex flex-col bg-background">
       <SiteHeader />
@@ -112,18 +122,19 @@ function Index() {
                     adventures.
                   </p>
                   <div className="mt-7 flex flex-wrap gap-3">
-                    <Link
-                      to="/shop"
+                    <a
+                      href="#featured-gear"
+                      onClick={scrollToFeatured}
                       className="min-h-11 inline-flex items-center bg-rf-tan text-rf-dark font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-tan-bright transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-cream focus-visible:ring-offset-2 focus-visible:ring-offset-rf-dark"
                     >
-                      SHOP THE RANGE
-                    </Link>
+                      SHOP FEATURED GEAR
+                    </a>
                     <Link
                       to="/category/$slug"
-                      params={{ slug: "recovery" }}
+                      params={{ slug: "lighting" }}
                       className="min-h-11 inline-flex items-center border border-rf-cream/80 text-rf-cream font-semibold tracking-[0.15em] text-sm px-6 py-3 hover:bg-rf-cream hover:text-rf-dark transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
                     >
-                      SHOP RECOVERY
+                      SHOP LIGHTFORCE
                     </Link>
                   </div>
                 </div>
@@ -140,6 +151,8 @@ function Index() {
         </section>
 
         <TrustStrip />
+
+        <FeaturedGear />
 
         {/* CATEGORIES */}
         <section id="categories" className="bg-rf-cream py-14">
@@ -193,8 +206,6 @@ function Index() {
           </div>
         </section>
 
-        <FeaturedGear />
-
         <TrustedBrands />
 
         <LifestyleSection />
@@ -234,10 +245,17 @@ function FeaturedGear() {
   const { featured } = Route.useLoaderData();
   if (!featured || featured.length === 0) return null;
   return (
-    <section aria-labelledby="featured-heading" className="bg-background py-14">
+    <section
+      id="featured-gear"
+      tabIndex={-1}
+      aria-labelledby="featured-heading"
+      className="scroll-mt-24 bg-background py-14 focus:outline-none"
+    >
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
         <div className="flex items-end justify-between gap-4">
-          <SectionHeading>FEATURED GEAR</SectionHeading>
+          <SectionHeading>
+            <span id="featured-heading">FEATURED 4WD GEAR</span>
+          </SectionHeading>
           <Link
             to="/shop"
             className="hidden text-xs font-semibold tracking-[0.15em] text-rf-dark hover:text-rf-tan sm:inline"
@@ -246,9 +264,17 @@ function FeaturedGear() {
           </Link>
         </div>
         <div className="mt-8 grid grid-cols-2 gap-6 md:grid-cols-4">
-          {featured.slice(0, 4).map((p: ShopifyProduct) => (
+          {featured.slice(0, 8).map((p: ShopifyProduct) => (
             <ProductCard key={p.node.id} product={p} />
           ))}
+        </div>
+        <div className="mt-10 flex justify-center sm:hidden">
+          <Link
+            to="/shop"
+            className="min-h-11 inline-flex items-center border border-rf-dark px-6 py-3 text-sm font-semibold tracking-[0.15em] text-rf-dark hover:bg-rf-dark hover:text-rf-cream transition-colors"
+          >
+            SHOP ALL PRODUCTS
+          </Link>
         </div>
       </div>
     </section>

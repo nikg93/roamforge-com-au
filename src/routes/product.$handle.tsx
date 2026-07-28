@@ -551,6 +551,14 @@ function ProductPageInner() {
                 Secure checkout powered by Shopify
               </p>
               <MiniTrustRow />
+              {!fitment && (
+                <p className="mt-4 text-xs text-muted-foreground">
+                  Not sure this suits your build?{" "}
+                  <Link to="/contact" className="underline hover:text-rf-dark">
+                    Need help confirming fitment?
+                  </Link>
+                </p>
+              )}
               {fitment && (
                 <section
                   aria-labelledby="fitment-heading"

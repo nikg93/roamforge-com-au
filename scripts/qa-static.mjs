@@ -138,7 +138,10 @@ check(
 // 12. Homepage uses the diversified featured helper so the rail spans
 // multiple categories instead of surfacing four near-identical products.
 const indexRoute = read("src/routes/index.tsx");
-check("homepage featured uses fetchDiverseFeatured", /fetchDiverseFeatured\s*\(/.test(indexRoute));
+check(
+  "homepage featured uses the merchandised homepage rail",
+  /fetchHomepageFeatured\s*\(/.test(indexRoute),
+);
 
 // 13. Shop All merchandising: core catalogue is served before merch.
 const shopRoute = read("src/routes/shop.tsx");
@@ -174,6 +177,29 @@ check(
     const m = pdp.match(/!loaderData[\s\S]{0,600}?return\s*\{[\s\S]*?\};/);
     return m ? !/rel:\s*["']canonical["']/.test(m[0]) : false;
   })(),
+);
+
+// 16. Homepage first-sales conversion block.
+const home = read("src/routes/index.tsx");
+check("homepage renders a featured product rail anchor", /id="featured-gear"/.test(home));
+check("homepage featured heading copy", /FEATURED 4WD GEAR/.test(home));
+check("homepage hero primary CTA targets featured gear", /href="#featured-gear"/.test(home));
+check("homepage featured rail loads 8 products", /fetchHomepageFeatured\(8\)/.test(home));
+
+// 17. Announcement strip claims are config-gated (no unverified claims).
+const announce = read("src/components/AnnouncementBar.tsx");
+check("announcement strip is gated on BRAND_CLAIMS", /BRAND_CLAIMS/.test(announce));
+check(
+  "authorised Lightforce dealer claim stays off until verified",
+  /authorisedLightforceDealer:\s*false/.test(read("src/lib/site.ts")),
+);
+
+// 18. Analytics single-fire guard present.
+const analytics = read("src/lib/analytics.ts");
+check("analytics dedupes duplicate events", /shouldEmit\(/.test(analytics));
+check(
+  "begin_checkout guards against empty carts",
+  /trackBeginCheckout[\s\S]{0,200}items\.length === 0/.test(analytics),
 );
 
 console.log(
