@@ -123,6 +123,7 @@ export function trackMeta(event: string, params: Record<string, unknown> = {}): 
 const AUD = "AUD";
 
 export function trackViewItem(item: AnalyticsItem, currency = AUD) {
+  if (!shouldEmit(`view_item:${item.item_id}:${item.item_variant ?? ""}`)) return;
   const price = item.price ?? 0;
   trackGa4("view_item", { currency, value: price, items: [item] });
   trackMeta("ViewContent", {
@@ -135,14 +136,19 @@ export function trackViewItem(item: AnalyticsItem, currency = AUD) {
 }
 
 export function trackViewItemList(items: AnalyticsItem[], listName: string) {
+  if (!shouldEmit(`view_item_list:${listName}:${items.map((i) => i.item_id).join(",")}`)) return;
   trackGa4("view_item_list", { item_list_name: listName, items });
 }
 
 export function trackSelectItem(item: AnalyticsItem, listName: string) {
+  if (!shouldEmit(`select_item:${listName}:${item.item_id}`, 400)) return;
   trackGa4("select_item", { item_list_name: listName, items: [item] });
 }
 
 export function trackAddToCart(item: AnalyticsItem, currency = AUD) {
+  // Short window only — guards against a double-bound click handler while
+  // still allowing a shopper to genuinely add the same item twice.
+  if (!shouldEmit(`add_to_cart:${item.item_id}:${item.quantity ?? 1}`, 400)) return;
   const qty = item.quantity ?? 1;
   const value = (item.price ?? 0) * qty;
   trackGa4("add_to_cart", { currency, value, items: [item] });
@@ -156,6 +162,7 @@ export function trackAddToCart(item: AnalyticsItem, currency = AUD) {
 }
 
 export function trackRemoveFromCart(item: AnalyticsItem, currency = AUD) {
+  if (!shouldEmit(`remove_from_cart:${item.item_id}`, 400)) return;
   const qty = item.quantity ?? 1;
   trackGa4("remove_from_cart", {
     currency,
@@ -165,11 +172,18 @@ export function trackRemoveFromCart(item: AnalyticsItem, currency = AUD) {
 }
 
 export function trackViewCart(items: AnalyticsItem[], currency = AUD) {
+  if (items.length === 0) return;
+  if (!shouldEmit(`view_cart:${items.map((i) => `${i.item_id}x${i.quantity ?? 1}`).join(",")}`))
+    return;
   const value = items.reduce((s, i) => s + (i.price ?? 0) * (i.quantity ?? 1), 0);
   trackGa4("view_cart", { currency, value, items });
 }
 
 export function trackBeginCheckout(items: AnalyticsItem[], currency = AUD) {
+  // Never emit a phantom checkout: no line items means no genuine handoff.
+  if (items.length === 0) return;
+  if (!shouldEmit(`begin_checkout:${items.map((i) => `${i.item_id}x${i.quantity ?? 1}`).join(",")}`))
+    return;
   const value = items.reduce((s, i) => s + (i.price ?? 0) * (i.quantity ?? 1), 0);
   trackGa4("begin_checkout", { currency, value, items });
   trackMeta("InitiateCheckout", {
@@ -184,6 +198,7 @@ export function trackBeginCheckout(items: AnalyticsItem[], currency = AUD) {
 export function trackSearch(term: string) {
   const clean = term.trim();
   if (!clean) return;
+  if (!shouldEmit(`search:${clean.toLowerCase()}`)) return;
   trackGa4("search", { search_term: clean });
   trackMeta("Search", { search_string: clean });
 }
