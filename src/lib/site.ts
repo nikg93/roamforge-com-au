@@ -38,11 +38,11 @@ export const SHOPIFY_STOREFRONT_URL = `https://${SHOPIFY.storeDomain}/api/${SHOP
  * - `australianOwned`: stated on /about and in the existing trust strip.
  * - `lightforceStockist`: the connected Shopify catalogue carries live,
  *   available `vendor:Lightforce` products tagged `dealer-import`.
- * - `authorisedLightforceDealer`: OFF until Lightforce dealer paperwork is
- *   confirmed. The `dealer-import` tag alone is not proof of authorisation.
+ * - `authorisedLightforceDealer`: ON — the store owner confirmed authorised
+ *   Lightforce dealer status and provided LFG Partners dealer catalogue access.
  */
 export const BRAND_CLAIMS = {
   australianOwned: true,
   lightforceStockist: true,
-  authorisedLightforceDealer: false,
+  authorisedLightforceDealer: true,
 } as const;

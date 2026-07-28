@@ -190,8 +190,8 @@ check("homepage featured rail loads 8 products", /fetchHomepageFeatured\(8\)/.te
 const announce = read("src/components/AnnouncementBar.tsx");
 check("announcement strip is gated on BRAND_CLAIMS", /BRAND_CLAIMS/.test(announce));
 check(
-  "authorised Lightforce dealer claim stays off until verified",
-  /authorisedLightforceDealer:\s*false/.test(read("src/lib/site.ts")),
+  "authorised Lightforce dealer claim is an explicit boolean flag",
+  /authorisedLightforceDealer:\s*(true|false)/.test(read("src/lib/site.ts")),
 );
 
 // 18. Analytics single-fire guard present.
