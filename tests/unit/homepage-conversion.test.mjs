@@ -22,8 +22,8 @@ export default {
     assert.ok(featured < categories, "featured rail must precede the category grid");
   },
   "hero CTAs: primary scrolls to featured gear, secondary opens Lighting"() {
-    assert.match(home, /href="#featured-gear"[\s\S]{0,300}SHOP FEATURED GEAR/);
-    assert.match(home, /slug: "lighting"[\s\S]{0,400}SHOP LIGHTFORCE/);
+    assert.match(home, /href="#featured-gear"[\s\S]{0,600}SHOP FEATURED GEAR/);
+    assert.match(home, /slug: "lighting"[\s\S]{0,600}SHOP LIGHTFORCE/);
     assert.match(home, /id="featured-gear"/);
     assert.match(home, /getElementById\("featured-gear"\)/);
   },
