@@ -176,6 +176,29 @@ check(
   })(),
 );
 
+// 16. Homepage first-sales conversion block.
+const home = read("src/routes/index.tsx");
+check("homepage renders a featured product rail anchor", /id="featured-gear"/.test(home));
+check("homepage featured heading copy", /FEATURED 4WD GEAR/.test(home));
+check("homepage hero primary CTA targets featured gear", /href="#featured-gear"/.test(home));
+check("homepage featured rail loads 8 products", /fetchHomepageFeatured\(8\)/.test(home));
+
+// 17. Announcement strip claims are config-gated (no unverified claims).
+const announce = read("src/components/AnnouncementBar.tsx");
+check("announcement strip is gated on BRAND_CLAIMS", /BRAND_CLAIMS/.test(announce));
+check(
+  "authorised Lightforce dealer claim stays off until verified",
+  /authorisedLightforceDealer:\s*false/.test(read("src/lib/site.ts")),
+);
+
+// 18. Analytics single-fire guard present.
+const analytics = read("src/lib/analytics.ts");
+check("analytics dedupes duplicate events", /shouldEmit\(/.test(analytics));
+check(
+  "begin_checkout guards against empty carts",
+  /trackBeginCheckout[\s\S]{0,200}items\.length === 0/.test(analytics),
+);
+
 console.log(
   `\n[qa:checks] ${failures.length === 0 ? "PASS" : `FAIL — ${failures.length} issue(s)`}`,
 );
