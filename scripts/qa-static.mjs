@@ -138,7 +138,10 @@ check(
 // 12. Homepage uses the diversified featured helper so the rail spans
 // multiple categories instead of surfacing four near-identical products.
 const indexRoute = read("src/routes/index.tsx");
-check("homepage featured uses fetchDiverseFeatured", /fetchDiverseFeatured\s*\(/.test(indexRoute));
+check(
+  "homepage featured uses the merchandised homepage rail",
+  /fetchHomepageFeatured\s*\(/.test(indexRoute),
+);
 
 // 13. Shop All merchandising: core catalogue is served before merch.
 const shopRoute = read("src/routes/shop.tsx");
