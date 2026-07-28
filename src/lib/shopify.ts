@@ -627,7 +627,7 @@ export function prioritiseFeatured(
   lightforce: ShopifyProduct[],
   core: ShopifyProduct[],
   count: number,
-  maxLightforce = 4,
+  maxLightforce = 3,
 ): ShopifyProduct[] {
   const out: ShopifyProduct[] = [];
   const seen = new Set<string>();
@@ -638,8 +638,13 @@ export function prioritiseFeatured(
     seen.add(p.node.handle);
     out.push(p);
   };
-  for (const p of lightforce.slice(0, Math.max(0, maxLightforce))) push(p);
-  for (const p of diversifyByCategory(core, count)) push(p);
+  const lead = lightforce.slice(0, Math.max(0, maxLightforce));
+  for (const p of lead) push(p);
+  // Keep the rest of the rail off the lead vendor so the section spans the
+  // catalogue rather than becoming a single-brand wall.
+  const leadVendors = new Set(lead.map((p) => (p.node.vendor || "").toLowerCase()));
+  const rest = core.filter((p) => !leadVendors.has((p.node.vendor || "").toLowerCase()));
+  for (const p of diversifyByCategory(rest.length >= count ? rest : core, count)) push(p);
   // Backfill from the raw core pool if diversification came up short.
   for (const p of core) push(p);
   return out.slice(0, count);
