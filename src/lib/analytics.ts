@@ -48,6 +48,47 @@ function marketingAllowed(): boolean {
   }
 }
 
+// --- Single-fire guard -------------------------------------------------
+// React StrictMode double-invokes effects in development, and route
+// re-renders can re-run view/list effects. Passive + handoff events are
+// deduped on an identity key inside a short window so GA4 never receives
+// two hits for one genuine user action. `add_to_cart` is intentionally NOT
+// deduped by payload alone beyond a very short window, so a shopper adding
+// the same item twice still yields two events.
+const DEDUPE_WINDOW_MS = 1500;
+const lastFired = new Map<string, number>();
+
+function shouldEmit(key: string, windowMs = DEDUPE_WINDOW_MS): boolean {
+  const now = Date.now();
+  const prev = lastFired.get(key);
+  if (typeof prev === "number" && now - prev < windowMs) {
+    devLog("suppressed duplicate", key);
+    return false;
+  }
+  lastFired.set(key, now);
+  return true;
+}
+
+/** Test-only: clear the dedupe window between assertions. */
+export function __resetAnalyticsDedupe() {
+  lastFired.clear();
+}
+
+function isDev(): boolean {
+  try {
+    return (
+      typeof import.meta !== "undefined" &&
+      (import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV === true
+    );
+  } catch {
+    return false;
+  }
+}
+
+function devLog(...args: unknown[]) {
+  if (isDev()) console.debug("[analytics]", ...args);
+}
+
 /**
  * Push a GA4 event. Returns `false` when consent is denied or gtag isn't
  * loaded so callers/tests can assert on gating behaviour.
@@ -57,6 +98,7 @@ export function trackGa4(event: string, params: Record<string, unknown> = {}): b
   const w = getWindow();
   if (!w) return false;
   const gtag = w.gtag;
+  devLog(event, params);
   if (typeof gtag !== "function") {
     // Buffer via dataLayer if gtag hasn't attached yet — GA4 replays it.
     if (Array.isArray(w.dataLayer)) {
