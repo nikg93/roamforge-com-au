@@ -5,6 +5,7 @@ import logo from "@/assets/logo.png";
 import { CartDrawer } from "./CartDrawer";
 import { CATEGORIES } from "@/lib/categories";
 import { SearchDialog } from "./SearchDialog";
+import { AnnouncementBar } from "./AnnouncementBar";
 import {
   Sheet,
   SheetContent,
@@ -21,6 +22,7 @@ export function SiteHeader() {
 
   return (
     <header className="bg-rf-dark text-rf-cream">
+      <AnnouncementBar />
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 lg:px-8">
         <div className="flex items-center gap-2">
           <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
