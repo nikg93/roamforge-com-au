@@ -37,8 +37,8 @@ function getWindow(): AnalyticsWindow | null {
  * to `dataLayer` as `arguments`; a plain array is silently ignored.
  */
 function toGtagArguments(...args: unknown[]): IArguments {
-  // eslint-disable-next-line prefer-rest-params
   return (function () {
+    // eslint-disable-next-line prefer-rest-params
     return arguments;
   })(...(args as []));
 }
