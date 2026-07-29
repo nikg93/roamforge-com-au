@@ -102,6 +102,10 @@ export const Route = createFileRoute("/product/$handle")({
         priceCurrency: price.currencyCode,
         price: price.amount,
         availability: anyAvailable ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        // Merchant listing requirements: shipping + returns policies, both
+        // derived from the published Roamforge policies (no invented rates).
+        shippingDetails: offerShippingDetails(),
+        hasMerchantReturnPolicy: merchantReturnPolicy(),
       },
     };
     // Only advertise a brand when Shopify has a real vendor. Defaulting to
