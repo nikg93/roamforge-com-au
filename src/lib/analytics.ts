@@ -32,6 +32,17 @@ function getWindow(): AnalyticsWindow | null {
   return window as unknown as AnalyticsWindow;
 }
 
+/**
+ * Build a native `arguments` object. gtag.js only recognises commands pushed
+ * to `dataLayer` as `arguments`; a plain array is silently ignored.
+ */
+function toGtagArguments(...args: unknown[]): IArguments {
+  // eslint-disable-next-line prefer-rest-params
+  return (function () {
+    return arguments;
+  })(...(args as []));
+}
+
 function analyticsAllowed(): boolean {
   try {
     return readConsent().analytics === true;
