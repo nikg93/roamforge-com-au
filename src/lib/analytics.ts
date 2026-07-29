@@ -192,15 +192,35 @@ export function trackViewCart(items: AnalyticsItem[], currency = AUD) {
   trackGa4("view_cart", { currency, value, items });
 }
 
-export function trackBeginCheckout(items: AnalyticsItem[], currency = AUD) {
+/**
+ * Fire `begin_checkout`, then invoke `onDispatched` once the hit has been
+ * handed to the transport (or after a short failsafe timeout).
+ *
+ * Checkout navigates cross-origin to Shopify immediately after this call.
+ * GA4 batches events, so a hit queued in the same tick as the navigation is
+ * discarded and never reaches /g/collect. Waiting for gtag's `event_callback`
+ * lets the beacon leave first; the timeout guarantees the shopper is never
+ * stranded if analytics is blocked, denied or slow.
+ */
+export function trackBeginCheckout(
+  items: AnalyticsItem[],
+  currency = AUD,
+  onDispatched?: () => void,
+) {
+  const proceed = once(onDispatched);
   // Never emit a phantom checkout: no line items means no genuine handoff.
-  if (items.length === 0) return;
+  if (items.length === 0) return proceed();
   if (
     !shouldEmit(`begin_checkout:${items.map((i) => `${i.item_id}x${i.quantity ?? 1}`).join(",")}`)
   )
-    return;
+    return proceed();
   const value = items.reduce((s, i) => s + (i.price ?? 0) * (i.quantity ?? 1), 0);
-  trackGa4("begin_checkout", { currency, value, items });
+  const sent = trackGa4("begin_checkout", {
+    currency,
+    value,
+    items,
+    ...(onDispatched ? { event_callback: proceed } : {}),
+  });
   trackMeta("InitiateCheckout", {
     content_ids: items.map((i) => i.item_id),
     contents: items.map((i) => ({ id: i.item_id, quantity: i.quantity ?? 1 })),
@@ -208,6 +228,9 @@ export function trackBeginCheckout(items: AnalyticsItem[], currency = AUD) {
     value,
     currency,
   });
+  if (!sent) return proceed();
+  // Failsafe: gtag may never call back (ad blocker, offline, buffered hit).
+  if (onDispatched && typeof setTimeout === "function") setTimeout(proceed, CHECKOUT_FLUSH_MS);
 }
 
 export function trackSearch(term: string) {
