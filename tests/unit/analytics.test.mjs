@@ -80,10 +80,6 @@ export default {
     try {
       trackAddToCart({ item_id: "gid://x/1", item_name: "Test", price: 25, quantity: 2 });
       assert.equal(gtagCalls.length, 1);
-    const { gtagCalls } = installFakeWindow({ analytics: true });
-    try {
-      trackAddToCart({ item_id: "gid://x/1", item_name: "Test", price: 25, quantity: 2 });
-      assert.equal(gtagCalls.length, 1);
       const [event, name, payload] = gtagCalls[0];
       assert.equal(event, "event");
       assert.equal(name, "add_to_cart");
