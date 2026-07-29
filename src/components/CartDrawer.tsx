@@ -97,7 +97,10 @@ export function CartDrawer() {
     // navigation destroys the page before that flush — measured, and it is why
     // begin_checkout never reached /g/collect. Fall back to same-tab
     // navigation if the browser still refuses the new tab.
-    const opened = window.open(target, "_blank", "noopener");
+    // No "noopener" feature string: it makes window.open return null even on
+    // success, which would trip the fallback and open checkout twice. Modern
+    // browsers already imply noopener for _blank.
+    const opened = window.open(target, "_blank");
     if (!opened) window.location.assign(target);
   };
 
