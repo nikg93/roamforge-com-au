@@ -24,6 +24,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { sanitizeProductHtml, textFromHtml } from "@/lib/sanitize";
 import { normalizeProductTitle } from "@/lib/product-title";
 import { canonicalFor } from "@/lib/seo";
+import { offerShippingDetails, merchantReturnPolicy } from "@/lib/merchant-policy";
 import { SITE } from "@/lib/site";
 import { MiniTrustRow } from "@/components/TrustStrip";
 import { JudgeMeReviews } from "@/components/JudgeMe";
