@@ -1,6 +1,6 @@
 import { getKlaviyoConfig } from "./klaviyo";
 
-export const WELCOME_DISCOUNT_PERCENT = 10;
+export const WELCOME_DISCOUNT_PERCENT = 5;
 
 export function isNativeWelcomePopupEnabled(): boolean {
   return getKlaviyoConfig() === null;
