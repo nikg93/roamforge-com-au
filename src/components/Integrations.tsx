@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useLocation } from "@tanstack/react-router";
 import { CONSENT_UPDATED_EVENT, readConsent } from "@/lib/consent";
 import { trackGa4, trackMeta } from "@/lib/analytics";
+import { ANALYTICS } from "@/lib/site";
 import { captureAttribution } from "@/lib/attribution";
 
 /**
@@ -24,7 +25,10 @@ export function Integrations() {
     // This avoids cross-project attribution when a fork / preview loads
     // the bundle without its own env configured. In dev, warn once when
     // an integration is left unconfigured so it is obvious to operators.
-    const ga4Raw = raw(import.meta.env.VITE_GA4_MEASUREMENT_ID);
+    // GA4 Measurement IDs are public client-side identifiers, so the verified
+    // Roamforge production ID lives in site config as a fallback. Setting
+    // VITE_GA4_MEASUREMENT_ID still overrides it.
+    const ga4Raw = raw(ANALYTICS.ga4MeasurementId);
     const klaviyoRaw = raw(import.meta.env.VITE_KLAVIYO_COMPANY_ID);
     const tidioRaw = raw(import.meta.env.VITE_TIDIO_PUBLIC_KEY);
     const judgeMeDomain = raw(import.meta.env.VITE_JUDGEME_SHOP_DOMAIN);
