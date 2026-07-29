@@ -23,7 +23,11 @@ export function Integrations() {
     // This avoids cross-project attribution when a fork / preview loads
     // the bundle without its own env configured. In dev, warn once when
     // an integration is left unconfigured so it is obvious to operators.
-    const ga4Raw = raw(import.meta.env.VITE_GA4_MEASUREMENT_ID);
+    // GA4 ID may come from an explicit env var or from the Lovable Google
+    // Analytics connector, which syncs the measurement ID under its own name.
+    const ga4Raw =
+      raw(import.meta.env.VITE_GA4_MEASUREMENT_ID) ||
+      raw(import.meta.env.VITE_LOVABLE_CONNECTOR_GOOGLE_ANALYTICS_API_KEY);
     const klaviyoRaw = raw(import.meta.env.VITE_KLAVIYO_COMPANY_ID);
     const tidioRaw = raw(import.meta.env.VITE_TIDIO_PUBLIC_KEY);
     const judgeMeDomain = raw(import.meta.env.VITE_JUDGEME_SHOP_DOMAIN);
