@@ -46,3 +46,17 @@ export const BRAND_CLAIMS = {
   lightforceStockist: true,
   authorisedLightforceDealer: true,
 } as const;
+
+/**
+ * Public analytics identifiers. A GA4 Measurement ID is a client-side public
+ * identifier (it ships in every page that loads gtag.js) — it is not a secret
+ * and carries no write access. The env var still wins so forks/previews can
+ * point at their own property; the fallback is Roamforge's verified
+ * production web-stream ID so live tracking works without build-time env.
+ */
+const ENV_GA4 =
+  typeof import.meta !== "undefined" ? import.meta.env?.VITE_GA4_MEASUREMENT_ID : undefined;
+
+export const ANALYTICS = {
+  ga4MeasurementId: ((ENV_GA4 as string) || "G-QGGYL7FRLG").trim(),
+} as const;
