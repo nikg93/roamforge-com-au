@@ -101,8 +101,10 @@ export function trackGa4(event: string, params: Record<string, unknown> = {}): b
   devLog(event, params);
   if (typeof gtag !== "function") {
     // Buffer via dataLayer if gtag hasn't attached yet — GA4 replays it.
+    // Must be pushed as a native `arguments` object: gtag.js ignores plain
+    // arrays, so an array push would look successful yet never transmit.
     if (Array.isArray(w.dataLayer)) {
-      w.dataLayer.push(["event", event, params]);
+      w.dataLayer.push(toGtagArguments("event", event, params));
       return true;
     }
     return false;
