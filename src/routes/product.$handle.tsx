@@ -24,6 +24,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { sanitizeProductHtml, textFromHtml } from "@/lib/sanitize";
 import { normalizeProductTitle } from "@/lib/product-title";
 import { canonicalFor } from "@/lib/seo";
+import { offerShippingDetails, merchantReturnPolicy } from "@/lib/merchant-policy";
 import { SITE } from "@/lib/site";
 import { MiniTrustRow } from "@/components/TrustStrip";
 import { JudgeMeReviews } from "@/components/JudgeMe";
@@ -102,6 +103,10 @@ export const Route = createFileRoute("/product/$handle")({
         priceCurrency: price.currencyCode,
         price: price.amount,
         availability: anyAvailable ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        // Merchant listing requirements: shipping + returns policies, both
+        // derived from the published Roamforge policies (no invented rates).
+        shippingDetails: offerShippingDetails(),
+        hasMerchantReturnPolicy: merchantReturnPolicy(),
       },
     };
     // Only advertise a brand when Shopify has a real vendor. Defaulting to
