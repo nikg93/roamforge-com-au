@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useLocation } from "@tanstack/react-router";
 import { CONSENT_UPDATED_EVENT, readConsent } from "@/lib/consent";
 import { trackGa4, trackMeta } from "@/lib/analytics";
+import { ANALYTICS } from "@/lib/site";
 import { captureAttribution } from "@/lib/attribution";
 
 /**
