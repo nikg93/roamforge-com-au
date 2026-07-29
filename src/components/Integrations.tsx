@@ -110,7 +110,11 @@ export function Integrations() {
         }
         if (!gaConfigured) {
           w.gtag("js", new Date());
-          w.gtag("config", ga4);
+          // `beacon` transport makes gtag.js dispatch hits via
+          // navigator.sendBeacon, which survives page teardown. Without it a
+          // queued hit is discarded when the tab navigates cross-origin to
+          // Shopify checkout, silently losing begin_checkout.
+          w.gtag("config", ga4, { transport_type: "beacon" });
           gaConfigured = true;
         }
         inject("ga4-loader", `https://www.googletagmanager.com/gtag/js?id=${ga4}`);

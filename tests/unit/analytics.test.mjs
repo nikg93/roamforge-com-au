@@ -75,6 +75,52 @@ export default {
       cleanup();
     }
   },
+  "begin_checkout dispatches the hit before the navigation callback runs"() {
+    const { gtagCalls } = installFakeWindow({ analytics: true });
+    try {
+      const order = [];
+      trackBeginCheckout([{ item_id: "p1", item_name: "N", price: 10, quantity: 1 }], "AUD", () =>
+        order.push("navigate"),
+      );
+      // The GA4 hit must already be queued at this point.
+      assert.equal(gtagCalls.length, 1);
+      assert.equal(gtagCalls[0][1], "begin_checkout");
+      // Navigation waits for gtag's event_callback, not the same tick.
+      assert.deepEqual(order, []);
+      const payload = gtagCalls[0][2];
+      assert.equal(typeof payload.event_callback, "function");
+      payload.event_callback();
+      assert.deepEqual(order, ["navigate"]);
+      // Failsafe timeout must not navigate a second time.
+      payload.event_callback();
+      assert.deepEqual(order, ["navigate"]);
+    } finally {
+      cleanup();
+    }
+  },
+  "begin_checkout still navigates when the cart is empty or analytics is denied"() {
+    let calls = 0;
+    const denied = installFakeWindow({ analytics: false });
+    try {
+      trackBeginCheckout([{ item_id: "p1", item_name: "N", price: 10, quantity: 1 }], "AUD", () => {
+        calls += 1;
+      });
+      assert.equal(denied.gtagCalls.length, 0);
+      assert.equal(calls, 1, "shopper must reach checkout even with analytics denied");
+    } finally {
+      cleanup();
+    }
+    const allowed = installFakeWindow({ analytics: true });
+    try {
+      trackBeginCheckout([], "AUD", () => {
+        calls += 1;
+      });
+      assert.equal(allowed.gtagCalls.length, 0);
+      assert.equal(calls, 2);
+    } finally {
+      cleanup();
+    }
+  },
   "trackAddToCart payload shape"() {
     const { gtagCalls } = installFakeWindow({ analytics: true });
     try {

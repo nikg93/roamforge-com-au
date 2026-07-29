@@ -72,6 +72,10 @@ export function CartDrawer() {
       toast.error("Checkout is not available right now. Please refresh and try again.");
       return;
     }
+    // Forward captured campaign params so ad attribution survives the
+    // cross-origin handoff into Shopify checkout.
+    const target = appendAttribution(url);
+    setDrawerOpen(false);
     trackBeginCheckout(
       items.map((i) =>
         toAnalyticsItem({
@@ -87,12 +91,17 @@ export function CartDrawer() {
       ),
       currency,
     );
-    setDrawerOpen(false);
-    // Synchronous navigation inside the click handler avoids Safari/iOS popup blockers
-    // that reject window.open called from async callbacks.
-    // Forward captured campaign params so ad attribution survives the
-    // cross-origin handoff into Shopify checkout.
-    window.location.assign(appendAttribution(url));
+    // Open checkout in a new tab, synchronously inside the click handler so no
+    // popup blocker rejects it. This also keeps the storefront tab alive:
+    // gtag.js batches hits and flushes ~2s later, and a same-tab cross-origin
+    // navigation destroys the page before that flush — measured, and it is why
+    // begin_checkout never reached /g/collect. Fall back to same-tab
+    // navigation if the browser still refuses the new tab.
+    // No "noopener" feature string: it makes window.open return null even on
+    // success, which would trip the fallback and open checkout twice. Modern
+    // browsers already imply noopener for _blank.
+    const opened = window.open(target, "_blank");
+    if (!opened) window.location.assign(target);
   };
 
   return (
