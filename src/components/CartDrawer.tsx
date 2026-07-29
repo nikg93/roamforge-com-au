@@ -72,6 +72,16 @@ export function CartDrawer() {
       toast.error("Checkout is not available right now. Please refresh and try again.");
       return;
     }
+    // Forward captured campaign params so ad attribution survives the
+    // cross-origin handoff into Shopify checkout. Resolved before tracking so
+    // the navigation callback does no work beyond assigning the URL.
+    const target = appendAttribution(url);
+    setDrawerOpen(false);
+    // Navigate only once the begin_checkout beacon has been dispatched (or the
+    // failsafe timeout elapses). Navigating in the same tick discards the
+    // queued GA4 hit, so the checkout event never reaches /g/collect.
+    // location.assign keeps this a same-tab navigation, so no popup blocker
+    // applies even though it now runs from a callback.
     trackBeginCheckout(
       items.map((i) =>
         toAnalyticsItem({
@@ -86,13 +96,8 @@ export function CartDrawer() {
         }),
       ),
       currency,
+      () => window.location.assign(target),
     );
-    setDrawerOpen(false);
-    // Synchronous navigation inside the click handler avoids Safari/iOS popup blockers
-    // that reject window.open called from async callbacks.
-    // Forward captured campaign params so ad attribution survives the
-    // cross-origin handoff into Shopify checkout.
-    window.location.assign(appendAttribution(url));
   };
 
   return (
