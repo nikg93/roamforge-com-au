@@ -1,8 +1,5 @@
 import assert from "node:assert/strict";
-import {
-  parseAttribution,
-  appendAttribution,
-} from "../../src/lib/attribution.ts";
+import { parseAttribution, appendAttribution } from "../../src/lib/attribution.ts";
 
 export default {
   "parses only known marketing params"() {

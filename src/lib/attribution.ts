@@ -94,7 +94,9 @@ export function readAttribution(): AttributionParams {
  * the session — a later internal navigation without params must never wipe the
  * original campaign, but a genuinely new ad click (fresh params) overwrites.
  */
-export function captureAttribution(search = typeof window === "undefined" ? "" : window.location.search) {
+export function captureAttribution(
+  search = typeof window === "undefined" ? "" : window.location.search,
+) {
   const incoming = parseAttribution(search);
   if (Object.keys(incoming).length === 0) return readAttribution();
   const s = storage();
