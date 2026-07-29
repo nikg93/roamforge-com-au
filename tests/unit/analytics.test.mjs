@@ -79,10 +79,8 @@ export default {
     const { gtagCalls } = installFakeWindow({ analytics: true });
     try {
       const order = [];
-      trackBeginCheckout(
-        [{ item_id: "p1", item_name: "N", price: 10, quantity: 1 }],
-        "AUD",
-        () => order.push("navigate"),
+      trackBeginCheckout([{ item_id: "p1", item_name: "N", price: 10, quantity: 1 }], "AUD", () =>
+        order.push("navigate"),
       );
       // The GA4 hit must already be queued at this point.
       assert.equal(gtagCalls.length, 1);

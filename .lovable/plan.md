@@ -24,12 +24,12 @@ read_themes, unauthenticated_read_product_listings, write_discounts,
 write_inventory, write_price_rules, write_products, write_publications
 ```
 
-| # | Question | Verdict | Blocked by |
-|---|---|---|---|
-| 1 | Facebook & Instagram/Meta app or sales channel installed? | UNKNOWN | 401, and no `read_apps` scope. Shopify also exposes no Admin query that lists *other* apps installed on a shop. |
-| 2 | Meta pixel/dataset linked; numeric Pixel ID? | UNKNOWN | 401, and no `read_pixels`. The `webPixel` query returns only the *calling* app's own pixel, never Meta's. |
-| 3 | Custom app `Windsor AI` exists / install status? | UNKNOWN | 401, and no `read_apps`. Same API limitation as #1. |
-| 4 | GA4 `G-QGGYL7FRLG` in Shopify customer events / checkout? | UNKNOWN | 401. `read_themes` is granted but unusable while the token 401s; customer-events pixels need `read_pixels` regardless. |
+| #   | Question                                                  | Verdict | Blocked by                                                                                                             |
+| --- | --------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 1   | Facebook & Instagram/Meta app or sales channel installed? | UNKNOWN | 401, and no `read_apps` scope. Shopify also exposes no Admin query that lists _other_ apps installed on a shop.        |
+| 2   | Meta pixel/dataset linked; numeric Pixel ID?              | UNKNOWN | 401, and no `read_pixels`. The `webPixel` query returns only the _calling_ app's own pixel, never Meta's.              |
+| 3   | Custom app `Windsor AI` exists / install status?          | UNKNOWN | 401, and no `read_apps`. Same API limitation as #1.                                                                    |
+| 4   | GA4 `G-QGGYL7FRLG` in Shopify customer events / checkout? | UNKNOWN | 401. `read_themes` is granted but unusable while the token 401s; customer-events pixels need `read_pixels` regardless. |
 
 I will not guess any of these four. Even a fully-scoped token cannot answer 1-3, so these are permanently manual checks in Shopify admin.
 
@@ -37,12 +37,12 @@ I will not guess any of these four. Even a fully-scoped token cannot answer 1-3,
 
 Real browser, fresh storage, consent accepted, observing actual `/g/collect` requests (query and batched POST bodies), all on `tid=G-QGGYL7FRLG`. Stopped before any order.
 
-| Event | Result | Evidence |
-|---|---|---|
-| `page_view` | PASS | fires on load and again on SPA navigation |
-| `view_item` | PASS | on `/product/n70-hilux-front-mount-intercooler-600x400` |
-| `add_to_cart` | PASS | on ADD TO CART |
-| `begin_checkout` | **FAIL** | zero `/g/collect` hits after "Checkout with Shopify" |
+| Event            | Result   | Evidence                                                |
+| ---------------- | -------- | ------------------------------------------------------- |
+| `page_view`      | PASS     | fires on load and again on SPA navigation               |
+| `view_item`      | PASS     | on `/product/n70-hilux-front-mount-intercooler-600x400` |
+| `add_to_cart`    | PASS     | on ADD TO CART                                          |
+| `begin_checkout` | **FAIL** | zero `/g/collect` hits after "Checkout with Shopify"    |
 
 Also observed passing: `view_item_list`, `select_item`, `view_cart`, `user_engagement`. Zero console errors on the storefront.
 
@@ -72,6 +72,6 @@ No visual, copy, pricing, offer or business-rule changes. The 5% welcome offer i
 ## Exact remaining actions you must take (external)
 
 1. **Reissue Shopify Admin access.** The current token 401s. If you want questions 1-4 answered by API rather than by eye, the app needs reinstalling with `read_apps`, `read_pixels` and `read_script_tags` added — but note 1-3 still are not answerable via Admin API even then.
-2. **Check in Shopify admin manually** (30 seconds each): Settings, Apps and sales channels — is *Facebook & Instagram* listed, and is *Windsor AI* listed under "Develop apps"? Settings, Customer events — is there a GA4 or Meta pixel entry?
+2. **Check in Shopify admin manually** (30 seconds each): Settings, Apps and sales channels — is _Facebook & Instagram_ listed, and is _Windsor AI_ listed under "Develop apps"? Settings, Customer events — is there a GA4 or Meta pixel entry?
 3. **Meta Pixel ID** still does not exist anywhere in this project. Send me the numeric ID from Events Manager and I will wire it exactly as GA4 is wired.
 4. **Purchase tracking** remains impossible from this codebase alone — the order confirmation happens on Shopify's domain, so GA4 and Meta must be installed inside Shopify checkout. I have not verified and will not claim any Purchase or checkout-side tracking works.
