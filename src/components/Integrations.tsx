@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useLocation } from "@tanstack/react-router";
 import { CONSENT_UPDATED_EVENT, readConsent } from "@/lib/consent";
 import { trackGa4, trackMeta } from "@/lib/analytics";
+import { captureAttribution } from "@/lib/attribution";
 
 /**
  * Third-party app integrations. Each one activates only when its VITE_ env var is set.
@@ -164,6 +165,9 @@ export function Integrations() {
   }, []);
 
   useEffect(() => {
+    // Capture campaign params on every navigation (the first ad-click landing
+    // wins for the session) so the Shopify checkout handoff can forward them.
+    captureAttribution();
     if (initialPageView.current) {
       initialPageView.current = false;
       return;

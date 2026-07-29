@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { FreeShippingBar } from "@/components/FreeShippingBar";
 import { CompleteTheKit } from "@/components/CompleteTheKit";
 import { trackViewCart, trackBeginCheckout, toAnalyticsItem } from "@/lib/analytics";
+import { appendAttribution } from "@/lib/attribution";
 
 export function CartDrawer() {
   const {
@@ -89,7 +90,9 @@ export function CartDrawer() {
     setDrawerOpen(false);
     // Synchronous navigation inside the click handler avoids Safari/iOS popup blockers
     // that reject window.open called from async callbacks.
-    window.location.assign(url);
+    // Forward captured campaign params so ad attribution survives the
+    // cross-origin handoff into Shopify checkout.
+    window.location.assign(appendAttribution(url));
   };
 
   return (
