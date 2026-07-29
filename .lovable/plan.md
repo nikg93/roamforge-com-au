@@ -1,77 +1,48 @@
-# Audit result + repair plan
+# Roamforge Production Audit — 29 Jul 2026
 
-Nothing was created, modified or deleted in Shopify. No token, secret or credential value is reproduced below.
+Read-only. Evidence gathered with headless Chromium against https://roamforge.com.au at 1440x900, 768x1024 and 390x844, plus repository inspection at local HEAD `7323b8a`.
 
-## Part A — Shopify Admin questions: BLOCKED (evidence)
+## Executive Summary
 
-Two blockers, both verified.
+The storefront is in good shape structurally. All audited routes return correct status codes (`/`, `/shop`, `/category/lighting`, `/faq` = 200; `/nonexistent-page-xyz` = true 404 with `PAGE NOT FOUND` H1 and no canonical). No horizontal overflow at any of the three widths (`scrollWidth == clientWidth` = 1440/768/390 on every route). Zero JavaScript console errors or page errors across all runs — the only console 404 is the intentional not-found probe. The full purchase path works end to end: add-to-cart on `/product/ultimate9-led-light-bar-20-inch` opens the cart drawer with correct line item and total, and Checkout hands off to `https://xmszfz-pj.myshopify.com/checkouts/cn/...` in a new tab. GA4 is confirmed live — two `google-analytics.com/g/collect?v=2&tid=G-QGGYL7FRLG` hits observed, `typeof window.gtag === "function"`, dataLayer length 6.
 
-**Blocker 1 — the Admin credentials in this project do not authenticate.**
-Direct Admin API calls against `xmszfz-pj.myshopify.com` return `401 / "[API] Invalid API key or access token"` on every attempt:
+SEO fundamentals are sound: unique titles/descriptions and canonicals per route, robots.txt allows all crawlers and advertises the sitemap, sitemap.xml is valid, and Product JSON-LD on PDPs now carries `shippingDetails` and `hasMerchantReturnPolicy` with no fabricated `aggregateRating`.
 
-```text
-POST /admin/api/2025-07/graphql.json   -> 401  (offline token)
-POST /admin/api/2025-07/graphql.json   -> 401  (online token)
-GET  /admin/api/2025-07/shop.json      -> 401  (both, 2025-07 and 2024-10)
-```
+The remaining issues are conversion and polish, not stability. The two that cost money are the mobile consent banner obscuring the buy zone and the missing Meta Pixel.
 
-The offline token has a valid `shpat_` shape, so this is a rejected/rotated credential or one bound to a different app context — not a malformed value. The managed Shopify tooling available here only covers products, variants, discounts, price rules, storefront token and shop domain; it exposes no app, pixel, theme or customer-events surface.
+## Critical Bugs to Fix
 
-**Blocker 2 — the granted scope set cannot answer these questions even with a working token.** The online credential self-reports its granted scopes:
+**P0 — Mobile consent banner covers the PDP purchase area.** At 390x844 on `/product/ultimate9-led-light-bar-20-inch`, the banner (`src/components/ConsentBanner.tsx:108`, `fixed inset-x-3 bottom-[calc(96px+env(safe-area-inset-bottom))]`) sits directly on top of the price, the "In Stock" line and the top of the description, stacked immediately above the sticky ADD TO CART bar. Roughly the bottom 40% of the first mobile viewport is consent UI. The same overlay hides the top of the Featured Gear rail on the homepage. Impact: high (first-view buy signal hidden on the dominant device). Effort: low.
 
-```text
-read_themes, unauthenticated_read_product_listings, write_discounts,
-write_inventory, write_price_rules, write_products, write_publications
-```
+**P1 — Meta Pixel is not firing in production.** `typeof window.fbq === "undefined"` on the live PDP; no `facebook.net`/`facebook.com/tr` requests observed. `src/components/Integrations.tsx:36` reads `VITE_META_PIXEL_ID`, which is unset in the production environment. The pixel ID `1043681748196165` was previously observed on the Shopify checkout. Impact: high (no Meta ad attribution or retargeting audiences). Effort: low.
 
-| #   | Question                                                  | Verdict | Blocked by                                                                                                             |
-| --- | --------------------------------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------- |
-| 1   | Facebook & Instagram/Meta app or sales channel installed? | UNKNOWN | 401, and no `read_apps` scope. Shopify also exposes no Admin query that lists _other_ apps installed on a shop.        |
-| 2   | Meta pixel/dataset linked; numeric Pixel ID?              | UNKNOWN | 401, and no `read_pixels`. The `webPixel` query returns only the _calling_ app's own pixel, never Meta's.              |
-| 3   | Custom app `Windsor AI` exists / install status?          | UNKNOWN | 401, and no `read_apps`. Same API limitation as #1.                                                                    |
-| 4   | GA4 `G-QGGYL7FRLG` in Shopify customer events / checkout? | UNKNOWN | 401. `read_themes` is granted but unusable while the token 401s; customer-events pixels need `read_pixels` regardless. |
+## Prioritised Action Plan
 
-I will not guess any of these four. Even a fully-scoped token cannot answer 1-3, so these are permanently manual checks in Shopify admin.
+### P1
+1. **Consent banner placement** — mobile banner and sticky ATC compete for the same space; buttons also wrap to two lines ("REJECT ALL" over two lines at 390px). Reflow to a compact single-row bar docked below the ATC bar, or suppress the ATC bar while consent is open. Effort: low.
+2. **Meta Pixel ID** — add the verified ID as an env value (or a public fallback in `src/lib/site.ts` alongside the GA4 pattern) so `fbq` initialises and PageView/AddToCart/InitiateCheckout fire. Effort: low.
+3. **Sub-44px tap targets on mobile** — measured button heights on the PDP at 390px: `ADD TO CART` in the Complete-the-Kit rail = 36px, main in-page ADD TO CART = 40px (only the sticky bar reaches 44px). WCAG 2.5.8 / iOS guidance is 44px. Files: `src/components/ProductCard.tsx`, `src/components/CompleteTheKit.tsx`. Effort: low.
 
-## Part B — GA4 live verification on roamforge.com.au: 3 of 4 PASS
+### P2
+4. **Missing alt text on two recurring images** — the header logo (`/assets/logo-Cke_sw9X.png`) has an empty `alt` on every page at all three widths, and the category hero (`/assets/cat-lighting-D0rKd_C9.jpg`) has none on `/category/lighting`. Files: `src/components/SiteHeader.tsx`, `src/routes/category.$slug.tsx`. Effort: low.
+5. **Duplicated H1/H2 on category pages** — `/category/lighting` renders `H1: LIGHTING` immediately followed by `H2: LIGHTING`. Thin duplication with no added keyword value; make the H2 descriptive (e.g. "Driving Lights, Light Bars & Wiring") or drop it. Effort: low.
+6. **Category page titles are bare** — `LIGHTING — Roamforge` (shouty, no intent keywords) versus the strong homepage title. Rewrite as e.g. "4WD Driving Lights & Light Bars | Roamforge". Effort: low.
+7. **Checkout domain is unbranded** — handoff lands on `xmszfz-pj.myshopify.com`, which reads as a different business at the moment of payment. Configuring a branded checkout domain in Shopify is a trust win. Effort: medium, external to the repo.
 
-Real browser, fresh storage, consent accepted, observing actual `/g/collect` requests (query and batched POST bodies), all on `tid=G-QGGYL7FRLG`. Stopped before any order.
+### P3
+8. **`/shop` merchandising order** — the first products shown are `N70 Hilux Front Mount Intercooler`, `GU Patrol Radiator Shroud`, `GQ Patrol Airbox`, and three `Roamforge Adventure Planner` digital SKUs appear high in the grid, ahead of hero Lightforce and recovery stock. Reorder so flagship physical gear leads. Effort: medium.
+9. **Internal linking depth** — PDP breadcrumb is `Home / Shop / <product>`; it skips the product's category, so category pages gain no internal link equity from PDPs. Effort: low.
+10. **Homepage H1 renders as "FORGEDFOR ADVENTURE"** when the DOM text is concatenated (line-break markup with no space). Visually fine; assistive tech and any text-extraction read it as one word. Effort: low.
 
-| Event            | Result   | Evidence                                                |
-| ---------------- | -------- | ------------------------------------------------------- |
-| `page_view`      | PASS     | fires on load and again on SPA navigation               |
-| `view_item`      | PASS     | on `/product/n70-hilux-front-mount-intercooler-600x400` |
-| `add_to_cart`    | PASS     | on ADD TO CART                                          |
-| `begin_checkout` | **FAIL** | zero `/g/collect` hits after "Checkout with Shopify"    |
+## Actionable Quick Wins
 
-Also observed passing: `view_item_list`, `select_item`, `view_cart`, `user_engagement`. Zero console errors on the storefront.
+- Add `alt` to the header logo and the category hero image (2 files, ~5 minutes).
+- Raise all `ADD TO CART` buttons to `min-h-11` (44px).
+- Rewrite the nine category `head()` titles with search-intent keywords.
+- Replace the duplicate category H2 with descriptive copy.
+- Set the Meta Pixel ID so the already-written pixel code activates.
+- Insert a non-breaking space (or `{" "}`) in the homepage H1 line break.
 
-The handoff itself works — the click lands on `https://xmszfz-pj.myshopify.com/checkouts/cn/...?_r=...`, correct store domain, attribution params forwarded. Only the analytics hit is lost.
+## Verified as passing (no action)
 
-**Root cause, confirmed by isolation test, not inferred.** On the live page I fired `begin_checkout` two ways:
-
-```text
-A) gtag event, no navigation, wait 4s   -> no /g/collect
-B) gtag event + immediate same-origin navigation -> begin_checkout DOES arrive
-```
-
-GA4 batches events and flushes them on unload. In case B the same-origin unload flush delivers it. In the real checkout path `CartDrawer.handleCheckout` calls `trackBeginCheckout(...)` and then `window.location.assign()` to a **cross-origin** Shopify URL in the same tick — the queued hit is discarded before any flush. `getCheckoutUrl()` is not the problem; it returns a valid URL and the browser reaches checkout.
-
-## Part C — Proposed fix (one defect, narrow)
-
-Make the checkout hit survive the cross-origin unload:
-
-1. In `src/lib/analytics.ts`, set GA4 `transport_type: "beacon"` so hits use `navigator.sendBeacon` and survive page teardown. Apply it at `config` time in `src/components/Integrations.tsx` so every event benefits, not just checkout.
-2. In `src/lib/analytics.ts`, give `trackBeginCheckout` an `event_callback` plus a short failsafe timeout (~250ms), and have `CartDrawer.handleCheckout` navigate from that callback — whichever fires first — so the hit is dispatched before unload. Keep the navigation inside the click handler's synchronous path where iOS popup rules require it, and keep the existing `items.length === 0` guard and `shouldEmit` dedupe untouched.
-3. Add a unit test asserting `begin_checkout` is dispatched before the navigation callback runs, and that an empty cart still emits nothing.
-4. Run the full gate: format, lint, typecheck, unit, static, catalogue, production build.
-5. Re-verify live after deploy by replaying the same journey and confirming a real `begin_checkout` `/g/collect` hit on `G-QGGYL7FRLG`, stopping before an order.
-
-No visual, copy, pricing, offer or business-rule changes. The 5% welcome offer is not touched.
-
-## Exact remaining actions you must take (external)
-
-1. **Reissue Shopify Admin access.** The current token 401s. If you want questions 1-4 answered by API rather than by eye, the app needs reinstalling with `read_apps`, `read_pixels` and `read_script_tags` added — but note 1-3 still are not answerable via Admin API even then.
-2. **Check in Shopify admin manually** (30 seconds each): Settings, Apps and sales channels — is _Facebook & Instagram_ listed, and is _Windsor AI_ listed under "Develop apps"? Settings, Customer events — is there a GA4 or Meta pixel entry?
-3. **Meta Pixel ID** still does not exist anywhere in this project. Send me the numeric ID from Events Manager and I will wire it exactly as GA4 is wired.
-4. **Purchase tracking** remains impossible from this codebase alone — the order confirmation happens on Shopify's domain, so GA4 and Meta must be installed inside Shopify checkout. I have not verified and will not claim any Purchase or checkout-side tracking works.
+Route status codes and true 404; zero console/runtime errors; no horizontal overflow at 1440/768/390; canonical, robots.txt, sitemap.xml; unique per-route titles and meta descriptions; Product/BreadcrumbList JSON-LD with `shippingDetails` + `hasMerchantReturnPolicy` and no fabricated reviews; GA4 collect hits; cart drawer contents, totals, "Shipping calculated at checkout" disclosure, and Shopify checkout handoff.
