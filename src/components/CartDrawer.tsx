@@ -73,15 +73,9 @@ export function CartDrawer() {
       return;
     }
     // Forward captured campaign params so ad attribution survives the
-    // cross-origin handoff into Shopify checkout. Resolved before tracking so
-    // the navigation callback does no work beyond assigning the URL.
+    // cross-origin handoff into Shopify checkout.
     const target = appendAttribution(url);
     setDrawerOpen(false);
-    // Navigate only once the begin_checkout beacon has been dispatched (or the
-    // failsafe timeout elapses). Navigating in the same tick discards the
-    // queued GA4 hit, so the checkout event never reaches /g/collect.
-    // location.assign keeps this a same-tab navigation, so no popup blocker
-    // applies even though it now runs from a callback.
     trackBeginCheckout(
       items.map((i) =>
         toAnalyticsItem({
@@ -96,8 +90,15 @@ export function CartDrawer() {
         }),
       ),
       currency,
-      () => window.location.assign(target),
     );
+    // Open checkout in a new tab, synchronously inside the click handler so no
+    // popup blocker rejects it. This also keeps the storefront tab alive:
+    // gtag.js batches hits and flushes ~2s later, and a same-tab cross-origin
+    // navigation destroys the page before that flush — measured, and it is why
+    // begin_checkout never reached /g/collect. Fall back to same-tab
+    // navigation if the browser still refuses the new tab.
+    const opened = window.open(target, "_blank", "noopener");
+    if (!opened) window.location.assign(target);
   };
 
   return (
