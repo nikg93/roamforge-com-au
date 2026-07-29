@@ -97,11 +97,17 @@ export function Integrations() {
       const c = readConsent();
       if (ga4 && c.analytics) {
         w.dataLayer = Array.isArray(w.dataLayer) ? w.dataLayer : [];
-        w.gtag =
-          w.gtag ||
-          ((...args: unknown[]) => {
-            w.dataLayer?.push(args);
-          });
+        // gtag.js identifies `js` / `config` / `event` commands by the native
+        // `arguments` object. Pushing a plain array instead makes gtag.js
+        // silently ignore every command: the library loads and `config` sits
+        // in dataLayer, but no /g/collect hit is ever sent. Must be a
+        // `function` (not an arrow) so `arguments` exists.
+        if (!w.gtag) {
+          w.gtag = function gtag() {
+            // eslint-disable-next-line prefer-rest-params
+            w.dataLayer?.push(arguments);
+          } as Gtag;
+        }
         if (!gaConfigured) {
           w.gtag("js", new Date());
           w.gtag("config", ga4);

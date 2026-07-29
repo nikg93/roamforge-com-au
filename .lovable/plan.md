@@ -1,28 +1,42 @@
-## Live audit result — https://roamforge.com.au (read-only, nothing changed)
+## Goal
 
-Chromium 1280x1800, fresh storage, "ACCEPT ALL" clicked (consent persisted: `{"analytics":true,"marketing":true,"decided":true}`).
+GA4 `G-QGGYL7FRLG` loads on production but transmits nothing. Make it actually record traffic and events. No business content, offer wording, or design changes.
 
-| #   | Check                                 | Result                 | Exact evidence                                                                                                                                                                                                               |
-| --- | ------------------------------------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Consent accepted, stored              | PASS                   | localStorage `roamforge-consent-v1` = `{"version":1,...,"analytics":true,"marketing":true,"decided":true}`                                                                                                                   |
-| 2   | GA4 script loads / valid ID           | **FAIL**               | `document.getElementById('ga4-loader')` = false, `typeof window.gtag` = `"undefined"`, `dataLayer.length` = 0. Zero requests to googletagmanager.com / google-analytics.com after consent. Only script on page: `/~flock.js` |
-| 3   | Meta Pixel loads / valid ID           | **FAIL**               | `meta-pixel-loader` = false, `typeof window.fbq` = `"undefined"`, zero requests to connect.facebook.net or facebook.com/tr                                                                                                   |
-| 3b  | Klaviyo / Tidio                       | not configured         | `klaviyo-loader` = false, `tidio-loader` = false                                                                                                                                                                             |
-| 4   | PDP `view_item` / `ViewContent`       | **FAIL (not emitted)** | `/product/lightforce-beast-190-3-mode-led-driving-light`, 3s wait: `dataLayer` = `[]`, no `/g/collect`, no `/tr?`                                                                                                            |
-| 5   | `add_to_cart` / `AddToCart`           | **FAIL (not emitted)** | ADD TO CART clicked, drawer opened, no tracking network calls, `dataLayer` still empty                                                                                                                                       |
-| 6   | `begin_checkout` / `InitiateCheckout` | **FAIL (not emitted)** | "Checkout with Shopify" clicked → redirected to `xmszfz-pj.myshopify.com/checkouts/cn/hWNF1RWDHl3Lf3uaBAPg7WkN/en-au` (stopped before order). No pixel/GA hits fired on handoff                                              |
-| 7   | Storefront funnel itself              | PASS                   | Home → PDP → ATC → Shopify checkout all worked, 0 console errors on roamforge.com.au; the only console errors (401, 403, permissions-policy `publickey-credentials-*`) came from Shopify's own checkout page after redirect  |
-| 8   | Purchase optimisation viable today?   | **NO**                 | No pixel and no GA4 property receiving data, so no `Purchase` signal exists; Meta/Google campaigns can only run on link-click objectives                                                                                     |
+## Findings this plan is based on
 
-### Root cause (code-confirmed, not changed)
+- Live test after consent: `gtag/js?id=G-QGGYL7FRLG` is requested, `window.gtag` is a function, `dataLayer` contains `["config","G-QGGYL7FRLG"]` — but **zero** requests to `*.google-analytics.com` or `/g/collect` over 12 seconds, including after an SPA navigation.
+- Meta Pixel ID: does not exist in chat history, repo, git history, plan files, or secrets. Nothing to configure.
+- Shopify custom app `Windsor AI`: no trace in any project record; never set up from here.
 
-`src/components/Integrations.tsx` deliberately loads each tag only when a validated env var is present — `VITE_GA4_MEASUREMENT_ID` (`G-XXXX…`) and `VITE_META_PIXEL_ID` (digits). Neither is set in the production build, so consent is honoured but there is nothing to load. The event layer in `src/lib/analytics.ts` is correct and consent-gated; it silently no-ops because `gtag`/`fbq`/`dataLayer` never exist.
+## Step 1 — Confirm the root cause before changing anything
 
-### Proposed fix (only if you approve — needs values from you)
+`src/components/Integrations.tsx` installs a `gtag` shim that pushes a plain array into `dataLayer`. Google's `gtag.js` recognises `js` / `config` / `event` commands by the `arguments` object, not by an array literal, which would explain a loaded-but-silent tag. Verify by comparing the live `dataLayer` entry types against a known-good gtag page before editing. If the evidence points elsewhere (for example Consent Mode default `denied` never being updated to `granted`), fix that instead.
 
-1. You supply GA4 Measurement ID and Meta Pixel ID; they are publishable, so they go in project env as `VITE_GA4_MEASUREMENT_ID` and `VITE_META_PIXEL_ID`.
-2. Redeploy production, then re-run this exact browser audit to confirm `gtag`/`fbq` defined and `view_item`/`ViewContent`, `add_to_cart`/`AddToCart`, `begin_checkout`/`InitiateCheckout` fire once each.
-3. For `Purchase` (the event ad platforms optimise on), the conversion happens on Shopify's checkout, not this site — install the same GA4 + Meta Pixel in the Shopify admin (Customer events / Meta sales channel) using the identical IDs so the funnel is attributed end to end. This is a Shopify-admin step, not a code change.
-4. Optional hardening: Meta Conversions API for server-side `Purchase` de-duplication, once step 3 is live.
+## Step 2 — Correct the tag installation
 
-No code, commits, or deploys were made during this audit.
+Assuming Step 1 confirms the shim:
+
+- Replace the shim with the canonical form so commands are pushed as `arguments`.
+- Ensure ordering is `js` → `config` → `gtag.js` script load, and that `config` runs only once.
+- Keep every existing consent behaviour exactly as-is: nothing loads before analytics consent, and revoking consent still pushes `analytics_storage: denied` and removes the loader.
+
+## Step 3 — Verify events actually transmit
+
+Re-run the live browser test after consent and require, as hard evidence:
+
+- at least one `/g/collect` request carrying `tid=G-QGGYL7FRLG` and `en=page_view`
+- a second `page_view` on SPA navigation to `/shop`
+- `view_item` on a product page and `add_to_cart` on an add
+- `begin_checkout` on the checkout handoff, stopping before any order
+
+Report the exact query parameters observed. GA4 is not called working until collect hits are seen.
+
+## Step 4 — QA and deploy
+
+Run format, lint, typecheck, unit tests, static/catalogue checks, and the production build, then publish and repeat Step 3 against `roamforge.com.au`.
+
+## External blockers (cannot be resolved in code)
+
+1. **Meta Pixel ID** — no value exists anywhere in this project. Provide the numeric ID from Meta Events Manager and it can be wired the same public-config way GA4 now is.
+2. **Windsor AI Shopify app** — no record of installation, scopes, or redirect URLs. Its setup lives in Shopify admin under Settings → Apps and sales channels → Develop apps; details would need to be read there.
+3. **Purchase tracking** — the order completes on Shopify checkout, so GA4 and Meta must also be installed in Shopify admin (Customer events / Meta sales channel) with the same IDs. Not a code change in this project.
