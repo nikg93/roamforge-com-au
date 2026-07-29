@@ -135,6 +135,19 @@ export function trackMeta(event: string, params: Record<string, unknown> = {}): 
 
 const AUD = "AUD";
 
+/** Failsafe delay before navigating when gtag's event_callback never fires. */
+const CHECKOUT_FLUSH_MS = 250;
+
+/** Wrap a callback so it runs at most once, whichever path reaches it first. */
+function once(fn?: () => void): () => void {
+  let called = false;
+  return () => {
+    if (called || !fn) return;
+    called = true;
+    fn();
+  };
+}
+
 export function trackViewItem(item: AnalyticsItem, currency = AUD) {
   if (!shouldEmit(`view_item:${item.item_id}:${item.item_variant ?? ""}`)) return;
   const price = item.price ?? 0;
