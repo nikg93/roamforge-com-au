@@ -158,7 +158,10 @@ for (const [name, src] of [
   ["shop", shopRoute],
   ["category", categoryRoute],
 ]) {
-  check(`${name} exposes numbered ?page= URLs`, /validateSearch/.test(src) && /parsePageParam/.test(src));
+  check(
+    `${name} exposes numbered ?page= URLs`,
+    /validateSearch/.test(src) && /parsePageParam/.test(src),
+  );
   check(`${name} emits a self-referencing paginated canonical`, /canonicalForPage/.test(src));
   check(`${name} emits rel=prev/next`, /"prev"/.test(src) && /"next"/.test(src));
   check(`${name} 404s on out-of-range pages`, /notFound\(\)/.test(src));
