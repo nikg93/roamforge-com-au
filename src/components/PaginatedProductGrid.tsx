@@ -105,7 +105,13 @@ export function PaginatedProductGrid({
         </div>
       )}
 
-      <CataloguePagination page={page} totalPages={totalPages} to={to} params={params} label={label} />
+      <CataloguePagination
+        page={page}
+        totalPages={totalPages}
+        to={to}
+        params={params}
+        label={label}
+      />
     </>
   );
 }
