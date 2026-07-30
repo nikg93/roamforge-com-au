@@ -1,5 +1,11 @@
 import { useEffect } from "react";
-import { createFileRoute, Link, notFound, useRouter, stripSearchParams } from "@tanstack/react-router";
+import {
+  createFileRoute,
+  Link,
+  notFound,
+  useRouter,
+  stripSearchParams,
+} from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
@@ -23,7 +29,12 @@ const shopQuery = (page: number) =>
   queryOptions({
     queryKey: ["products", "shop", "page", page],
     queryFn: async () => {
-      const res = await fetchTwoPhaseNumberedPage(page, PAGE_SIZE, SHOP_CORE_QUERY, SHOP_MERCH_QUERY);
+      const res = await fetchTwoPhaseNumberedPage(
+        page,
+        PAGE_SIZE,
+        SHOP_CORE_QUERY,
+        SHOP_MERCH_QUERY,
+      );
       // Beyond the end of the catalogue: a real 404, never an empty
       // indexable page or a silent redirect to page 1.
       if (!res) throw notFound();

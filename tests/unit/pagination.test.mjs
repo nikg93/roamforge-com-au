@@ -49,7 +49,10 @@ export default {
   "fitment: only real metafield values surface, never invented ones"() {
     assert.deepEqual(readVehicleFitment(undefined), []);
     assert.deepEqual(readVehicleFitment([]), []);
-    assert.deepEqual(readVehicleFitment([null, { namespace: "custom", key: "engine", value: "" }]), []);
+    assert.deepEqual(
+      readVehicleFitment([null, { namespace: "custom", key: "engine", value: "" }]),
+      [],
+    );
     assert.deepEqual(
       readVehicleFitment([{ namespace: "other", key: "vehicle_make", value: "Toyota" }]),
       [],
