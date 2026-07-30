@@ -65,7 +65,7 @@ export const CATEGORIES: Category[] = [
       "Battery monitors, DC-DC chargers, isolators and live vehicle telemetry — full control over your 12V and touring electrical system.",
     query: "tag:cat-monitoring",
     image: catMonitoring,
-    primary: true,
+    primary: false,
   },
   {
     slug: "gps-tracking",
@@ -104,7 +104,7 @@ export const CATEGORIES: Category[] = [
       "Portable and in-vehicle air compressors, tyre deflators and inflation kits — air up fast after every low-pressure run.",
     query: "tag:cat-air-compressors",
     image: catCompressors,
-    primary: true,
+    primary: false,
   },
   {
     slug: "recovery",
@@ -143,7 +143,7 @@ export const CATEGORIES: Category[] = [
       "Nudge bars, bull bars, side steps, rock sliders and underbody protection — armour your 4WD for the tracks and the outback.",
     query: "tag:cat-vehicle-protection",
     image: catVehicleProtection,
-    primary: false,
+    primary: true,
   },
   {
     slug: "merch",
