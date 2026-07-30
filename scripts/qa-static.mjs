@@ -148,7 +148,29 @@ const shopRoute = read("src/routes/shop.tsx");
 check("shop all filters merch out of the first page", /-tag:cat-merch/.test(shopRoute));
 check(
   "shop all still paginates merch at the end",
-  /tag:cat-merch/.test(shopRoute) && /phase/.test(shopRoute),
+  /tag:cat-merch/.test(shopRoute) && /fetchTwoPhaseNumberedPage/.test(shopRoute),
+);
+
+// 13b. Catalogue pagination must be crawlable: real ?page=N URLs with
+// self-referencing canonicals and rel prev/next on both listing routes.
+const categoryRoute = read("src/routes/category.$slug.tsx");
+for (const [name, src] of [
+  ["shop", shopRoute],
+  ["category", categoryRoute],
+]) {
+  check(`${name} exposes numbered ?page= URLs`, /validateSearch/.test(src) && /parsePageParam/.test(src));
+  check(`${name} emits a self-referencing paginated canonical`, /canonicalForPage/.test(src));
+  check(`${name} emits rel=prev/next`, /"prev"/.test(src) && /"next"/.test(src));
+  check(`${name} 404s on out-of-range pages`, /notFound\(\)/.test(src));
+  check(`${name} renders crawlable pagination links`, /CataloguePagination/.test(src));
+}
+
+// 13c. Fitment data must come from real Shopify metafields, never invented.
+const pdpRoute = read("src/routes/product.$handle.tsx");
+check("PDP reads vehicle fitment from Shopify metafields", /readVehicleFitment/.test(pdpRoute));
+check(
+  "product query requests custom fitment metafields",
+  /metafields\(identifiers:/.test(read("src/lib/shopify.ts")),
 );
 
 // 14. Global OG/Twitter fallback wired at the root shell.
