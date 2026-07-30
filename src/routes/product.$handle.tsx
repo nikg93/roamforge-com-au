@@ -560,7 +560,7 @@ function ProductPageInner() {
                 Secure checkout powered by Shopify
               </p>
               <MiniTrustRow />
-              {!fitment && (
+              {!hasFitment && (
                 <p className="mt-4 text-xs text-muted-foreground">
                   Not sure this suits your build?{" "}
                   <Link to="/contact" className="underline hover:text-rf-dark">
@@ -568,7 +568,7 @@ function ProductPageInner() {
                   </Link>
                 </p>
               )}
-              {fitment && (
+              {hasFitment && (
                 <section
                   aria-labelledby="fitment-heading"
                   className="mt-8 border-t border-border pt-6"
@@ -577,10 +577,34 @@ function ProductPageInner() {
                     id="fitment-heading"
                     className="font-display text-sm tracking-[0.2em] text-rf-dark"
                   >
-                    FITMENT
+                    VEHICLE FITMENT
                   </h2>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Compatible with: <span className="text-rf-dark">{fitment.join(", ")}</span>.
+                  {fitmentRows.length > 0 ? (
+                    <table className="mt-3 w-full border-collapse text-xs">
+                      <caption className="sr-only">
+                        Vehicle compatibility details for this product
+                      </caption>
+                      <tbody>
+                        {fitmentRows.map((row) => (
+                          <tr key={row.key} className="border-b border-border last:border-b-0">
+                            <th
+                              scope="row"
+                              className="w-32 py-2 pr-3 text-left align-top font-medium uppercase tracking-[0.12em] text-muted-foreground"
+                            >
+                              {row.label}
+                            </th>
+                            <td className="py-2 align-top text-rf-dark">{row.value}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Commonly fitted to:{" "}
+                      <span className="text-rf-dark">{fitment?.join(", ")}</span>.
+                    </p>
+                  )}
+                  <p className="mt-3 text-xs text-muted-foreground">
                     Confirm compatibility before ordering —{" "}
                     <Link to="/contact" className="underline hover:text-rf-dark">
                       contact us
