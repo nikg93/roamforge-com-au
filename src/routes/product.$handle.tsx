@@ -545,7 +545,7 @@ function ProductPageInner() {
                 size="lg"
                 disabled={adding || !canAdd}
                 onClick={doAdd}
-                className="mt-8 w-full bg-rf-dark text-rf-cream hover:bg-rf-dark-2 rounded-none"
+                className="mt-8 min-h-11 w-full bg-rf-dark text-rf-cream hover:bg-rf-dark-2 rounded-none"
               >
                 {adding ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
