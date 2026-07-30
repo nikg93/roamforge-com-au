@@ -165,7 +165,10 @@ for (const [name, src] of [
   check(`${name} emits a self-referencing paginated canonical`, /canonicalForPage/.test(src));
   check(`${name} emits rel=prev/next`, /"prev"/.test(src) && /"next"/.test(src));
   check(`${name} 404s on out-of-range pages`, /notFound\(\)/.test(src));
-  check(`${name} renders crawlable pagination links`, /CataloguePagination/.test(src));
+  check(
+    `${name} renders crawlable pagination links`,
+    /CataloguePagination|PaginatedProductGrid/.test(src),
+  );
 }
 
 // 13c. Fitment data must come from real Shopify metafields, never invented.
