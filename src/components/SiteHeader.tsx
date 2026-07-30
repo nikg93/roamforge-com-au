@@ -3,9 +3,16 @@ import { Link } from "@tanstack/react-router";
 import { Search, Menu, X } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { CartDrawer } from "./CartDrawer";
-import { CATEGORIES } from "@/lib/categories";
+import { CATEGORIES, PRIMARY_CATEGORIES, SECONDARY_CATEGORIES } from "@/lib/categories";
 import { SearchDialog } from "./SearchDialog";
 import { AnnouncementBar } from "./AnnouncementBar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -129,12 +136,13 @@ export function SiteHeader() {
           </Link>
         </div>
 
-        {/* Single accessible desktop nav — all categories exposed with
-            compact, wrap-friendly styling so nothing hides behind a
-            dropdown at lg and up. */}
+        {/* Desktop nav: one row that never wraps. High-intent categories are
+            visible; the remainder live in a keyboard-accessible "More" menu.
+            Every category is still reachable in one hop, and the mobile
+            drawer above continues to list all of them. */}
         <nav
           aria-label="Primary"
-          className="hidden lg:flex flex-1 flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10.5px] font-semibold uppercase tracking-[0.14em]"
+          className="hidden lg:flex flex-1 items-center justify-center gap-x-4 text-[11px] font-semibold uppercase tracking-[0.14em]"
         >
           <Link
             to="/shop"
@@ -143,17 +151,42 @@ export function SiteHeader() {
           >
             SHOP ALL
           </Link>
-          {CATEGORIES.map((c) => (
+          {PRIMARY_CATEGORIES.map((c) => (
             <Link
               key={c.slug}
               to="/category/$slug"
               params={{ slug: c.slug }}
+              title={c.navLabel}
               className="whitespace-nowrap text-rf-cream/90 hover:text-rf-tan transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2 focus-visible:ring-offset-rf-dark"
               activeProps={{ className: "text-rf-tan" }}
             >
-              {c.navLabel}
+              {c.shortLabel}
             </Link>
           ))}
+          {SECONDARY_CATEGORIES.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="inline-flex items-center gap-1 whitespace-nowrap uppercase tracking-[0.14em] text-rf-cream/90 hover:text-rf-tan transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2 focus-visible:ring-offset-rf-dark data-[state=open]:text-rf-tan">
+                MORE
+                <ChevronDown className="h-3.5 w-3.5" aria-hidden />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="min-w-56 rounded-none border-rf-cream/15 bg-rf-dark text-rf-cream"
+              >
+                {SECONDARY_CATEGORIES.map((c) => (
+                  <DropdownMenuItem key={c.slug} asChild>
+                    <Link
+                      to="/category/$slug"
+                      params={{ slug: c.slug }}
+                      className="flex min-h-11 cursor-pointer items-center text-[11px] font-semibold uppercase tracking-[0.14em] text-rf-cream/90 focus:bg-rf-dark-2 focus:text-rf-tan"
+                    >
+                      {c.navLabel}
+                    </Link>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </nav>
 
         <div className="flex items-center gap-1">

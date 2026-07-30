@@ -19,17 +19,20 @@ The remaining issues are conversion and polish, not stability. The two that cost
 ## Prioritised Action Plan
 
 ### P1
+
 1. **Consent banner placement** — mobile banner and sticky ATC compete for the same space; buttons also wrap to two lines ("REJECT ALL" over two lines at 390px). Reflow to a compact single-row bar docked below the ATC bar, or suppress the ATC bar while consent is open. Effort: low.
 2. **Meta Pixel ID** — add the verified ID as an env value (or a public fallback in `src/lib/site.ts` alongside the GA4 pattern) so `fbq` initialises and PageView/AddToCart/InitiateCheckout fire. Effort: low.
 3. **Sub-44px tap targets on mobile** — measured button heights on the PDP at 390px: `ADD TO CART` in the Complete-the-Kit rail = 36px, main in-page ADD TO CART = 40px (only the sticky bar reaches 44px). WCAG 2.5.8 / iOS guidance is 44px. Files: `src/components/ProductCard.tsx`, `src/components/CompleteTheKit.tsx`. Effort: low.
 
 ### P2
+
 4. **Missing alt text on two recurring images** — the header logo (`/assets/logo-Cke_sw9X.png`) has an empty `alt` on every page at all three widths, and the category hero (`/assets/cat-lighting-D0rKd_C9.jpg`) has none on `/category/lighting`. Files: `src/components/SiteHeader.tsx`, `src/routes/category.$slug.tsx`. Effort: low.
 5. **Duplicated H1/H2 on category pages** — `/category/lighting` renders `H1: LIGHTING` immediately followed by `H2: LIGHTING`. Thin duplication with no added keyword value; make the H2 descriptive (e.g. "Driving Lights, Light Bars & Wiring") or drop it. Effort: low.
 6. **Category page titles are bare** — `LIGHTING — Roamforge` (shouty, no intent keywords) versus the strong homepage title. Rewrite as e.g. "4WD Driving Lights & Light Bars | Roamforge". Effort: low.
 7. **Checkout domain is unbranded** — handoff lands on `xmszfz-pj.myshopify.com`, which reads as a different business at the moment of payment. Configuring a branded checkout domain in Shopify is a trust win. Effort: medium, external to the repo.
 
 ### P3
+
 8. **`/shop` merchandising order** — the first products shown are `N70 Hilux Front Mount Intercooler`, `GU Patrol Radiator Shroud`, `GQ Patrol Airbox`, and three `Roamforge Adventure Planner` digital SKUs appear high in the grid, ahead of hero Lightforce and recovery stock. Reorder so flagship physical gear leads. Effort: medium.
 9. **Internal linking depth** — PDP breadcrumb is `Home / Shop / <product>`; it skips the product's category, so category pages gain no internal link equity from PDPs. Effort: low.
 10. **Homepage H1 renders as "FORGEDFOR ADVENTURE"** when the DOM text is concatenated (line-break markup with no space). Visually fine; assistive tech and any text-extraction read it as one word. Effort: low.

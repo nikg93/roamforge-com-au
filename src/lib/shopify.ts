@@ -94,6 +94,18 @@ export interface ShopifyProduct {
       }>;
     };
     options: Array<{ name: string; values: string[] }>;
+    /**
+     * Shopify metafields requested by explicit identifier. Shopify returns a
+     * positional array with `null` for any identifier that does not exist or
+     * is not published to the Storefront API, so every consumer must treat
+     * entries as nullable.
+     */
+    metafields?: Array<{
+      namespace: string;
+      key: string;
+      value: string | null;
+      type?: string | null;
+    } | null>;
   };
 }
 
@@ -216,14 +228,36 @@ export const PRODUCTS_PAGE_QUERY = `
   }
 `;
 
+/**
+ * Vehicle fitment metafields, namespace `custom`. Requested by explicit
+ * identifier so the query never fails when a definition is missing — Shopify
+ * simply returns `null` in that slot.
+ */
+export const FITMENT_METAFIELD_KEYS = [
+  "vehicle_make",
+  "vehicle_model",
+  "vehicle_series",
+  "year_range",
+  "engine",
+  "fitment_notes",
+  "installation_difficulty",
+] as const;
+
+const FITMENT_METAFIELD_IDENTIFIERS = FITMENT_METAFIELD_KEYS.map(
+  (k) => `{namespace: "custom", key: "${k}"}`,
+).join(", ");
+
 // Rich detail query for the product route: description HTML, SEO, vendor,
-// SKU, compare-at price, all images and variants.
+// SKU, compare-at price, all images, variants and fitment metafields.
 export const PRODUCT_BY_HANDLE_QUERY = `
   query ProductByHandle($handle: String!) {
     product(handle: $handle) {
       id title handle vendor productType tags availableForSale
       description descriptionHtml
       seo { title description }
+      metafields(identifiers: [${FITMENT_METAFIELD_IDENTIFIERS}]) {
+        namespace key value type
+      }
       priceRange { minVariantPrice { amount currencyCode } }
       compareAtPriceRange { minVariantPrice { amount currencyCode } }
       featuredImage { url altText }
@@ -401,6 +435,116 @@ export async function fetchProductByHandle(handle: string) {
   const product = data?.data?.product;
   if (!product) return null;
   return { node: product } as ShopifyProduct;
+}
+
+/* ------------------------------------------------------------------ *
+ * Crawlable numbered pagination
+ *
+ * The Storefront API is cursor-based, so a `?page=N` URL is resolved by
+ * first fetching a cheap handle-only index (which also yields the opaque
+ * cursor for every position) and then requesting the single page of full
+ * product data that starts at the right cursor. Two small requests, fully
+ * server-renderable, and stable ordering means no duplicate products
+ * across pages.
+ * ------------------------------------------------------------------ */
+
+const AVAILABILITY_PREDICATE = "available_for_sale:true";
+
+function withAvailability(query?: string): string {
+  return query ? `(${query}) AND ${AVAILABILITY_PREDICATE}` : AVAILABILITY_PREDICATE;
+}
+
+/**
+ * Ordered list of opaque cursors, one per product matching `query`.
+ * `cursors[i]` is the cursor *of* product i, so paging to offset N uses
+ * `after: cursors[N - 1]`.
+ */
+export async function fetchProductCursors(query?: string, cap = 1000): Promise<string[]> {
+  const combined = withAvailability(query);
+  const cursors: string[] = [];
+  let after: string | null = null;
+  for (let i = 0; i < 20 && cursors.length < cap; i++) {
+    const data: {
+      data?: {
+        products?: {
+          edges: Array<{ cursor: string }>;
+          pageInfo: { hasNextPage: boolean; endCursor: string | null };
+        };
+      };
+    } = await storefrontApiRequest(PRODUCT_HANDLES_QUERY, {
+      first: Math.min(250, cap - cursors.length),
+      after,
+      query: combined,
+    });
+    const page = data?.data?.products;
+    if (!page) break;
+    for (const e of page.edges) cursors.push(e.cursor);
+    if (!page.pageInfo.hasNextPage) break;
+    after = page.pageInfo.endCursor;
+  }
+  return cursors;
+}
+
+export interface NumberedProductPage {
+  products: ShopifyProduct[];
+  page: number;
+  totalPages: number;
+  totalProducts: number;
+}
+
+/**
+ * Resolve a single numbered catalogue page. Returns `null` when the page is
+ * beyond the end of the catalogue so callers can emit a real 404 instead of
+ * an empty indexable page.
+ */
+export async function fetchNumberedProductPage(
+  page: number,
+  size: number,
+  query?: string,
+): Promise<NumberedProductPage | null> {
+  const cursors = await fetchProductCursors(query);
+  const totalProducts = cursors.length;
+  const totalPages = Math.max(1, Math.ceil(totalProducts / size));
+  if (page > totalPages) return null;
+  const start = (page - 1) * size;
+  const after = start > 0 ? (cursors[start - 1] ?? null) : null;
+  const res = await fetchProductsPage(size, query, after);
+  return { products: res.products, page, totalPages, totalProducts };
+}
+
+/**
+ * Two-phase numbered page: every product matching `coreQuery` is paginated
+ * first, then everything matching `merchQuery`. Used by Shop All so branded
+ * merch never outranks core 4WD gear, while the ordering stays stable and
+ * duplicate-free across paginated URLs.
+ */
+export async function fetchTwoPhaseNumberedPage(
+  page: number,
+  size: number,
+  coreQuery: string,
+  merchQuery: string,
+): Promise<NumberedProductPage | null> {
+  const [core, merch] = await Promise.all([
+    fetchProductCursors(coreQuery),
+    fetchProductCursors(merchQuery),
+  ]);
+  const corePages = core.length > 0 ? Math.ceil(core.length / size) : 0;
+  const merchPages = merch.length > 0 ? Math.ceil(merch.length / size) : 0;
+  const totalProducts = core.length + merch.length;
+  const totalPages = Math.max(1, corePages + merchPages);
+  if (page > totalPages) return null;
+
+  const inCore = corePages > 0 && page <= corePages;
+  const list = inCore ? core : merch;
+  const query = inCore ? coreQuery : merchQuery;
+  const localPage = inCore ? page : page - corePages;
+  const start = (localPage - 1) * size;
+  if (list.length === 0) {
+    return { products: [], page, totalPages, totalProducts };
+  }
+  const after = start > 0 ? (list[start - 1] ?? null) : null;
+  const res = await fetchProductsPage(size, query, after);
+  return { products: res.products, page, totalPages, totalProducts };
 }
 
 // Best-selling / featured product query for the homepage. Storefront API

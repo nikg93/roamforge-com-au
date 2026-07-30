@@ -1,16 +1,22 @@
-import { useEffect, useState } from "react";
-import { createFileRoute, notFound, Link, useRouter } from "@tanstack/react-router";
+import { useEffect } from "react";
+import {
+  createFileRoute,
+  notFound,
+  Link,
+  useRouter,
+  stripSearchParams,
+} from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SectionHeading } from "@/components/SectionHeading";
 import { ProductCard } from "@/components/ProductCard";
 import { EmptyProducts } from "@/components/EmptyProducts";
-import { fetchProductsPage, type ProductPage, type ShopifyProduct } from "@/lib/shopify";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { CataloguePagination } from "@/components/CataloguePagination";
+import { fetchNumberedProductPage } from "@/lib/shopify";
+import { PAGE_SIZE, pageRange, parsePageParam } from "@/lib/pagination";
 import { CATEGORY_MAP, isCategorySlug } from "@/lib/categories";
-import { canonicalFor, SITE_URL } from "@/lib/seo";
+import { canonicalForPage, SITE_URL } from "@/lib/seo";
 import { trackViewItemList, toAnalyticsItem } from "@/lib/analytics";
 
 function toAbsoluteUrl(pathOrUrl: string): string {
@@ -19,35 +25,47 @@ function toAbsoluteUrl(pathOrUrl: string): string {
   return `${SITE_URL}${path}`;
 }
 
-const PAGE_SIZE = 24;
-
-const categoryQuery = (slug: string, q: string) =>
+const categoryQuery = (slug: string, q: string, page: number) =>
   queryOptions({
-    queryKey: ["products", "category", slug],
-    queryFn: () => fetchProductsPage(PAGE_SIZE, q, null),
+    queryKey: ["products", "category", slug, "page", page],
+    queryFn: async () => {
+      const res = await fetchNumberedProductPage(page, PAGE_SIZE, q);
+      // Out-of-range page → real 404 rather than a thin indexable page.
+      if (!res) throw notFound();
+      return res;
+    },
     staleTime: 60_000,
     retry: 1,
     retryDelay: 500,
   });
 
 export const Route = createFileRoute("/category/$slug")({
+  validateSearch: (search: Record<string, unknown>): { page: number } => ({
+    page: parsePageParam(search.page),
+  }),
+  search: { middlewares: [stripSearchParams({ page: 1 })] },
+  loaderDeps: ({ search }) => ({ page: search.page }),
   beforeLoad: ({ params }) => {
     if (!isCategorySlug(params.slug)) throw notFound();
   },
-  loader: ({ params, context }) => {
+  loader: ({ params, context, deps }) => {
     if (!isCategorySlug(params.slug)) return;
     return context.queryClient.ensureQueryData(
-      categoryQuery(params.slug, CATEGORY_MAP[params.slug].query),
+      categoryQuery(params.slug, CATEGORY_MAP[params.slug].query, deps.page),
     );
   },
   head: ({ params, loaderData }) => {
     const cfg = isCategorySlug(params.slug) ? CATEGORY_MAP[params.slug] : undefined;
-    const title = cfg ? `${cfg.label} — Roamforge` : "Roamforge";
-    const desc = cfg?.description ?? "Roamforge gear.";
-    const url = canonicalFor(`/category/${params.slug}`);
+    const page = loaderData?.page ?? 1;
+    const totalPages = loaderData?.totalPages ?? 1;
+    const basePath = `/category/${params.slug}`;
+    const baseTitle = cfg ? `${cfg.seoTitle} — Roamforge` : "Roamforge";
+    const title = page > 1 ? `${baseTitle} — Page ${page} of ${totalPages}` : baseTitle;
+    const baseDesc = cfg?.description ?? "Roamforge gear.";
+    const desc = page > 1 ? `Page ${page} of ${totalPages}. ${baseDesc}` : baseDesc;
+    const url = canonicalForPage(basePath, page);
     const absImage = cfg?.image ? toAbsoluteUrl(cfg.image) : undefined;
-    const page = loaderData as ProductPage | undefined;
-    const products = page?.products ?? [];
+    const products = loaderData?.products ?? [];
     return {
       meta: [
         { title },
@@ -66,7 +84,15 @@ export const Route = createFileRoute("/category/$slug")({
           : []),
         { name: "robots", content: cfg ? "index, follow" : "noindex, follow" },
       ],
-      links: cfg ? [{ rel: "canonical", href: url }] : [],
+      links: cfg
+        ? [
+            { rel: "canonical", href: url },
+            ...(page > 1 ? [{ rel: "prev", href: canonicalForPage(basePath, page - 1) }] : []),
+            ...(page < totalPages
+              ? [{ rel: "next", href: canonicalForPage(basePath, page + 1) }]
+              : []),
+          ]
+        : [],
       scripts: cfg
         ? [
             {
@@ -82,7 +108,12 @@ export const Route = createFileRoute("/category/$slug")({
                     name: "Shop",
                     item: `${SITE_URL}/shop`,
                   },
-                  { "@type": "ListItem", position: 3, name: cfg.label, item: url },
+                  {
+                    "@type": "ListItem",
+                    position: 3,
+                    name: cfg.label,
+                    item: canonicalForPage(basePath, 1),
+                  },
                 ],
               }),
             },
@@ -97,9 +128,9 @@ export const Route = createFileRoute("/category/$slug")({
                 mainEntity: {
                   "@type": "ItemList",
                   numberOfItems: products.length,
-                  itemListElement: products.slice(0, 20).map((p, i) => ({
+                  itemListElement: products.slice(0, 24).map((p, i) => ({
                     "@type": "ListItem",
-                    position: i + 1,
+                    position: (page - 1) * PAGE_SIZE + i + 1,
                     url: `${SITE_URL}/product/${p.node.handle}`,
                     name: p.node.title,
                   })),
@@ -113,13 +144,13 @@ export const Route = createFileRoute("/category/$slug")({
   notFoundComponent: () => (
     <div className="min-h-dvh flex flex-col bg-background">
       <SiteHeader />
-      <main className="mx-auto max-w-7xl flex-1 px-4 py-20 lg:px-8">
-        <h1 className="font-display text-3xl tracking-widest text-rf-dark">CATEGORY NOT FOUND</h1>
+      <main id="main-content" className="mx-auto max-w-7xl flex-1 px-4 py-20 lg:px-8">
+        <h1 className="font-display text-3xl tracking-widest text-rf-dark">PAGE NOT FOUND</h1>
         <p className="mt-4 text-sm text-muted-foreground">
-          The category you're looking for doesn't exist. Browse all categories from the homepage.
+          That category or catalogue page doesn&apos;t exist. Browse the full range instead.
         </p>
-        <Link to="/" className="mt-6 inline-block text-rf-tan underline">
-          Back to home
+        <Link to="/shop" className="mt-6 inline-block text-rf-tan underline">
+          Shop all gear
         </Link>
       </main>
       <SiteFooter />
@@ -134,10 +165,10 @@ function CategoryErrorFallback({ reset }: { reset: () => void }) {
   return (
     <div className="min-h-dvh flex flex-col bg-background">
       <SiteHeader />
-      <main className="mx-auto max-w-7xl flex-1 px-4 py-20 lg:px-8">
+      <main id="main-content" className="mx-auto max-w-7xl flex-1 px-4 py-20 lg:px-8">
         <h1 className="font-display text-3xl tracking-widest text-rf-dark">SOMETHING WENT WRONG</h1>
         <p className="mt-3 text-sm text-muted-foreground">
-          Category products couldn't load. Please check your connection and try again.
+          Category products couldn&apos;t load. Please check your connection and try again.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <button
@@ -165,26 +196,15 @@ function CategoryErrorFallback({ reset }: { reset: () => void }) {
 
 function CategoryPage() {
   const { slug } = Route.useParams();
+  const { page } = Route.useSearch();
   const cfg = isCategorySlug(slug) ? CATEGORY_MAP[slug] : undefined;
-  const { data: initial } = useSuspenseQuery(categoryQuery(slug, cfg?.query ?? ""));
-  const [extra, setExtra] = useState<ShopifyProduct[]>([]);
-  const [cursor, setCursor] = useState<string | null>(initial?.pageInfo.endCursor ?? null);
-  const [hasNext, setHasNext] = useState<boolean>(!!initial?.pageInfo.hasNextPage);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [loadMoreError, setLoadMoreError] = useState<string | null>(null);
-  // Reset pagination state whenever the slug changes so switching categories
-  // never leaks products from a previous category into the grid.
+  const { data } = useSuspenseQuery(categoryQuery(slug, cfg?.query ?? "", page));
+  const products = data.products;
+
   useEffect(() => {
-    setExtra([]);
-    setCursor(initial?.pageInfo.endCursor ?? null);
-    setHasNext(!!initial?.pageInfo.hasNextPage);
-    setLoadMoreError(null);
-  }, [slug, initial]);
-  useEffect(() => {
-    const list = initial?.products ?? [];
-    if (list.length === 0) return;
+    if (products.length === 0) return;
     trackViewItemList(
-      list.slice(0, 24).map((p) =>
+      products.map((p) =>
         toAnalyticsItem({
           id: p.node.id,
           title: p.node.title,
@@ -196,32 +216,11 @@ function CategoryPage() {
       ),
       `category_${slug}`,
     );
-  }, [slug, initial]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug, page]);
+
   if (!cfg) return null;
-
-  const seen = new Set<string>();
-  const products = [...(initial?.products ?? []), ...extra].filter((p) => {
-    if (seen.has(p.node.id)) return false;
-    seen.add(p.node.id);
-    return true;
-  });
-
-  const onLoadMore = async () => {
-    if (loadingMore || !hasNext) return;
-    setLoadingMore(true);
-    setLoadMoreError(null);
-    try {
-      const next = await fetchProductsPage(PAGE_SIZE, cfg.query, cursor);
-      setExtra((cur) => [...cur, ...next.products]);
-      setCursor(next.pageInfo.endCursor);
-      setHasNext(next.pageInfo.hasNextPage);
-    } catch (err) {
-      console.error("[category] load more failed", err);
-      setLoadMoreError("Couldn't load more products. Please try again.");
-    } finally {
-      setLoadingMore(false);
-    }
-  };
+  const range = pageRange(page, PAGE_SIZE, products.length, data.totalProducts);
 
   return (
     <div className="min-h-dvh flex flex-col bg-background">
@@ -231,8 +230,7 @@ function CategoryPage() {
           {cfg.image && (
             <img
               src={cfg.image}
-              alt=""
-              aria-hidden="true"
+              alt={`${cfg.label} — Roamforge 4WD gear`}
               width={1600}
               height={600}
               fetchPriority="high"
@@ -264,14 +262,14 @@ function CategoryPage() {
         </section>
         <section className="bg-rf-cream py-14 flex-1">
           <div className="mx-auto max-w-7xl px-4 lg:px-8">
-            <SectionHeading>{cfg.label}</SectionHeading>
+            <SectionHeading>{cfg.headingSubtitle}</SectionHeading>
             {products.length > 0 && (
               <p
                 className="mt-4 text-xs uppercase tracking-[0.18em] text-muted-foreground"
                 aria-live="polite"
               >
-                Showing {products.length} {products.length === 1 ? "product" : "products"}
-                {hasNext ? " — load more below" : ""}
+                Showing {range.from}–{range.to} of {range.total} products
+                {data.totalPages > 1 ? ` — page ${page} of ${data.totalPages}` : ""}
               </p>
             )}
             <div className="mt-10 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -281,31 +279,13 @@ function CategoryPage() {
                 products.map((p) => <ProductCard key={p.node.id} product={p} />)
               )}
             </div>
-            {hasNext && products.length > 0 && (
-              <div className="mt-12 flex flex-col items-center gap-3">
-                {loadMoreError && (
-                  <p role="alert" className="text-sm text-destructive">
-                    {loadMoreError}
-                  </p>
-                )}
-                <Button
-                  onClick={onLoadMore}
-                  disabled={loadingMore}
-                  variant="outline"
-                  className="min-h-11 min-w-44 rounded-none border-rf-dark text-rf-dark hover:bg-rf-dark hover:text-rf-cream"
-                  aria-label="Load more products"
-                >
-                  {loadingMore ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
-                      Loading…
-                    </>
-                  ) : (
-                    "LOAD MORE"
-                  )}
-                </Button>
-              </div>
-            )}
+            <CataloguePagination
+              page={page}
+              totalPages={data.totalPages}
+              to="/category/$slug"
+              params={{ slug }}
+              label={`${cfg.label} pagination`}
+            />
           </div>
         </section>
       </main>

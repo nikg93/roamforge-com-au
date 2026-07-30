@@ -19,6 +19,16 @@ export function canonicalFor(path: string): string {
   return `${SITE_URL}${normalized}`;
 }
 
+/**
+ * Self-referencing canonical for a paginated catalogue URL. Page 1 keeps the
+ * bare path; page N canonicalises to itself (`?page=N`) — paginated pages
+ * must never all point back at page 1, or Google drops the deeper products.
+ */
+export function canonicalForPage(path: string, page: number): string {
+  const base = canonicalFor(path);
+  return page > 1 ? `${base}?page=${page}` : base;
+}
+
 export interface RouteMetaInput {
   path: string;
   title: string;

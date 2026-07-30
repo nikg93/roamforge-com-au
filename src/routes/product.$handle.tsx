@@ -32,6 +32,7 @@ import { CompleteTheKit } from "@/components/CompleteTheKit";
 import { RecentlyViewedRail } from "@/components/RecentlyViewedRail";
 import { addRecentlyViewed } from "@/lib/recently-viewed";
 import { trackViewItem, toAnalyticsItem } from "@/lib/analytics";
+import { readVehicleFitment } from "@/lib/fitment";
 
 const productQuery = (handle: string) =>
   queryOptions({
@@ -270,10 +271,13 @@ function ProductPageInner() {
 
   const activeImage = galleryImages[imageIdx] ?? galleryImages[0];
 
-  // Fitment / compatibility block. Derived, never fabricated — we only
-  // surface a section when the product's own tags or copy mention specific
-  // vehicle makes. If nothing is found, the block stays hidden.
+  // Fitment / compatibility. Structured Shopify metafields (namespace
+  // `custom`) are authoritative and render as a table; when a product has
+  // none, we fall back to the conservative keyword extractor. Nothing is
+  // ever fabricated — no data means no section.
+  const fitmentRows = useMemo(() => readVehicleFitment(p.metafields), [p.metafields]);
   const fitment = useMemo(() => extractFitment(p), [p]);
+  const hasFitment = fitmentRows.length > 0 || !!fitment;
 
   // Related products — client-side; keeps the loader fast and this section
   // stays optional (empty list is fine, we just don't render it).
@@ -556,7 +560,7 @@ function ProductPageInner() {
                 Secure checkout powered by Shopify
               </p>
               <MiniTrustRow />
-              {!fitment && (
+              {!hasFitment && (
                 <p className="mt-4 text-xs text-muted-foreground">
                   Not sure this suits your build?{" "}
                   <Link to="/contact" className="underline hover:text-rf-dark">
@@ -564,7 +568,7 @@ function ProductPageInner() {
                   </Link>
                 </p>
               )}
-              {fitment && (
+              {hasFitment && (
                 <section
                   aria-labelledby="fitment-heading"
                   className="mt-8 border-t border-border pt-6"
@@ -573,10 +577,34 @@ function ProductPageInner() {
                     id="fitment-heading"
                     className="font-display text-sm tracking-[0.2em] text-rf-dark"
                   >
-                    FITMENT
+                    VEHICLE FITMENT
                   </h2>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Compatible with: <span className="text-rf-dark">{fitment.join(", ")}</span>.
+                  {fitmentRows.length > 0 ? (
+                    <table className="mt-3 w-full border-collapse text-xs">
+                      <caption className="sr-only">
+                        Vehicle compatibility details for this product
+                      </caption>
+                      <tbody>
+                        {fitmentRows.map((row) => (
+                          <tr key={row.key} className="border-b border-border last:border-b-0">
+                            <th
+                              scope="row"
+                              className="w-32 py-2 pr-3 text-left align-top font-medium uppercase tracking-[0.12em] text-muted-foreground"
+                            >
+                              {row.label}
+                            </th>
+                            <td className="py-2 align-top text-rf-dark">{row.value}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  ) : (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Commonly fitted to:{" "}
+                      <span className="text-rf-dark">{fitment?.join(", ")}</span>.
+                    </p>
+                  )}
+                  <p className="mt-3 text-xs text-muted-foreground">
                     Confirm compatibility before ordering —{" "}
                     <Link to="/contact" className="underline hover:text-rf-dark">
                       contact us
