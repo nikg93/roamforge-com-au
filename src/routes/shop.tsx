@@ -10,9 +10,7 @@ import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SectionHeading } from "@/components/SectionHeading";
-import { ProductCard } from "@/components/ProductCard";
-import { EmptyProducts } from "@/components/EmptyProducts";
-import { CataloguePagination } from "@/components/CataloguePagination";
+import { PaginatedProductGrid } from "@/components/PaginatedProductGrid";
 import { fetchTwoPhaseNumberedPage } from "@/lib/shopify";
 import { PAGE_SIZE, pageRange, parsePageParam } from "@/lib/pagination";
 import { canonicalForPage, routeMeta, SITE_URL } from "@/lib/seo";
@@ -229,18 +227,15 @@ function ShopPage() {
                 {data.totalPages > 1 ? ` — page ${page} of ${data.totalPages}` : ""}
               </p>
             )}
-            <div className="mt-10 grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-              {products.length === 0 ? (
-                <EmptyProducts />
-              ) : (
-                products.map((p) => <ProductCard key={p.node.id} product={p} />)
-              )}
-            </div>
-            <CataloguePagination
+            <PaginatedProductGrid
+              products={products}
               page={page}
               totalPages={data.totalPages}
               to="/shop"
               label="Shop All pagination"
+              fetchPage={(n) =>
+                fetchTwoPhaseNumberedPage(n, PAGE_SIZE, SHOP_CORE_QUERY, SHOP_MERCH_QUERY)
+              }
             />
           </div>
         </section>
