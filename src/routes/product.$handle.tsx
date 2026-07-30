@@ -32,6 +32,7 @@ import { CompleteTheKit } from "@/components/CompleteTheKit";
 import { RecentlyViewedRail } from "@/components/RecentlyViewedRail";
 import { addRecentlyViewed } from "@/lib/recently-viewed";
 import { trackViewItem, toAnalyticsItem } from "@/lib/analytics";
+import { readVehicleFitment } from "@/lib/fitment";
 
 const productQuery = (handle: string) =>
   queryOptions({
@@ -270,10 +271,13 @@ function ProductPageInner() {
 
   const activeImage = galleryImages[imageIdx] ?? galleryImages[0];
 
-  // Fitment / compatibility block. Derived, never fabricated — we only
-  // surface a section when the product's own tags or copy mention specific
-  // vehicle makes. If nothing is found, the block stays hidden.
+  // Fitment / compatibility. Structured Shopify metafields (namespace
+  // `custom`) are authoritative and render as a table; when a product has
+  // none, we fall back to the conservative keyword extractor. Nothing is
+  // ever fabricated — no data means no section.
+  const fitmentRows = useMemo(() => readVehicleFitment(p.metafields), [p.metafields]);
   const fitment = useMemo(() => extractFitment(p), [p]);
+  const hasFitment = fitmentRows.length > 0 || !!fitment;
 
   // Related products — client-side; keeps the loader fast and this section
   // stays optional (empty list is fine, we just don't render it).
