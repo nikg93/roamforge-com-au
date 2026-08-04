@@ -85,6 +85,18 @@ export function ConsentBanner() {
     };
   }, [showPanel]);
 
+  // Mutual exclusion with the sticky mobile Add-to-Cart bar: while any consent
+  // UI is on screen we flag the document so CSS removes the sticky bar. The
+  // two can therefore never overlap or stack.
+  const consentUiOpen = !!prefs && (!prefs.decided || showPanel);
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    if (consentUiOpen) root.setAttribute("data-consent-open", "true");
+    else root.removeAttribute("data-consent-open");
+    return () => root.removeAttribute("data-consent-open");
+  }, [consentUiOpen]);
+
   if (!prefs) return null;
 
   const bannerVisible = !prefs.decided && !showPanel;
