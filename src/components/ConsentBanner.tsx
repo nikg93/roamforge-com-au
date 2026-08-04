@@ -13,6 +13,14 @@ import {
  * site usage), no dark patterns — Reject All and Accept All are given equal
  * weight. Analytics/marketing default OFF until an explicit choice is made.
  */
+/**
+ * Shared action-button styling. Accept All and Reject All MUST render with
+ * identical geometry and visual weight (no dark patterns), so both use this
+ * exact class string.
+ */
+const CONSENT_ACTION_CLASS =
+  "min-h-11 flex-1 border border-rf-dark bg-rf-cream px-4 py-2 text-xs font-semibold tracking-widest text-rf-dark hover:bg-rf-dark hover:text-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan";
+
 export function ConsentBanner() {
   const [prefs, setPrefs] = useState<ConsentPrefs | null>(null);
   const [showPanel, setShowPanel] = useState(false);
@@ -78,6 +86,8 @@ export function ConsentBanner() {
   }, [showPanel]);
 
   if (!prefs) return null;
+
+  const bannerVisible = !prefs.decided && !showPanel;
 
   const acceptAll = () => {
     writeConsent({ analytics: true, marketing: true, decided: true });
