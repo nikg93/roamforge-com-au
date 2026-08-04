@@ -141,18 +141,10 @@ export function ConsentBanner() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={rejectAll}
-                  className={CONSENT_ACTION_CLASS}
-                >
+                <button type="button" onClick={rejectAll} className={CONSENT_ACTION_CLASS}>
                   REJECT ALL
                 </button>
-                <button
-                  type="button"
-                  onClick={acceptAll}
-                  className={CONSENT_ACTION_CLASS}
-                >
+                <button type="button" onClick={acceptAll} className={CONSENT_ACTION_CLASS}>
                   ACCEPT ALL
                 </button>
                 <button
@@ -241,18 +233,10 @@ export function ConsentBanner() {
               </div>
             </div>
             <div className="flex flex-wrap gap-2 border-t border-rf-dark/10 p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
-              <button
-                type="button"
-                onClick={rejectAll}
-                className={CONSENT_ACTION_CLASS}
-              >
+              <button type="button" onClick={rejectAll} className={CONSENT_ACTION_CLASS}>
                 REJECT ALL
               </button>
-              <button
-                type="button"
-                onClick={acceptAll}
-                className={CONSENT_ACTION_CLASS}
-              >
+              <button type="button" onClick={acceptAll} className={CONSENT_ACTION_CLASS}>
                 ACCEPT ALL
               </button>
               <button
