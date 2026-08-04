@@ -52,13 +52,13 @@ export default {
   "homepage H1 text content is exactly FORGED FOR ADVENTURE"() {
     const h1 = home.match(/<h1[^>]*>([\s\S]*?)<\/h1>/);
     assert.ok(h1, "homepage must render an h1");
-    const text = h1[1]
-      .replace(/\{\/\*[\s\S]*?\*\/\}/g, "")
+    const body = h1[1].replace(/\{\/\*[\s\S]*?\*\/\}/g, "");
+    const text = body
       .replace(/<[^>]+>/g, "")
       .replace(/\s+/g, " ")
       .trim();
     assert.equal(text, "FORGED FOR ADVENTURE");
-    assert.doesNotMatch(h1[1], /<br\s*\/?>/);
+    assert.doesNotMatch(body, /<br\s*\/?>/);
   },
   "Meta Pixel ID is sanitised and unquoted"() {
     assert.equal(sanitizeNumericId("'1043681748196165'"), "1043681748196165");
