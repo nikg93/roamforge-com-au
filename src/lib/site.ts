@@ -57,6 +57,24 @@ export const BRAND_CLAIMS = {
 const ENV_GA4 =
   typeof import.meta !== "undefined" ? import.meta.env?.VITE_GA4_MEASUREMENT_ID : undefined;
 
+const ENV_META =
+  typeof import.meta !== "undefined" ? import.meta.env?.VITE_META_PIXEL_ID : undefined;
+
+/**
+ * Normalise a public numeric analytics ID. Env values are frequently pasted
+ * with stray quotes/whitespace ("'1043681748196165'"), which would make the
+ * pixel init silently fail — strip everything that is not a digit and reject
+ * anything that is not a plausible ID.
+ */
+export function sanitizeNumericId(value: unknown): string {
+  const digits = (typeof value === "string" ? value : "").replace(/[^0-9]/g, "");
+  return /^\d{6,}$/.test(digits) ? digits : "";
+}
+
 export const ANALYTICS = {
   ga4MeasurementId: ((ENV_GA4 as string) || "G-QGGYL7FRLG").trim(),
+  // Meta Pixel IDs are public browser-side identifiers (they ship in every
+  // page that loads fbevents.js). Env wins; the fallback is Roamforge's
+  // verified production dataset ID.
+  metaPixelId: sanitizeNumericId((ENV_META as string) || "1043681748196165"),
 } as const;

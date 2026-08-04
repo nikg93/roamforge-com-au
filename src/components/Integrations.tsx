@@ -33,7 +33,8 @@ export function Integrations() {
     const tidioRaw = raw(import.meta.env.VITE_TIDIO_PUBLIC_KEY);
     const judgeMeDomain = raw(import.meta.env.VITE_JUDGEME_SHOP_DOMAIN);
     const judgeMeTokenRaw = raw(import.meta.env.VITE_JUDGEME_PUBLIC_TOKEN);
-    const metaPixelRaw = raw(import.meta.env.VITE_META_PIXEL_ID);
+    // Public Meta Pixel ID — env override with sanitised production fallback.
+    const metaPixelRaw = raw(ANALYTICS.metaPixelId);
     const ga4 = /^G-[A-Z0-9]{4,}$/i.test(ga4Raw) ? ga4Raw : "";
     const klaviyo = /^[A-Z0-9]{4,}$/i.test(klaviyoRaw) ? klaviyoRaw : "";
     const tidio = /^[A-Za-z0-9]{6,}$/.test(tidioRaw) ? tidioRaw : "";

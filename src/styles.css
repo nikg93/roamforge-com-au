@@ -193,6 +193,13 @@
   }
 
   /* Respect prefers-reduced-motion: kill non-essential animation/transitions */
+  /* Consent UI and the sticky mobile purchase bar are mutually exclusive:
+     while the privacy banner/dialog is open the sticky Add to Cart bar is
+     removed from the viewport so it can never be covered or stacked. */
+  [data-consent-open="true"] [data-sticky-atc] {
+    display: none !important;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

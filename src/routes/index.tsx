@@ -113,9 +113,9 @@ function Index() {
               <div className="mx-auto h-full max-w-7xl px-4 lg:px-8 flex items-center">
                 <div className="max-w-xl text-rf-cream">
                   <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[0.95] tracking-tight">
-                    FORGED
-                    <br />
-                    <span className="text-rf-tan">FOR ADVENTURE</span>
+                    {/* Rendered on two lines via a block span (not <br />) so
+                        textContent reads exactly "FORGED FOR ADVENTURE". */}
+                    FORGED <span className="block text-rf-tan">FOR ADVENTURE</span>
                   </h1>
                   <p className="mt-5 text-base sm:text-lg text-rf-cream/85 max-w-md">
                     Roamforge — premium 4WD, recovery and touring gear selected for Australian

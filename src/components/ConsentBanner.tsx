@@ -13,6 +13,14 @@ import {
  * site usage), no dark patterns — Reject All and Accept All are given equal
  * weight. Analytics/marketing default OFF until an explicit choice is made.
  */
+/**
+ * Shared action-button styling. Accept All and Reject All MUST render with
+ * identical geometry and visual weight (no dark patterns), so both use this
+ * exact class string.
+ */
+const CONSENT_ACTION_CLASS =
+  "min-h-11 flex-1 border border-rf-dark bg-rf-cream px-4 py-2 text-xs font-semibold tracking-widest text-rf-dark hover:bg-rf-dark hover:text-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan";
+
 export function ConsentBanner() {
   const [prefs, setPrefs] = useState<ConsentPrefs | null>(null);
   const [showPanel, setShowPanel] = useState(false);
@@ -77,7 +85,21 @@ export function ConsentBanner() {
     };
   }, [showPanel]);
 
+  // Mutual exclusion with the sticky mobile Add-to-Cart bar: while any consent
+  // UI is on screen we flag the document so CSS removes the sticky bar. The
+  // two can therefore never overlap or stack.
+  const consentUiOpen = !!prefs && (!prefs.decided || showPanel);
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    if (consentUiOpen) root.setAttribute("data-consent-open", "true");
+    else root.removeAttribute("data-consent-open");
+    return () => root.removeAttribute("data-consent-open");
+  }, [consentUiOpen]);
+
   if (!prefs) return null;
+
+  const bannerVisible = !prefs.decided && !showPanel;
 
   const acceptAll = () => {
     writeConsent({ analytics: true, marketing: true, decided: true });
@@ -92,21 +114,18 @@ export function ConsentBanner() {
     setShowPanel(false);
   };
 
-  const bannerVisible = !prefs.decided && !showPanel;
-
   return (
     <>
       {bannerVisible && (
         <div
           role="region"
           aria-label="Privacy preferences"
-          // Mobile: pin to TOP so it never overlaps the PDP sticky Add-to-Cart,
-          // cart drawer controls, or hero CTAs at the bottom of the viewport.
-          // Mobile: pinned bottom, positioned above the sticky PDP Add-to-Cart
-          // bar (~72px + safe-area) so it can't cover it or the header.
+          // Mobile: compact sheet pinned to the bottom edge, inside the iPhone
+          // safe area. It is never stacked above the sticky PDP Add-to-Cart —
+          // that bar is hidden while the consent UI is open (see the
+          // [data-consent-open] rule in src/styles.css).
           // Desktop (sm+): compact card tucked into the bottom-left corner.
-          className="fixed inset-x-3 bottom-[calc(96px+env(safe-area-inset-bottom))] z-40 sm:inset-x-auto sm:bottom-4 sm:left-4 sm:max-w-sm"
-          style={{ paddingTop: "env(safe-area-inset-top)" }}
+          className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom,0px)+0.75rem)] z-50 sm:inset-x-auto sm:bottom-4 sm:left-4 sm:max-w-sm"
         >
           <div className="border-b border-rf-dark bg-rf-cream text-rf-dark shadow-lg sm:rounded sm:border">
             <div className="flex flex-col gap-2 p-3 sm:gap-3 sm:p-4">
@@ -122,26 +141,18 @@ export function ConsentBanner() {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={rejectAll}
-                  className="min-h-11 flex-1 border border-rf-dark px-4 py-2 text-xs font-semibold tracking-widest text-rf-dark hover:bg-rf-dark hover:text-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
-                >
+                <button type="button" onClick={rejectAll} className={CONSENT_ACTION_CLASS}>
                   REJECT ALL
+                </button>
+                <button type="button" onClick={acceptAll} className={CONSENT_ACTION_CLASS}>
+                  ACCEPT ALL
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowPanel(true)}
-                  className="min-h-11 flex-1 border border-rf-dark px-4 py-2 text-xs font-semibold tracking-widest text-rf-dark hover:bg-rf-dark hover:text-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
+                  className="min-h-11 w-full px-4 py-2 text-xs font-semibold tracking-widest text-rf-dark underline hover:text-rf-tan focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
                 >
-                  MANAGE
-                </button>
-                <button
-                  type="button"
-                  onClick={acceptAll}
-                  className="min-h-11 flex-1 bg-rf-dark px-4 py-2 text-xs font-semibold tracking-widest text-rf-cream hover:bg-rf-dark-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2"
-                >
-                  ACCEPT ALL
+                  MANAGE PREFERENCES
                 </button>
               </div>
             </div>
@@ -221,18 +232,17 @@ export function ConsentBanner() {
                 </label>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 border-t border-rf-dark/10 p-4">
-              <button
-                type="button"
-                onClick={rejectAll}
-                className="min-h-11 flex-1 border border-rf-dark px-4 py-2 text-xs font-semibold tracking-widest text-rf-dark hover:bg-rf-dark hover:text-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
-              >
+            <div className="flex flex-wrap gap-2 border-t border-rf-dark/10 p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
+              <button type="button" onClick={rejectAll} className={CONSENT_ACTION_CLASS}>
                 REJECT ALL
+              </button>
+              <button type="button" onClick={acceptAll} className={CONSENT_ACTION_CLASS}>
+                ACCEPT ALL
               </button>
               <button
                 type="button"
                 onClick={savePanel}
-                className="min-h-11 flex-1 bg-rf-dark px-4 py-2 text-xs font-semibold tracking-widest text-rf-cream hover:bg-rf-dark-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2"
+                className="min-h-11 w-full bg-rf-dark px-4 py-2 text-xs font-semibold tracking-widest text-rf-cream hover:bg-rf-dark-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2"
               >
                 SAVE PREFERENCES
               </button>
