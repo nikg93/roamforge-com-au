@@ -240,18 +240,25 @@ export function ConsentBanner() {
                 </label>
               </div>
             </div>
-            <div className="flex flex-wrap gap-2 border-t border-rf-dark/10 p-4">
+            <div className="flex flex-wrap gap-2 border-t border-rf-dark/10 p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)]">
               <button
                 type="button"
                 onClick={rejectAll}
-                className="min-h-11 flex-1 border border-rf-dark px-4 py-2 text-xs font-semibold tracking-widest text-rf-dark hover:bg-rf-dark hover:text-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
+                className={CONSENT_ACTION_CLASS}
               >
                 REJECT ALL
               </button>
               <button
                 type="button"
+                onClick={acceptAll}
+                className={CONSENT_ACTION_CLASS}
+              >
+                ACCEPT ALL
+              </button>
+              <button
+                type="button"
                 onClick={savePanel}
-                className="min-h-11 flex-1 bg-rf-dark px-4 py-2 text-xs font-semibold tracking-widest text-rf-cream hover:bg-rf-dark-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2"
+                className="min-h-11 w-full bg-rf-dark px-4 py-2 text-xs font-semibold tracking-widest text-rf-cream hover:bg-rf-dark-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan focus-visible:ring-offset-2"
               >
                 SAVE PREFERENCES
               </button>
