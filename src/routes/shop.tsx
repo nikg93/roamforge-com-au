@@ -48,7 +48,7 @@ export const Route = createFileRoute("/shop")({
     page: parsePageParam(search.page),
   }),
   search: { middlewares: [stripSearchParams({ page: 1 })] },
-  loaderDeps: ({ search }) => ({ page: search.page }),
+  loaderDeps: ({ search }) => ({ page: search.page ?? 1 }),
   loader: ({ context, deps }) => context.queryClient.ensureQueryData(shopQuery(deps.page)),
   head: ({ loaderData }) => {
     const page = loaderData?.page ?? 1;
@@ -168,7 +168,7 @@ function ShopErrorFallback({ reset }: { reset: () => void }) {
 }
 
 function ShopPage() {
-  const { page } = Route.useSearch();
+  const { page = 1 } = Route.useSearch();
   const { data } = useSuspenseQuery(shopQuery(page));
   const products = data.products;
   const range = pageRange(page, PAGE_SIZE, products.length, data.totalProducts);
