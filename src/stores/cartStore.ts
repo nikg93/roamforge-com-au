@@ -525,12 +525,29 @@ export const useCartStore = create<CartStore>()(
         if (!cartId || isSyncing || isLoading) return;
         set({ isSyncing: true });
         try {
-          const data = await storefrontApiRequest(CART_QUERY, { id: cartId });
-          if (!data) return;
-          const cart = data?.data?.cart;
+          const lines = await fetchServerLines(cartId);
+          // Network/transient failure — keep local state untouched.
+          if (lines === null) return;
           // Re-check isLoading after the network round-trip; if the user added
           // an item mid-sync, keep the local state.
-          if ((!cart || cart.totalQuantity === 0) && !get().isLoading) clearCart();
+          if (get().isLoading) return;
+          if (lines.length === 0) {
+            clearCart();
+            return;
+          }
+          // Reconcile against server truth: heal missing/stale line ids and
+          // drop local rows that no longer exist in the Shopify cart.
+          const byVariant = new Map(lines.map((l) => [l.variantId, l]));
+          const next = get()
+            .items.filter((i) => byVariant.has(i.variantId))
+            .map((i) => {
+              const l = byVariant.get(i.variantId)!;
+              return i.lineId === l.lineId && i.quantity === l.quantity
+                ? i
+                : { ...i, lineId: l.lineId, quantity: l.quantity };
+            });
+          if (next.length === 0) clearCart();
+          else set({ items: next });
         } catch (err) {
           // Transient failure — keep the local cart intact so a slow/offline
           // network never destroys the user's selections.
