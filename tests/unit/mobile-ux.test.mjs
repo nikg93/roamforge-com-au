@@ -60,12 +60,15 @@ export default {
     assert.equal(text, "FORGED FOR ADVENTURE");
     assert.doesNotMatch(body, /<br\s*\/?>/);
   },
-  "Meta Pixel ID is sanitised and unquoted"() {
+  "Meta Pixel ID is sanitised and disabled by default"() {
     assert.equal(sanitizeNumericId("'1043681748196165'"), "1043681748196165");
     assert.equal(sanitizeNumericId(' "1043681748196165" '), "1043681748196165");
     assert.equal(sanitizeNumericId("abc"), "");
     assert.equal(sanitizeNumericId(undefined), "");
-    assert.equal(ANALYTICS.metaPixelId, "1043681748196165");
+    // Shopify Customer Events (Facebook & Instagram: Optimized, Server + Web)
+    // is the authoritative Meta integration — no storefront fallback pixel.
+    assert.equal(ANALYTICS.metaPixelId, "");
+    assert.doesNotMatch(read("src/lib/site.ts"), /1043681748196165"\s*\)/);
     assert.equal(ANALYTICS.ga4MeasurementId, "G-QGGYL7FRLG");
   },
   "product schema adds no fabricated fields"() {

@@ -38,11 +38,11 @@ const categoryQuery = (slug: string, q: string, page: number) =>
   });
 
 export const Route = createFileRoute("/category/$slug")({
-  validateSearch: (search: Record<string, unknown>): { page: number } => ({
+  validateSearch: (search: Record<string, unknown>): { page?: number } => ({
     page: parsePageParam(search.page),
   }),
   search: { middlewares: [stripSearchParams({ page: 1 })] },
-  loaderDeps: ({ search }) => ({ page: search.page }),
+  loaderDeps: ({ search }) => ({ page: search.page ?? 1 }),
   beforeLoad: ({ params }) => {
     if (!isCategorySlug(params.slug)) throw notFound();
   },
@@ -194,7 +194,7 @@ function CategoryErrorFallback({ reset }: { reset: () => void }) {
 
 function CategoryPage() {
   const { slug } = Route.useParams();
-  const { page } = Route.useSearch();
+  const { page = 1 } = Route.useSearch();
   const cfg = isCategorySlug(slug) ? CATEGORY_MAP[slug] : undefined;
   const { data } = useSuspenseQuery(categoryQuery(slug, cfg?.query ?? "", page));
   const products = data.products;

@@ -73,8 +73,11 @@ export function sanitizeNumericId(value: unknown): string {
 
 export const ANALYTICS = {
   ga4MeasurementId: ((ENV_GA4 as string) || "G-QGGYL7FRLG").trim(),
-  // Meta Pixel IDs are public browser-side identifiers (they ship in every
-  // page that loads fbevents.js). Env wins; the fallback is Roamforge's
-  // verified production dataset ID.
-  metaPixelId: sanitizeNumericId((ENV_META as string) || "1043681748196165"),
+  // Meta Pixel: intentionally NO hardcoded fallback. Shopify Customer Events
+  // was directly verified as the authoritative Meta integration — the
+  // Facebook & Instagram channel reports "Optimized" with both Server and Web
+  // collection, so Shopify already emits browser + CAPI events for this
+  // dataset. Loading a second top-level pixel here would duplicate events.
+  // Setting VITE_META_PIXEL_ID explicitly re-enables the storefront pixel.
+  metaPixelId: sanitizeNumericId(ENV_META as string),
 } as const;
