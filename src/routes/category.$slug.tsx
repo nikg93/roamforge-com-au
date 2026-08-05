@@ -241,6 +241,14 @@ function CategoryPage() {
             <p className="font-display tracking-[0.3em] text-rf-tan text-xs">CATEGORY</p>
             <h1 className="mt-2 font-display text-5xl sm:text-6xl tracking-tight">{cfg.label}</h1>
             <p className="mt-3 max-w-xl text-sm text-rf-cream/85">{cfg.description}</p>
+            {slug === "air-compressors" && (
+              <Link
+                to="/guides/how-to-choose-a-4wd-air-compressor"
+                className="mt-5 min-h-11 inline-flex items-center justify-center border border-rf-tan px-5 py-3 text-xs font-medium tracking-widest text-rf-tan hover:bg-rf-tan hover:text-rf-dark"
+              >
+                READ: HOW TO CHOOSE A 4WD AIR COMPRESSOR
+              </Link>
+            )}
             <nav aria-label="Breadcrumb" className="mt-4 text-xs text-rf-cream/75">
               <Link to="/" className="hover:text-rf-tan">
                 Home
