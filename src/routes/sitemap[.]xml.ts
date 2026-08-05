@@ -21,6 +21,11 @@ const staticEntries: SitemapEntry[] = [
     priority: "0.9",
   })),
   { path: "/about", changefreq: "monthly", priority: "0.6" },
+  {
+    path: "/guides/how-to-choose-a-4wd-air-compressor",
+    changefreq: "monthly",
+    priority: "0.7",
+  },
   { path: "/contact", changefreq: "monthly", priority: "0.6" },
   { path: "/faq", changefreq: "monthly", priority: "0.5" },
   { path: "/shipping", changefreq: "monthly", priority: "0.5" },
