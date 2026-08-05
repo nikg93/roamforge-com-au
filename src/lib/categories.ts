@@ -186,3 +186,16 @@ export const PRIMARY_CATEGORIES = CATEGORIES.filter((c) => c.primary);
 
 /** Remaining categories, surfaced under the desktop "More" menu. */
 export const SECONDARY_CATEGORIES = CATEGORIES.filter((c) => !c.primary);
+
+/**
+ * Resolve a product's category from its real Shopify `cat-*` tags so PDP
+ * breadcrumbs and back-links point at the collection the product is
+ * actually merchandised in. Returns null when no tag maps to a category.
+ */
+export function categoryFromTags(tags: string[] | undefined): Category | null {
+  for (const tag of tags ?? []) {
+    const slug = tag.trim().toLowerCase().replace(/^cat-/, "");
+    if (slug !== tag.trim().toLowerCase() && isCategorySlug(slug)) return CATEGORY_MAP[slug];
+  }
+  return null;
+}
