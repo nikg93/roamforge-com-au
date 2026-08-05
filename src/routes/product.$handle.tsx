@@ -410,6 +410,20 @@ function ProductPageInner() {
             <span className="mx-2" aria-hidden>
               /
             </span>
+            {category && (
+              <>
+                <Link
+                  to="/category/$slug"
+                  params={{ slug: category.slug }}
+                  className="hover:text-rf-dark"
+                >
+                  {category.label}
+                </Link>
+                <span className="mx-2" aria-hidden>
+                  /
+                </span>
+              </>
+            )}
             <span className="text-rf-dark">{displayTitle}</span>
           </nav>
           <div className="grid gap-12 lg:grid-cols-2">
