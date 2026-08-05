@@ -437,6 +437,59 @@ export async function fetchProductByHandle(handle: string) {
   return { node: product } as ShopifyProduct;
 }
 
+// Card-level fields, shared by the grid queries and the by-handle batch
+// fetch used for curated cross-sells.
+const PRODUCT_CARD_FIELDS = `
+  id title handle vendor availableForSale
+  priceRange { minVariantPrice { amount currencyCode } }
+  compareAtPriceRange { minVariantPrice { amount currencyCode } }
+  featuredImage { url altText }
+  selectedOrFirstAvailableVariant {
+    id title sku availableForSale
+    price { amount currencyCode }
+    compareAtPrice { amount currencyCode }
+    image { url altText }
+    selectedOptions { name value }
+  }
+`;
+
+/**
+ * Fetch a specific set of live products by handle, preserving the requested
+ * order. Handles that no longer exist (or are unavailable) are simply
+ * omitted — curated cross-sells must never render a dead or invented card.
+ * Shopify search has no `handle:` predicate, so this uses aliased
+ * `product(handle:)` lookups in a single request.
+ */
+export async function fetchProductsByHandles(handles: string[]): Promise<ShopifyProduct[]> {
+  const unique = [...new Set(handles.filter(Boolean))].slice(0, 10);
+  if (unique.length === 0) return [];
+  const args = unique.map((_, i) => `$h${i}: String!`).join(", ");
+  const body = unique
+    .map((_, i) => `p${i}: product(handle: $h${i}) { ${PRODUCT_CARD_FIELDS} }`)
+    .join("\n");
+  const variables = Object.fromEntries(unique.map((h, i) => [`h${i}`, h]));
+  const data = await storefrontApiRequest(
+    `query ProductsByHandles(${args}) { ${body} }`,
+    variables,
+  );
+  const out: ShopifyProduct[] = [];
+  unique.forEach((_, i) => {
+    const node = data?.data?.[`p${i}`] as ShopifyProduct["node"] | null | undefined;
+    if (!node || node.availableForSale === false) return;
+    const img = node.featuredImage;
+    out.push({
+      node: {
+        ...node,
+        description: node.description ?? "",
+        images: img ? { edges: [{ node: img }] } : { edges: [] },
+        variants: node.variants ?? { edges: [] },
+        options: node.options ?? [],
+      },
+    });
+  });
+  return out;
+}
+
 /* ------------------------------------------------------------------ *
  * Crawlable numbered pagination
  *
