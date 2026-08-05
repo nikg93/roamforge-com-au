@@ -541,9 +541,12 @@ export const useCartStore = create<CartStore>()(
             .items.filter((i) => byVariant.has(i.variantId))
             .map((i) => {
               const l = byVariant.get(i.variantId)!;
-              return i.lineId === l.lineId && i.quantity === l.quantity
+              // Shopify reports quantity 0 for lines whose variant is
+              // currently unavailable; never let that zero-out a live row.
+              const quantity = l.quantity > 0 ? l.quantity : i.quantity;
+              return i.lineId === l.lineId && i.quantity === quantity
                 ? i
-                : { ...i, lineId: l.lineId, quantity: l.quantity };
+                : { ...i, lineId: l.lineId, quantity };
             });
           if (next.length === 0) clearCart();
           else set({ items: next });
