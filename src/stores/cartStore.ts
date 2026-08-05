@@ -395,15 +395,30 @@ export const useCartStore = create<CartStore>()(
           try {
             const { items, cartId, clearCart } = get();
             const item = items.find((i) => i.variantId === variantId);
-            if (!item?.lineId || !cartId) return;
-            const r = await updateLine(cartId, item.lineId, quantity);
+            if (!item) return;
+            if (!cartId) {
+              // No server cart backs this item — it cannot be a real Shopify
+              // line, so drop it locally instead of silently doing nothing.
+              dropLocalItem(set, get, variantId);
+              return;
+            }
+            const lineId = item.lineId ?? (await resolveLineId(cartId, variantId));
+            if (!lineId) {
+              dropLocalItem(set, get, variantId);
+              return;
+            }
+            const r = await updateLine(cartId, lineId, quantity);
             if (r.success) {
               set({
-                items: get().items.map((i) => (i.variantId === variantId ? { ...i, quantity } : i)),
+                items: get().items.map((i) =>
+                  i.variantId === variantId ? { ...i, quantity, lineId } : i,
+                ),
               });
             } else if (r.cartNotFound) {
               clearCart();
               toast.error("Your cart expired.");
+            } else if (r.lineNotFound) {
+              dropLocalItem(set, get, variantId);
             } else {
               toast.error(`Couldn't update quantity. ${r.errorMessage}`);
             }
@@ -431,8 +446,19 @@ export const useCartStore = create<CartStore>()(
           try {
             const { items, cartId, clearCart } = get();
             const item = items.find((i) => i.variantId === variantId);
-            if (!item?.lineId || !cartId) return;
-            const r = await removeLine(cartId, item.lineId);
+            if (!item) return;
+            if (!cartId) {
+              dropLocalItem(set, get, variantId);
+              return;
+            }
+            const lineId = item.lineId ?? (await resolveLineId(cartId, variantId));
+            if (!lineId) {
+              // Phantom local line: never existed server-side, so removing it
+              // is a local cleanup, not a real cart removal — no analytics.
+              dropLocalItem(set, get, variantId);
+              return;
+            }
+            const r = await removeLine(cartId, lineId);
             if (r.success) {
               const next = get().items.filter((i) => i.variantId !== variantId);
               if (next.length === 0) clearCart();
@@ -455,6 +481,8 @@ export const useCartStore = create<CartStore>()(
             } else if (r.cartNotFound) {
               clearCart();
               toast.error("Your cart expired.");
+            } else if (r.lineNotFound) {
+              dropLocalItem(set, get, variantId);
             } else {
               toast.error(`Couldn't remove item. ${r.errorMessage}`);
             }
