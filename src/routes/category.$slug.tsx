@@ -298,6 +298,32 @@ function CategoryPage() {
               label={`${cfg.label} pagination`}
               fetchPage={(n) => fetchNumberedProductPage(n, PAGE_SIZE, cfg.query)}
             />
+            {cfg.faqs && cfg.faqs.length > 0 && page === 1 && (
+              <section aria-labelledby="category-faq-heading" className="mt-16">
+                <h2
+                  id="category-faq-heading"
+                  className="font-display text-xl tracking-widest text-rf-dark"
+                >
+                  FREQUENTLY ASKED QUESTIONS
+                </h2>
+                <dl className="mt-4 max-w-3xl divide-y divide-border">
+                  {cfg.faqs.map(([q, a]) => (
+                    <div key={q} className="py-4">
+                      <dt className="text-sm font-semibold text-rf-dark">{q}</dt>
+                      <dd className="mt-2 text-sm leading-relaxed text-rf-dark/80">{a}</dd>
+                    </div>
+                  ))}
+                </dl>
+                {cfg.guidePath && (
+                  <Link
+                    to="/guides/how-to-choose-a-4wd-air-compressor"
+                    className="mt-5 min-h-11 inline-flex items-center justify-center border border-rf-dark px-5 py-3 text-xs font-medium tracking-widest text-rf-dark hover:bg-rf-dark hover:text-rf-cream"
+                  >
+                    READ THE FULL BUYER GUIDE
+                  </Link>
+                )}
+              </section>
+            )}
           </div>
         </section>
       </main>
