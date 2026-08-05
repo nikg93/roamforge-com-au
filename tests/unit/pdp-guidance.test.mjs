@@ -18,8 +18,14 @@ export default {
     assert.match(GUIDANCE, /cat-air-compressors/);
   },
   "guidance: unique curated title and meta description for the demand pages"() {
-    assert.match(GUIDANCE, /seoTitle: "Lightforce BEAST 230mm LED Driving Light – Single \| Roamforge"/);
-    assert.match(GUIDANCE, /seoTitle: "Lightforce Switch Fascia – Next-Gen Ford Ranger \| Roamforge"/);
+    assert.match(
+      GUIDANCE,
+      /seoTitle: "Lightforce BEAST 230mm LED Driving Light – Single \| Roamforge"/,
+    );
+    assert.match(
+      GUIDANCE,
+      /seoTitle: "Lightforce Switch Fascia – Next-Gen Ford Ranger \| Roamforge"/,
+    );
     const descs = [...GUIDANCE.matchAll(/seoDescription:\s*\n?\s*"([^"]+)"/g)].map((m) => m[1]);
     assert.ok(descs.length >= 2, "expected curated meta descriptions");
     assert.equal(new Set(descs).size, descs.length, "meta descriptions must be unique");
@@ -30,7 +36,10 @@ export default {
     assert.doesNotMatch(GUIDANCE, /guaranteed fit|fits all|universal fit/i);
   },
   "guidance: no fabricated schema/commerce fields"() {
-    assert.doesNotMatch(GUIDANCE, /aggregateRating|"review"|\bgtin\b|\bmpn\b|in stock now|free shipping/i);
+    assert.doesNotMatch(
+      GUIDANCE,
+      /aggregateRating|"review"|\bgtin\b|\bmpn\b|in stock now|free shipping/i,
+    );
     assert.doesNotMatch(GUIDANCE, /10%/);
   },
   "guidance: cross-sells reference real catalogue handles only"() {
@@ -70,7 +79,10 @@ export default {
     for (const c of ctas) assert.match(c, /min-h-11/, `CTA below 44px: ${c}`);
   },
   "category: air compressors targets verified buyer queries"() {
-    assert.match(CATEGORIES, /seoTitle: "4WD Air Compressor Kits — Portable & Onboard Compressors"/);
+    assert.match(
+      CATEGORIES,
+      /seoTitle: "4WD Air Compressor Kits — Portable & Onboard Compressors"/,
+    );
     assert.match(CATEGORIES, /vehicle-mounted 4WD air compressor kits/);
     assert.match(CATEGORIES, /guidePath: "\/guides\/how-to-choose-a-4wd-air-compressor"/);
   },
