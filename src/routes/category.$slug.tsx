@@ -15,6 +15,7 @@ import { fetchNumberedProductPage } from "@/lib/shopify";
 import { PAGE_SIZE, pageRange, parsePageParam } from "@/lib/pagination";
 import { CATEGORY_MAP, isCategorySlug } from "@/lib/categories";
 import { canonicalForPage, SITE_URL } from "@/lib/seo";
+import { faqPageJsonLd } from "@/lib/pdp-guidance";
 import { trackViewItemList, toAnalyticsItem } from "@/lib/analytics";
 
 function toAbsoluteUrl(pathOrUrl: string): string {
@@ -135,6 +136,15 @@ export const Route = createFileRoute("/category/$slug")({
                 },
               }),
             },
+            // FAQPage schema mirrors the visible FAQs rendered below the grid.
+            ...(cfg.faqs && cfg.faqs.length > 0 && page === 1
+              ? [
+                  {
+                    type: "application/ld+json",
+                    children: JSON.stringify(faqPageJsonLd(cfg.faqs)),
+                  },
+                ]
+              : []),
           ]
         : [],
     };
