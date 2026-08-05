@@ -41,7 +41,6 @@ interface CartStore {
   getCheckoutUrl: () => string | null;
 }
 
-const CART_QUERY = `query cart($id: ID!) { cart(id: $id) { id totalQuantity } }`;
 /** Server-truth line listing. Used to heal local items whose `lineId` is
  * missing or stale — without this, such items can never be removed. */
 const CART_LINES_QUERY = `query cartLines($id: ID!) {
