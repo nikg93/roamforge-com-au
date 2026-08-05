@@ -122,8 +122,8 @@ function GuidePage() {
               {GUIDE_TITLE}
             </h1>
             <p className="mt-4 text-sm text-rf-cream/85">
-              What actually matters when you&apos;re picking a compressor for Australian 4WD
-              touring — explained in plain language, without the spec-sheet noise.
+              What actually matters when you&apos;re picking a compressor for Australian 4WD touring
+              — explained in plain language, without the spec-sheet noise.
             </p>
             <nav aria-label="Breadcrumb" className="mt-5 text-xs text-rf-cream/75">
               <Link to="/" className="hover:text-rf-tan">
@@ -151,16 +151,16 @@ function GuidePage() {
           <article className="leading-relaxed">
             <H2>Portable vs onboard compressors</H2>
             <P>
-              A portable compressor lives in a bag or case and comes out when you need it. It
-              clamps or plugs into a power source, sits beside the vehicle, and can be shared
-              between rigs or lent to a mate in your convoy. It&apos;s the simpler starting point
-              if you tour a few times a year.
+              A portable compressor lives in a bag or case and comes out when you need it. It clamps
+              or plugs into a power source, sits beside the vehicle, and can be shared between rigs
+              or lent to a mate in your convoy. It&apos;s the simpler starting point if you tour a
+              few times a year.
             </P>
             <P>
               An onboard compressor is mounted permanently — under the bonnet, in a canopy or in a
-              drawer system — and wired into the vehicle&apos;s electrical system. Airing up
-              becomes a matter of unrolling a hose, and your load space stays free. The trade-off
-              is installation: mounting, wiring and a sensible air line route all need planning.
+              drawer system — and wired into the vehicle&apos;s electrical system. Airing up becomes
+              a matter of unrolling a hose, and your load space stays free. The trade-off is
+              installation: mounting, wiring and a sensible air line route all need planning.
             </P>
 
             <H2>Duty cycle: how long it can keep running</H2>
@@ -176,8 +176,8 @@ function GuidePage() {
             <P>
               Pressure (usually quoted in PSI or kPa) is the maximum a compressor can push to.
               Airflow (litres per minute or CFM) is how much air it moves. For tyres, airflow
-              usually decides how long you stand there. Airflow always drops as pressure rises, so
-              a flow figure quoted at zero pressure tells you little — look for figures given at a
+              usually decides how long you stand there. Airflow always drops as pressure rises, so a
+              flow figure quoted at zero pressure tells you little — look for figures given at a
               realistic working pressure.
             </P>
 
@@ -193,18 +193,18 @@ function GuidePage() {
             <H2>Hose length and reach</H2>
             <P>
               Reach is the detail most people underestimate. Measure from the compressor&apos;s
-              mounting or standing position to the furthest tyre — usually the opposite rear
-              corner — and add slack so the hose isn&apos;t stretched tight. Towing a trailer or
-              camper adds several more metres again. Extension hoses and quick-connect fittings
-              solve this, provided the fittings match.
+              mounting or standing position to the furthest tyre — usually the opposite rear corner
+              — and add slack so the hose isn&apos;t stretched tight. Towing a trailer or camper
+              adds several more metres again. Extension hoses and quick-connect fittings solve this,
+              provided the fittings match.
             </P>
 
             <H2>Storage and packing</H2>
             <P>
-              A portable unit needs somewhere to live that keeps it clean, dry and secured. A
-              padded case protects the pump and keeps hoses, clamps and fittings together, so
-              nothing goes missing at the tyre bay. For onboard setups, plan where the air outlet
-              sits and how the hose is stowed — the tidier that is, the more you&apos;ll use it.
+              A portable unit needs somewhere to live that keeps it clean, dry and secured. A padded
+              case protects the pump and keeps hoses, clamps and fittings together, so nothing goes
+              missing at the tyre bay. For onboard setups, plan where the air outlet sits and how
+              the hose is stowed — the tidier that is, the more you&apos;ll use it.
             </P>
 
             <H2>Tyre size and how much air you actually need</H2>
