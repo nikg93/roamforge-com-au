@@ -29,6 +29,9 @@ import { SITE } from "@/lib/site";
 import { MiniTrustRow } from "@/components/TrustStrip";
 import { JudgeMeReviews } from "@/components/JudgeMe";
 import { CompleteTheKit } from "@/components/CompleteTheKit";
+import { ProductGuidance } from "@/components/ProductGuidance";
+import { getPdpGuidance, faqPageJsonLd } from "@/lib/pdp-guidance";
+import { categoryFromTags } from "@/lib/categories";
 import { RecentlyViewedRail } from "@/components/RecentlyViewedRail";
 import { addRecentlyViewed } from "@/lib/recently-viewed";
 import { trackViewItem, toAnalyticsItem } from "@/lib/analytics";
@@ -74,9 +77,17 @@ export const Route = createFileRoute("/product/$handle")({
     const p = (loaderData as ShopifyProduct).node;
 
     const displayTitle = normalizeProductTitle(p.title, p.vendor);
-    const rawTitle = p.seo?.title || displayTitle;
+    // Curated demand-led metadata (traceable to the live listing) wins over
+    // the generic Shopify SEO fields on high-intent pages.
+    const guidance = getPdpGuidance({
+      handle: p.handle,
+      tags: p.tags,
+      productType: p.productType,
+    });
+    const rawTitle = guidance?.seoTitle || p.seo?.title || displayTitle;
     const title = /roamforge/i.test(rawTitle) ? rawTitle : `${rawTitle} | Roamforge`;
     const rawDescription =
+      guidance?.seoDescription ||
       p.seo?.description ||
       textFromHtml(p.descriptionHtml || p.description, 160) ||
       `${displayTitle} — available at Roamforge.`;
@@ -117,6 +128,8 @@ export const Route = createFileRoute("/product/$handle")({
     }
     if (sku) productSchema.sku = sku;
 
+    const category = categoryFromTags(p.tags);
+
     return {
       meta: [
         { title },
@@ -151,10 +164,29 @@ export const Route = createFileRoute("/product/$handle")({
             itemListElement: [
               { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
               { "@type": "ListItem", position: 2, name: "Shop", item: `${SITE.url}/shop` },
-              { "@type": "ListItem", position: 3, name: displayTitle, item: url },
+              ...(category
+                ? [
+                    {
+                      "@type": "ListItem",
+                      position: 3,
+                      name: category.label,
+                      item: `${SITE.url}/category/${category.slug}`,
+                    },
+                    { "@type": "ListItem", position: 4, name: displayTitle, item: url },
+                  ]
+                : [{ "@type": "ListItem", position: 3, name: displayTitle, item: url }]),
             ],
           }),
         },
+        // FAQPage schema is generated from the same visible FAQ content.
+        ...(guidance
+          ? [
+              {
+                type: "application/ld+json",
+                children: JSON.stringify(faqPageJsonLd(guidance.faqs)),
+              },
+            ]
+          : []),
       ],
     };
   },
