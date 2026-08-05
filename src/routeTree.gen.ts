@@ -22,6 +22,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
+import { Route as GuidesHowToChooseA4wdAirCompressorRouteImport } from './routes/guides.how-to-choose-a-4wd-air-compressor'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
 
 const WarrantyRoute = WarrantyRouteImport.update({
@@ -89,6 +90,12 @@ const ProductHandleRoute = ProductHandleRouteImport.update({
   path: '/product/$handle',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesHowToChooseA4wdAirCompressorRoute =
+  GuidesHowToChooseA4wdAirCompressorRouteImport.update({
+    id: '/guides/how-to-choose-a-4wd-air-compressor',
+    path: '/guides/how-to-choose-a-4wd-air-compressor',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const CategorySlugRoute = CategorySlugRouteImport.update({
   id: '/category/$slug',
   path: '/category/$slug',
@@ -109,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/warranty': typeof WarrantyRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/guides/how-to-choose-a-4wd-air-compressor': typeof GuidesHowToChooseA4wdAirCompressorRoute
   '/product/$handle': typeof ProductHandleRoute
 }
 export interface FileRoutesByTo {
@@ -125,6 +133,7 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/warranty': typeof WarrantyRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/guides/how-to-choose-a-4wd-air-compressor': typeof GuidesHowToChooseA4wdAirCompressorRoute
   '/product/$handle': typeof ProductHandleRoute
 }
 export interface FileRoutesById {
@@ -142,6 +151,7 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/warranty': typeof WarrantyRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/guides/how-to-choose-a-4wd-air-compressor': typeof GuidesHowToChooseA4wdAirCompressorRoute
   '/product/$handle': typeof ProductHandleRoute
 }
 export interface FileRouteTypes {
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/warranty'
     | '/category/$slug'
+    | '/guides/how-to-choose-a-4wd-air-compressor'
     | '/product/$handle'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/warranty'
     | '/category/$slug'
+    | '/guides/how-to-choose-a-4wd-air-compressor'
     | '/product/$handle'
   id:
     | '__root__'
@@ -192,6 +204,7 @@ export interface FileRouteTypes {
     | '/terms'
     | '/warranty'
     | '/category/$slug'
+    | '/guides/how-to-choose-a-4wd-air-compressor'
     | '/product/$handle'
   fileRoutesById: FileRoutesById
 }
@@ -209,6 +222,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   WarrantyRoute: typeof WarrantyRoute
   CategorySlugRoute: typeof CategorySlugRoute
+  GuidesHowToChooseA4wdAirCompressorRoute: typeof GuidesHowToChooseA4wdAirCompressorRoute
   ProductHandleRoute: typeof ProductHandleRoute
 }
 
@@ -305,6 +319,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProductHandleRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guides/how-to-choose-a-4wd-air-compressor': {
+      id: '/guides/how-to-choose-a-4wd-air-compressor'
+      path: '/guides/how-to-choose-a-4wd-air-compressor'
+      fullPath: '/guides/how-to-choose-a-4wd-air-compressor'
+      preLoaderRoute: typeof GuidesHowToChooseA4wdAirCompressorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/category/$slug': {
       id: '/category/$slug'
       path: '/category/$slug'
@@ -329,6 +350,8 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   WarrantyRoute: WarrantyRoute,
   CategorySlugRoute: CategorySlugRoute,
+  GuidesHowToChooseA4wdAirCompressorRoute:
+    GuidesHowToChooseA4wdAirCompressorRoute,
   ProductHandleRoute: ProductHandleRoute,
 }
 export const routeTree = rootRouteImport
