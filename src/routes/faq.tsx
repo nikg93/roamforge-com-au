@@ -12,6 +12,14 @@ const FAQ_GROUPS: Array<{ heading: string; items: Array<[string, string]> }> = [
     items: [
       ["Do you offer Australia-wide shipping?", "Yes. We ship Australia-wide."],
       [
+        "How long will my order take?",
+        "Orders are typically processed within 1–3 business days after payment. Estimated transit times begin after dispatch: 3–7 business days for metro areas, 5–10 for regional areas and 7–14 for remote areas.",
+      ],
+      [
+        "Will my order arrive in one delivery?",
+        "Some products are fulfilled directly by authorised supplier partners, so an order may arrive in separate shipments and separate tracking details may be provided.",
+      ],
+      [
         "Can I track my order?",
         "Yes. Tracking details are emailed once your order has been dispatched.",
       ],
@@ -21,6 +29,10 @@ const FAQ_GROUPS: Array<{ heading: string; items: Array<[string, string]> }> = [
     heading: "Returns & Warranty",
     items: [
       ["Do you offer returns?", "Yes. Please refer to our Returns & Refunds Policy."],
+      [
+        "What if my item is faulty, damaged or incorrect?",
+        "Please contact us as soon as practicable after you notice the issue. Your rights under the Australian Consumer Law are not limited by any fixed notice period.",
+      ],
       [
         "Do your products come with warranties?",
         "Many products include manufacturer warranties. Warranty periods vary by brand and product — see the product page or our Warranty page for specifics.",
