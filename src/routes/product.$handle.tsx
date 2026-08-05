@@ -435,7 +435,14 @@ function ProductPageInner() {
                     src={activeImage.url}
                     srcSet={shopifySrcSet(activeImage.url)}
                     sizes="(max-width: 1024px) 100vw, 600px"
-                    alt={activeImage.altText ?? displayTitle}
+                    alt={
+                      activeImage.altText ??
+                      `${displayTitle}${p.productType ? ` — ${p.productType}` : ""}${
+                        galleryImages.length > 1
+                          ? ` (image ${imageIdx + 1} of ${galleryImages.length})`
+                          : ""
+                      }`
+                    }
                     width={800}
                     height={800}
                     fetchPriority="high"
