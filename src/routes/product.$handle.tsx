@@ -714,6 +714,7 @@ function ProductPageInner() {
               </div>
             </section>
           )}
+          {guidance && <ProductGuidance guidance={guidance} />}
           <CompleteTheKit source={p} />
           <JudgeMeReviews productId={p.id} />
           <RecentlyViewedRail excludeHandle={p.handle} />
