@@ -38,6 +38,14 @@ export interface Category {
   image: string;
   /** Shown directly in the desktop nav row; the rest live under "More". */
   primary: boolean;
+  /**
+   * Optional visible FAQs for the category page. Answers must be supported
+   * by the live catalogue, published policies or an on-site guide — the same
+   * array feeds FAQPage structured data.
+   */
+  faqs?: Array<[question: string, answer: string]>;
+  /** Optional on-site buyer guide surfaced on the category page. */
+  guidePath?: string;
 }
 
 export const CATEGORIES: Category[] = [
@@ -98,13 +106,28 @@ export const CATEGORIES: Category[] = [
     label: "AIR COMPRESSORS",
     navLabel: "AIR COMPRESSORS",
     shortLabel: "COMPRESSORS",
-    seoTitle: "4WD Air Compressors, Deflators & Inflation Kits",
-    headingSubtitle: "PORTABLE COMPRESSORS, DEFLATORS & INFLATION KITS",
+    seoTitle: "4WD Air Compressor Kits — Portable & Onboard Compressors",
+    headingSubtitle: "PORTABLE, ONBOARD & VEHICLE-MOUNTED COMPRESSOR KITS",
     description:
-      "Portable and in-vehicle air compressors, tyre deflators and inflation kits — air up fast after every low-pressure run.",
+      "Portable, onboard and vehicle-mounted 4WD air compressor kits, tyre deflators and inflation kits — air down for traction off road, then air up fast for the drive home.",
     query: "tag:cat-air-compressors",
     image: catCompressors,
     primary: false,
+    guidePath: "/guides/how-to-choose-a-4wd-air-compressor",
+    faqs: [
+      [
+        "What's the difference between a portable and an onboard air compressor kit?",
+        "A portable compressor stows in the tub or boot and can move between vehicles. An onboard or vehicle-mounted kit is fitted permanently and stays wired and ready to use. Both are listed in this range — our buyer guide compares duty cycle, airflow, pressure and hose reach.",
+      ],
+      [
+        "Do I need a tyre deflator as well as a compressor?",
+        "Most 4WD owners run both. This range also lists AOB tyre deflators and an inflator/deflator kit with a gauge, so you can drop pressure quickly before a track and check it again as you air up.",
+      ],
+      [
+        "How do I know a compressor kit will suit my vehicle?",
+        "Check fitment before ordering. Listings only state the vehicles and applications the manufacturer specifies, so if yours isn't named, contact us with your make, model, series and build year and we'll confirm before you buy.",
+      ],
+    ],
   },
   {
     slug: "recovery",
