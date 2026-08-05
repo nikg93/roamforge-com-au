@@ -44,7 +44,7 @@ const shopQuery = (page: number) =>
   });
 
 export const Route = createFileRoute("/shop")({
-  validateSearch: (search: Record<string, unknown>): { page: number } => ({
+  validateSearch: (search: Record<string, unknown>): { page?: number } => ({
     page: parsePageParam(search.page),
   }),
   search: { middlewares: [stripSearchParams({ page: 1 })] },

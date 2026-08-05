@@ -38,7 +38,7 @@ const categoryQuery = (slug: string, q: string, page: number) =>
   });
 
 export const Route = createFileRoute("/category/$slug")({
-  validateSearch: (search: Record<string, unknown>): { page: number } => ({
+  validateSearch: (search: Record<string, unknown>): { page?: number } => ({
     page: parsePageParam(search.page),
   }),
   search: { middlewares: [stripSearchParams({ page: 1 })] },
