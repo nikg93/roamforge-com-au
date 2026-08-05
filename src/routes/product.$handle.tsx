@@ -308,6 +308,11 @@ function ProductPageInner() {
   // none, we fall back to the conservative keyword extractor. Nothing is
   // ever fabricated — no data means no section.
   const fitmentRows = useMemo(() => readVehicleFitment(p.metafields), [p.metafields]);
+  const guidance = useMemo(
+    () => getPdpGuidance({ handle: p.handle, tags: p.tags, productType: p.productType }),
+    [p.handle, p.tags, p.productType],
+  );
+  const category = useMemo(() => categoryFromTags(p.tags), [p.tags]);
   const fitment = useMemo(() => extractFitment(p), [p]);
   const hasFitment = fitmentRows.length > 0 || !!fitment;
 
