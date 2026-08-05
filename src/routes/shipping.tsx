@@ -25,7 +25,9 @@ function ShippingPage() {
         slightly extended.
       </P>
       <H2>Shipping Times</H2>
-      <P>Estimated delivery times:</P>
+      <P>
+        Estimated delivery times below begin after your order has been processed and dispatched:
+      </P>
       <UL>
         <li>Metro Areas: 3–7 business days</li>
         <li>Regional Areas: 5–10 business days</li>
@@ -34,6 +36,12 @@ function ShippingPage() {
       <P>
         Delivery times are estimates only and may vary depending on courier services and
         destination.
+      </P>
+      <H2>Orders Fulfilled by Supplier Partners</H2>
+      <P>
+        Some products are fulfilled directly by authorised supplier partners. Where an order
+        includes these items, it may arrive in separate shipments and separate tracking details may
+        be provided.
       </P>
       <H2>Shipping Costs</H2>
       <P>
