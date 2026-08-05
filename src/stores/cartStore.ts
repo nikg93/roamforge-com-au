@@ -251,6 +251,20 @@ export async function resolveLineId(cartId: string, variantId: string): Promise<
   return lines.find((l) => l.variantId === variantId)?.lineId ?? null;
 }
 
+type SetState = (partial: Partial<CartStore>) => void;
+type GetState = () => CartStore;
+
+/**
+ * Remove a local item that has no corresponding Shopify line. Keeps the
+ * visible cart honest instead of leaving an unremovable ghost row, and never
+ * emits a remove_from_cart analytics event (the line was never real).
+ */
+function dropLocalItem(set: SetState, get: GetState, variantId: string) {
+  const next = get().items.filter((i) => i.variantId !== variantId);
+  if (next.length === 0) set({ items: [], cartId: null, checkoutUrl: null });
+  else set({ items: next });
+}
+
 export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
