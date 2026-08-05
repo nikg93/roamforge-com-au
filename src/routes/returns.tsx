@@ -29,8 +29,12 @@ function ReturnsPage() {
       </P>
       <H2>Faulty or Damaged Products</H2>
       <P>
-        If your item arrives damaged, faulty, or incorrect, please contact us within 7 days of
-        receiving your order.
+        If your item arrives damaged, faulty, or incorrect, please contact us as soon as practicable
+        after you notice the issue so we can help resolve it quickly.
+      </P>
+      <P>
+        Nothing here limits your rights under the Australian Consumer Law. Your rights and remedies
+        for faulty, damaged or incorrect goods are not restricted by any fixed notice period.
       </P>
       <P>Where applicable, we will:</P>
       <UL>
@@ -39,6 +43,7 @@ function ReturnsPage() {
         <li>Offer a refund</li>
       </UL>
       <P>In accordance with Australian Consumer Law.</P>
+      <P>Change-of-mind returns remain subject to the separate 30-day window described above.</P>
       <H2>Refund Processing</H2>
       <P>Approved refunds are typically processed within 5–10 business days.</P>
     </PageShell>

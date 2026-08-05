@@ -16,6 +16,12 @@ function TermsPage() {
   return (
     <PageShell eyebrow="TERMS & CONDITIONS" title="Terms and Conditions">
       <P>By accessing and purchasing from Roamforge, you agree to the following terms:</P>
+      <H2>Australian Consumer Law</H2>
+      <P>
+        Nothing in these terms excludes, restricts or modifies any right, guarantee or remedy you
+        have under the Australian Consumer Law or any other law that cannot lawfully be excluded,
+        restricted or modified.
+      </P>
       <H2>Product Information</H2>
       <P>
         We strive to ensure all product descriptions, pricing, and images are accurate. However,
@@ -32,8 +38,9 @@ function TermsPage() {
       </P>
       <H2>Limitation of Liability</H2>
       <P>
-        Roamforge shall not be liable for any indirect, incidental, or consequential damages arising
-        from the use of products purchased from our store.
+        To the maximum extent permitted by law, and subject to the Australian Consumer Law clause
+        above, Roamforge shall not be liable for any indirect, incidental, or consequential damages
+        arising from the use of products purchased from our store.
       </P>
       <H2>Governing Law</H2>
       <P>These terms are governed by the laws of Western Australia and Australia.</P>
