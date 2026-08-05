@@ -217,9 +217,18 @@ export function CartDrawer() {
                       </div>
                     </div>
                   ))}
+                  {/* Upsell lives inside the scroll region, never the pinned
+                      footer. In the footer its product grid made the
+                      flex-shrink-0 footer taller than the drawer on mobile,
+                      which pushed the line rows underneath it — remove and
+                      quantity buttons were still in the DOM but every tap
+                      landed on the footer, so the cart appeared frozen. */}
+                  {items[0] && (
+                    <CompleteTheKit source={items[items.length - 1].product.node} compact />
+                  )}
                 </div>
               </div>
-              <div className="flex-shrink-0 space-y-4 pt-4 border-t bg-background">
+              <div className="flex-shrink-0 space-y-3 pt-4 border-t bg-background">
                 <FreeShippingBar subtotal={mixedCurrency ? 0 : totalPrice} currency={currency} />
                 <div className="flex justify-between items-center">
                   <span className="text-lg font-semibold">Total</span>
@@ -245,9 +254,6 @@ export function CartDrawer() {
                     </>
                   )}
                 </Button>
-                {items[0] && (
-                  <CompleteTheKit source={items[items.length - 1].product.node} compact />
-                )}
               </div>
             </>
           )}

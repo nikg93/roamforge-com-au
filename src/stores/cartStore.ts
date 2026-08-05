@@ -41,7 +41,11 @@ interface CartStore {
   getCheckoutUrl: () => string | null;
 }
 
-const CART_QUERY = `query cart($id: ID!) { cart(id: $id) { id totalQuantity } }`;
+/** Server-truth line listing. Used to heal local items whose `lineId` is
+ * missing or stale — without this, such items can never be removed. */
+const CART_LINES_QUERY = `query cartLines($id: ID!) {
+  cart(id: $id) { id totalQuantity lines(first:100){edges{node{id quantity merchandise{... on ProductVariant{id}}}}} }
+}`;
 const CART_CREATE = `mutation cartCreate($input: CartInput!) {
   cartCreate(input: $input) {
     cart { id checkoutUrl lines(first:100) { edges { node { id merchandise { ... on ProductVariant { id } } } } } }
@@ -94,11 +98,25 @@ function isValidCheckoutUrl(url: string | null): url is string {
   }
 }
 
+/**
+ * Shopify reports two very different failures with similar wording:
+ *   - "Cart not found"                                   → the whole cart is gone
+ *   - "The merchandise line with id X does not exist."   → only that line is gone
+ * Treating the second as the first wipes a perfectly good cart, so they are
+ * classified separately. Verified against the live Storefront API (2026-07).
+ */
+export type CartErrorKind = "none" | "cart_not_found" | "line_not_found" | "other";
+export function classifyCartErrors(errs: Array<{ message: string }>): CartErrorKind {
+  if (!errs.length) return "none";
+  const msgs = errs.map((e) => (e.message || "").toLowerCase());
+  if (msgs.some((m) => m.includes("merchandise line") && m.includes("does not exist")))
+    return "line_not_found";
+  if (msgs.some((m) => m.includes("cart not found") || m.includes("does not exist")))
+    return "cart_not_found";
+  return "other";
+}
 function isCartNotFound(errs: Array<{ message: string }>) {
-  return errs.some((e) => {
-    const m = e.message.toLowerCase();
-    return m.includes("cart not found") || m.includes("does not exist");
-  });
+  return classifyCartErrors(errs) === "cart_not_found";
 }
 
 function summarizeUserErrors(errs: Array<{ message: string }>): string {
@@ -171,8 +189,11 @@ async function updateLine(cartId: string, lineId: string, quantity: number) {
     lines: [{ id: lineId, quantity }],
   });
   const errs = data?.data?.cartLinesUpdate?.userErrors ?? [];
-  if (isCartNotFound(errs))
+  const kind = classifyCartErrors(errs);
+  if (kind === "cart_not_found")
     return { success: false as const, cartNotFound: true, errorMessage: "Cart expired." };
+  if (kind === "line_not_found")
+    return { success: false as const, lineNotFound: true, errorMessage: "Line no longer exists." };
   if (errs.length) {
     console.error("[cart] cartLinesUpdate userErrors", errs);
     return { success: false as const, errorMessage: summarizeUserErrors(errs) };
@@ -183,13 +204,64 @@ async function updateLine(cartId: string, lineId: string, quantity: number) {
 async function removeLine(cartId: string, lineId: string) {
   const data = await storefrontApiRequest(CART_LINES_REMOVE, { cartId, lineIds: [lineId] });
   const errs = data?.data?.cartLinesRemove?.userErrors ?? [];
-  if (isCartNotFound(errs))
+  const kind = classifyCartErrors(errs);
+  if (kind === "cart_not_found")
     return { success: false as const, cartNotFound: true, errorMessage: "Cart expired." };
+  if (kind === "line_not_found")
+    // The line is already gone server-side: the user's intent is satisfied.
+    return { success: false as const, lineNotFound: true, errorMessage: "Line already removed." };
   if (errs.length) {
     console.error("[cart] cartLinesRemove userErrors", errs);
     return { success: false as const, errorMessage: summarizeUserErrors(errs) };
   }
   return { success: true as const };
+}
+
+/**
+ * Resolve the server line id for a variant. Local items can end up with a
+ * null/stale `lineId` (an add response that didn't echo the line, or a cart
+ * mutated in another tab). Before this existed, such items silently no-oped
+ * on every remove / quantity-decrease and reappeared after refresh.
+ */
+async function fetchServerLines(
+  cartId: string,
+): Promise<Array<{ lineId: string; variantId: string; quantity: number }> | null> {
+  try {
+    const data = await storefrontApiRequest(CART_LINES_QUERY, { id: cartId });
+    const cart = data?.data?.cart;
+    if (!cart) return [];
+    const edges = cart.lines?.edges ?? [];
+    return edges.map(
+      (e: { node: { id: string; quantity: number; merchandise?: { id?: string } } }) => ({
+        lineId: e.node.id,
+        variantId: e.node.merchandise?.id ?? "",
+        quantity: e.node.quantity,
+      }),
+    );
+  } catch (err) {
+    console.error("[cart] fetchServerLines failed", err);
+    return null;
+  }
+}
+
+export async function resolveLineId(cartId: string, variantId: string): Promise<string | null> {
+  const lines = await fetchServerLines(cartId);
+  if (!lines) return null;
+  return lines.find((l) => l.variantId === variantId)?.lineId ?? null;
+}
+
+type SetState = (partial: Partial<CartStore>) => void;
+type GetState = () => CartStore;
+
+/**
+ * Remove a local item that has no corresponding Shopify line. Keeps the
+ * visible cart honest instead of leaving an unremovable ghost row, and never
+ * emits a remove_from_cart analytics event (the line was never real).
+ */
+function dropLocalItem(set: SetState, get: GetState, variantId: string) {
+  const next = get().items.filter((i) => i.variantId !== variantId);
+  if (next.length === 0) set({ items: [], cartId: null, checkoutUrl: null });
+  else set({ items: next });
 }
 
 export const useCartStore = create<CartStore>()(
@@ -336,15 +408,30 @@ export const useCartStore = create<CartStore>()(
           try {
             const { items, cartId, clearCart } = get();
             const item = items.find((i) => i.variantId === variantId);
-            if (!item?.lineId || !cartId) return;
-            const r = await updateLine(cartId, item.lineId, quantity);
+            if (!item) return;
+            if (!cartId) {
+              // No server cart backs this item — it cannot be a real Shopify
+              // line, so drop it locally instead of silently doing nothing.
+              dropLocalItem(set, get, variantId);
+              return;
+            }
+            const lineId = item.lineId ?? (await resolveLineId(cartId, variantId));
+            if (!lineId) {
+              dropLocalItem(set, get, variantId);
+              return;
+            }
+            const r = await updateLine(cartId, lineId, quantity);
             if (r.success) {
               set({
-                items: get().items.map((i) => (i.variantId === variantId ? { ...i, quantity } : i)),
+                items: get().items.map((i) =>
+                  i.variantId === variantId ? { ...i, quantity, lineId } : i,
+                ),
               });
             } else if (r.cartNotFound) {
               clearCart();
               toast.error("Your cart expired.");
+            } else if (r.lineNotFound) {
+              dropLocalItem(set, get, variantId);
             } else {
               toast.error(`Couldn't update quantity. ${r.errorMessage}`);
             }
@@ -372,8 +459,19 @@ export const useCartStore = create<CartStore>()(
           try {
             const { items, cartId, clearCart } = get();
             const item = items.find((i) => i.variantId === variantId);
-            if (!item?.lineId || !cartId) return;
-            const r = await removeLine(cartId, item.lineId);
+            if (!item) return;
+            if (!cartId) {
+              dropLocalItem(set, get, variantId);
+              return;
+            }
+            const lineId = item.lineId ?? (await resolveLineId(cartId, variantId));
+            if (!lineId) {
+              // Phantom local line: never existed server-side, so removing it
+              // is a local cleanup, not a real cart removal — no analytics.
+              dropLocalItem(set, get, variantId);
+              return;
+            }
+            const r = await removeLine(cartId, lineId);
             if (r.success) {
               const next = get().items.filter((i) => i.variantId !== variantId);
               if (next.length === 0) clearCart();
@@ -396,6 +494,8 @@ export const useCartStore = create<CartStore>()(
             } else if (r.cartNotFound) {
               clearCart();
               toast.error("Your cart expired.");
+            } else if (r.lineNotFound) {
+              dropLocalItem(set, get, variantId);
             } else {
               toast.error(`Couldn't remove item. ${r.errorMessage}`);
             }
@@ -424,12 +524,32 @@ export const useCartStore = create<CartStore>()(
         if (!cartId || isSyncing || isLoading) return;
         set({ isSyncing: true });
         try {
-          const data = await storefrontApiRequest(CART_QUERY, { id: cartId });
-          if (!data) return;
-          const cart = data?.data?.cart;
+          const lines = await fetchServerLines(cartId);
+          // Network/transient failure — keep local state untouched.
+          if (lines === null) return;
           // Re-check isLoading after the network round-trip; if the user added
           // an item mid-sync, keep the local state.
-          if ((!cart || cart.totalQuantity === 0) && !get().isLoading) clearCart();
+          if (get().isLoading) return;
+          if (lines.length === 0) {
+            clearCart();
+            return;
+          }
+          // Reconcile against server truth: heal missing/stale line ids and
+          // drop local rows that no longer exist in the Shopify cart.
+          const byVariant = new Map(lines.map((l) => [l.variantId, l]));
+          const next = get()
+            .items.filter((i) => byVariant.has(i.variantId))
+            .map((i) => {
+              const l = byVariant.get(i.variantId)!;
+              // Shopify reports quantity 0 for lines whose variant is
+              // currently unavailable; never let that zero-out a live row.
+              const quantity = l.quantity > 0 ? l.quantity : i.quantity;
+              return i.lineId === l.lineId && i.quantity === quantity
+                ? i
+                : { ...i, lineId: l.lineId, quantity };
+            });
+          if (next.length === 0) clearCart();
+          else set({ items: next });
         } catch (err) {
           // Transient failure — keep the local cart intact so a slow/offline
           // network never destroys the user's selections.
