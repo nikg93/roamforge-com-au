@@ -8,7 +8,7 @@ export const Route = createFileRoute("/about")({
       path: "/about",
       title: "About Roamforge | Australian 4WD & Touring Gear",
       description:
-        "Founded in Western Australia, Roamforge supplies premium 4WD, camping and touring gear for Australian adventures.",
+        "Founded in Western Australia, Roamforge is an online retailer supplying 4WD, camping and touring gear for Australian adventures.",
     }),
   component: AboutPage,
 });
@@ -21,19 +21,24 @@ function AboutPage() {
         exploring beyond the ordinary.
       </P>
       <P>
-        Founded in Western Australia, Roamforge was created for 4WD enthusiasts, campers,
-        overlanders, and outdoor adventurers who demand quality equipment they can trust. Whether
-        you're tackling remote tracks, setting up camp under the stars, or preparing your vehicle
-        for the next big journey, we're here to help you gear up with confidence.
+        Founded in Western Australia, Roamforge is an online-only retailer created for 4WD
+        enthusiasts, campers, overlanders, and outdoor adventurers. Whether you're tackling remote
+        tracks, setting up camp under the stars, or preparing your vehicle for the next big journey,
+        we're here to help you gear up with confidence.
+      </P>
+      <H2>How We Fulfil Orders</H2>
+      <P>
+        We source products from Australian brands and suppliers. Depending on the product, your
+        order may be dispatched directly by one of our Australian suppliers, and items in the same
+        order may arrive separately.
       </P>
       <H2>Our Mission</H2>
       <P>
-        To provide premium 4WD, camping, touring, and outdoor products that inspire adventure and
-        withstand the toughest Australian conditions.
+        To provide 4WD, camping, touring, and outdoor products that support Australian adventures.
       </P>
       <P>
-        We carefully select products from trusted brands and suppliers to ensure our customers
-        receive equipment that delivers performance, durability, and value.
+        We select products from established brands and suppliers with a focus on performance,
+        durability, and value.
       </P>
       <P>
         At Roamforge, we're not just selling products—we're building a community of adventurers who
