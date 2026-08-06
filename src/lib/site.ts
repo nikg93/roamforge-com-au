@@ -35,13 +35,13 @@ export const SHOPIFY_STOREFRONT_URL = `https://${SHOPIFY.storeDomain}/api/${SHOP
  * Brand claims rendered in the announcement strip. Every flag must be
  * backed by current written evidence.
  *
- * Lightforce stockist/dealer messaging is disabled until written
- * authorisation for Roamforge is retained in the compliance record.
+ * Roamforge's owner has confirmed current authorised Lightforce dealer
+ * status. Retain the supporting dealer record in the compliance file.
  */
 export const BRAND_CLAIMS = {
   australianOwned: true,
-  lightforceStockist: false,
-  authorisedLightforceDealer: false,
+  lightforceStockist: true,
+  authorisedLightforceDealer: true,
 } as const;
 
 /**
