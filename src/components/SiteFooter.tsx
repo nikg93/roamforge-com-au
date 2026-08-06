@@ -118,11 +118,19 @@ export function SiteFooter() {
           </ul>
           <div className="mt-6">
             <p className="text-xs text-rf-cream/60 leading-relaxed">
-              Based in Western Australia. For product, order or trade enquiries email{" "}
+              ROAMFORGE · Online-only Australian retailer
+              <br />
+              PO Box 4017, Alexander Heights WA 6064
+              <br />
+              <a href="tel:+61472725709" className="text-rf-tan hover:underline">
+                0472 725 709
+              </a>
+              {" · "}
               <a href="mailto:info@roamforge.com.au" className="text-rf-tan hover:underline">
                 info@roamforge.com.au
               </a>
-              .
+              <br />
+              No customer collection point.
             </p>
           </div>
         </div>
