@@ -118,7 +118,9 @@ export function SiteFooter() {
           </ul>
           <div className="mt-6">
             <p className="text-xs text-rf-cream/60 leading-relaxed">
-              ROAMFORGE · Online-only Australian retailer
+              ROAMFORGE · ABN 12 269 090 681
+              <br />
+              Online-only Australian retailer
               <br />
               PO Box 4017, Alexander Heights WA 6064
               <br />
