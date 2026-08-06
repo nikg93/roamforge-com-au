@@ -18,7 +18,9 @@ function ContactPage() {
     <PageShell eyebrow="CONTACT US" title="Get In Touch">
       <P>Have a question about a product, order, or upcoming adventure? We're here to help.</P>
       <H2>Business Details</H2>
+      <P>Legal entity: Nikola Grujic, sole trader</P>
       <P>Registered business name: ROAMFORGE</P>
+      <P>ABN: 12 269 090 681</P>
       <P>
         Phone:{" "}
         <a className="text-rf-tan underline" href="tel:+61472725709">
