@@ -8,7 +8,7 @@ export const Route = createFileRoute("/contact")({
       path: "/contact",
       title: "Contact Roamforge | Get in Touch",
       description:
-        "Get in touch with the Roamforge team for product enquiries, warranty support and general questions.",
+        "Contact Roamforge for product enquiries, order support and warranty assistance.",
     }),
   component: ContactPage,
 });
@@ -17,24 +17,24 @@ function ContactPage() {
   return (
     <PageShell eyebrow="CONTACT US" title="Get In Touch">
       <P>Have a question about a product, order, or upcoming adventure? We're here to help.</P>
-      <H2>Contact Details</H2>
+      <H2>Business Details</H2>
+      <P>Registered business name: ROAMFORGE</P>
+      <P>
+        Phone:{" "}
+        <a className="text-rf-tan underline" href="tel:+61472725709">
+          0472 725 709
+        </a>
+      </P>
       <P>
         Email:{" "}
         <a className="text-rf-tan underline" href="mailto:info@roamforge.com.au">
           info@roamforge.com.au
         </a>
       </P>
+      <P>Postal address: PO Box 4017, Alexander Heights WA 6064, Australia</P>
       <P>
-        Sales:{" "}
-        <a className="text-rf-tan underline" href="mailto:sales@roamforge.com.au">
-          sales@roamforge.com.au
-        </a>
-      </P>
-      <P>
-        Customer Support:{" "}
-        <a className="text-rf-tan underline" href="mailto:support@roamforge.com.au">
-          support@roamforge.com.au
-        </a>
+        Roamforge is an online-only retailer. This postal address is not a retail store or customer
+        collection point.
       </P>
       <H2>Business Hours</H2>
       <P>Monday – Friday</P>
