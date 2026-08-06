@@ -31,10 +31,16 @@ function TermsPage() {
       <H2>Pricing</H2>
       <P>All prices are listed in Australian Dollars (AUD).</P>
       <P>Prices may change at any time without notice.</P>
-      <H2>Orders</H2>
+      <H2>Orders and Cancellations</H2>
       <P>
         We reserve the right to refuse or cancel any order where necessary, including suspected
         fraud, pricing errors, or stock availability issues.
+      </P>
+      <P>
+        Customer-requested cancellations completed before dispatch are free of charge. Customers
+        should contact Roamforge within 24 hours for the best chance of stopping fulfilment. Once an
+        order has been dispatched, it cannot be cancelled for change of mind. Our Returns Policy
+        explains the remedies available for faulty, damaged or incorrect goods.
       </P>
       <H2>Limitation of Liability</H2>
       <P>
