@@ -33,18 +33,15 @@ export const SHOPIFY_STOREFRONT_URL = `https://${SHOPIFY.storeDomain}/api/${SHOP
 
 /**
  * Brand claims rendered in the announcement strip. Every flag must be
- * backed by verifiable data — never turn one on for marketing effect.
+ * backed by current written evidence.
  *
- * - `australianOwned`: stated on /about and in the existing trust strip.
- * - `lightforceStockist`: the connected Shopify catalogue carries live,
- *   available `vendor:Lightforce` products tagged `dealer-import`.
- * - `authorisedLightforceDealer`: ON — the store owner confirmed authorised
- *   Lightforce dealer status and provided LFG Partners dealer catalogue access.
+ * Lightforce stockist/dealer messaging is disabled until written
+ * authorisation for Roamforge is retained in the compliance record.
  */
 export const BRAND_CLAIMS = {
   australianOwned: true,
-  lightforceStockist: true,
-  authorisedLightforceDealer: true,
+  lightforceStockist: false,
+  authorisedLightforceDealer: false,
 } as const;
 
 /**
