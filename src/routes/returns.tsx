@@ -16,7 +16,9 @@ export const Route = createFileRoute("/returns")({
 function ReturnsPage() {
   return (
     <PageShell eyebrow="RETURNS & REFUNDS" title="Returns Policy">
-      <P>This policy explains cancellations, returns and remedies available to Roamforge customers.</P>
+      <P>
+        This policy explains cancellations, returns and remedies available to Roamforge customers.
+      </P>
       <H2>Order Cancellations</H2>
       <P>
         Please contact us within 24 hours if you need to cancel an order. A cancellation completed

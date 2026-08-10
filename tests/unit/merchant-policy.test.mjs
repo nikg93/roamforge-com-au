@@ -2,11 +2,7 @@
 // fabricated review/rating or invented shipping rates.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import {
-  offerShippingDetails,
-  merchantReturnPolicy,
-  RETURN_WINDOW_DAYS,
-} from "../../src/lib/merchant-policy.ts";
+import { offerShippingDetails, merchantReturnPolicy } from "../../src/lib/merchant-policy.ts";
 
 const productRoute = readFileSync("src/routes/product.$handle.tsx", "utf8");
 
@@ -31,17 +27,21 @@ export default {
       [3, 14, "DAY"],
     );
   },
-  "returnPolicy: AU, 30-day finite window, buyer pays return shipping"() {
+  "returnPolicy: AU, change-of-mind returns not permitted, no finite-window fields"() {
     const r = merchantReturnPolicy();
     assert.equal(r["@type"], "MerchantReturnPolicy");
     assert.equal(r.applicableCountry, "AU");
-    assert.equal(r.returnPolicyCountry, "AU");
-    assert.equal(r.returnPolicyCategory, "https://schema.org/MerchantReturnFiniteReturnWindow");
-    assert.equal(r.merchantReturnDays, RETURN_WINDOW_DAYS);
-    assert.equal(RETURN_WINDOW_DAYS, 30);
-    assert.equal(r.returnFees, "https://schema.org/ReturnShippingFees");
-    assert.equal(r.returnMethod, "https://schema.org/ReturnByMail");
+    assert.equal(r.returnPolicyCategory, "https://schema.org/MerchantReturnNotPermitted");
     assert.equal(r.merchantReturnLink, "https://roamforge.com.au/returns");
+    for (const k of [
+      "merchantReturnDays",
+      "returnFees",
+      "returnMethod",
+      "returnShippingFeesAmount",
+      "returnPolicySeasonalOverride",
+    ]) {
+      assert.ok(!(k in r), `${k} must not be present`);
+    }
   },
   "product offer wires both merchant listing properties"() {
     assert.match(productRoute, /shippingDetails:\s*offerShippingDetails\(\)/);
