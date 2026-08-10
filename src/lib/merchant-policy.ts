@@ -9,9 +9,10 @@
 //    `shippingSettingsLink` in place of a fabricated `shippingRate`.
 //  - Delivery windows are estimates, not guarantees: handling 1-3 business
 //    days, transit 3-14 business days (metro 3-7 through remote 7-14).
-//  - Returns: AU, 30-day change-of-mind window, buyer pays return postage,
-//    goods unused / original packaging / resalable. Faulty or damaged goods
-//    are handled separately under Australian Consumer Law.
+//  - Returns: Roamforge does not accept change-of-mind returns, so the
+//    structured data declares MerchantReturnNotPermitted with no finite
+//    window or fee fields. Faulty, damaged or incorrect goods remain covered
+//    by Australian Consumer Law remedies (handled outside this schema).
 import { SITE } from "./site";
 
 export const SHIPPING_POLICY_URL = `${SITE.url}/shipping`;
@@ -21,9 +22,6 @@ export const RETURNS_POLICY_URL = `${SITE.url}/returns`;
 export const HANDLING_DAYS = { min: 1, max: 3 } as const;
 /** Conservative AU transit window in business days: metro 3 through remote 14. */
 export const TRANSIT_DAYS = { min: 3, max: 14 } as const;
-/** Change-of-mind return window, in days (published policy). */
-export const RETURN_WINDOW_DAYS = 30;
-
 export function offerShippingDetails(): Record<string, unknown> {
   return {
     "@type": "OfferShippingDetails",
@@ -55,11 +53,7 @@ export function merchantReturnPolicy(): Record<string, unknown> {
   return {
     "@type": "MerchantReturnPolicy",
     applicableCountry: "AU",
-    returnPolicyCountry: "AU",
-    returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
-    merchantReturnDays: RETURN_WINDOW_DAYS,
-    returnMethod: "https://schema.org/ReturnByMail",
-    returnFees: "https://schema.org/ReturnShippingFees",
+    returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
     merchantReturnLink: RETURNS_POLICY_URL,
   };
 }
