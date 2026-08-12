@@ -15,6 +15,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as ShippingRouteImport } from './routes/shipping'
 import { Route as ReturnsRouteImport } from './routes/returns'
+import { Route as RecoveryChecklistRouteImport } from './routes/recovery-checklist'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MerchantUrlOverridesDottsvRouteImport } from './routes/merchant-url-overrides[.]tsv'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
@@ -56,6 +57,11 @@ const ShippingRoute = ShippingRouteImport.update({
 const ReturnsRoute = ReturnsRouteImport.update({
   id: '/returns',
   path: '/returns',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecoveryChecklistRoute = RecoveryChecklistRouteImport.update({
+  id: '/recovery-checklist',
+  path: '/recovery-checklist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -130,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/integrations': typeof IntegrationsRoute
   '/merchant-url-overrides.tsv': typeof MerchantUrlOverridesDottsvRoute
   '/privacy': typeof PrivacyRoute
+  '/recovery-checklist': typeof RecoveryChecklistRoute
   '/returns': typeof ReturnsRoute
   '/shipping': typeof ShippingRoute
   '/shop': typeof ShopRoute
@@ -150,6 +157,7 @@ export interface FileRoutesByTo {
   '/integrations': typeof IntegrationsRoute
   '/merchant-url-overrides.tsv': typeof MerchantUrlOverridesDottsvRoute
   '/privacy': typeof PrivacyRoute
+  '/recovery-checklist': typeof RecoveryChecklistRoute
   '/returns': typeof ReturnsRoute
   '/shipping': typeof ShippingRoute
   '/shop': typeof ShopRoute
@@ -171,6 +179,7 @@ export interface FileRoutesById {
   '/integrations': typeof IntegrationsRoute
   '/merchant-url-overrides.tsv': typeof MerchantUrlOverridesDottsvRoute
   '/privacy': typeof PrivacyRoute
+  '/recovery-checklist': typeof RecoveryChecklistRoute
   '/returns': typeof ReturnsRoute
   '/shipping': typeof ShippingRoute
   '/shop': typeof ShopRoute
@@ -193,6 +202,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/merchant-url-overrides.tsv'
     | '/privacy'
+    | '/recovery-checklist'
     | '/returns'
     | '/shipping'
     | '/shop'
@@ -213,6 +223,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/merchant-url-overrides.tsv'
     | '/privacy'
+    | '/recovery-checklist'
     | '/returns'
     | '/shipping'
     | '/shop'
@@ -233,6 +244,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/merchant-url-overrides.tsv'
     | '/privacy'
+    | '/recovery-checklist'
     | '/returns'
     | '/shipping'
     | '/shop'
@@ -254,6 +266,7 @@ export interface RootRouteChildren {
   IntegrationsRoute: typeof IntegrationsRoute
   MerchantUrlOverridesDottsvRoute: typeof MerchantUrlOverridesDottsvRoute
   PrivacyRoute: typeof PrivacyRoute
+  RecoveryChecklistRoute: typeof RecoveryChecklistRoute
   ReturnsRoute: typeof ReturnsRoute
   ShippingRoute: typeof ShippingRoute
   ShopRoute: typeof ShopRoute
@@ -308,6 +321,13 @@ declare module '@tanstack/react-router' {
       path: '/returns'
       fullPath: '/returns'
       preLoaderRoute: typeof ReturnsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recovery-checklist': {
+      id: '/recovery-checklist'
+      path: '/recovery-checklist'
+      fullPath: '/recovery-checklist'
+      preLoaderRoute: typeof RecoveryChecklistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -416,6 +436,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntegrationsRoute: IntegrationsRoute,
   MerchantUrlOverridesDottsvRoute: MerchantUrlOverridesDottsvRoute,
   PrivacyRoute: PrivacyRoute,
+  RecoveryChecklistRoute: RecoveryChecklistRoute,
   ReturnsRoute: ReturnsRoute,
   ShippingRoute: ShippingRoute,
   ShopRoute: ShopRoute,
@@ -431,3 +452,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
