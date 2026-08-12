@@ -15,7 +15,6 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { Integrations } from "@/components/Integrations";
 import { ConsentBanner } from "@/components/ConsentBanner";
-import { WelcomePopup } from "@/components/WelcomePopup";
 import { useCartSync } from "@/hooks/useCartSync";
 import { SITE_URL, DEFAULT_OG_IMAGE } from "@/lib/seo";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -229,7 +228,6 @@ function RootComponent() {
       <Toaster position="top-right" />
       <Integrations />
       <ConsentBanner />
-      <WelcomePopup />
     </QueryClientProvider>
   );
 }

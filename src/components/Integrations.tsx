@@ -10,7 +10,6 @@ import { captureAttribution } from "@/lib/attribution";
  *
  * To enable, add the corresponding value in your Lovable project env / .env:
  *   VITE_GA4_MEASUREMENT_ID     e.g. G-XXXXXXXXXX          (Google Analytics 4)
- *   VITE_KLAVIYO_COMPANY_ID     e.g. ABC123                (Klaviyo — email capture / marketing)
  *   VITE_TIDIO_PUBLIC_KEY       e.g. abcd1234...           (Tidio live chat)
  *   VITE_JUDGEME_SHOP_DOMAIN    e.g. xmszfz-pj.myshopify.com   (Judge.me reviews — with token below)
  *   VITE_JUDGEME_PUBLIC_TOKEN   Judge.me public token
@@ -29,14 +28,12 @@ export function Integrations() {
     // Roamforge production ID lives in site config as a fallback. Setting
     // VITE_GA4_MEASUREMENT_ID still overrides it.
     const ga4Raw = raw(ANALYTICS.ga4MeasurementId);
-    const klaviyoRaw = raw(import.meta.env.VITE_KLAVIYO_COMPANY_ID);
     const tidioRaw = raw(import.meta.env.VITE_TIDIO_PUBLIC_KEY);
     const judgeMeDomain = raw(import.meta.env.VITE_JUDGEME_SHOP_DOMAIN);
     const judgeMeTokenRaw = raw(import.meta.env.VITE_JUDGEME_PUBLIC_TOKEN);
     // Public Meta Pixel ID — env override with sanitised production fallback.
     const metaPixelRaw = raw(ANALYTICS.metaPixelId);
     const ga4 = /^G-[A-Z0-9]{4,}$/i.test(ga4Raw) ? ga4Raw : "";
-    const klaviyo = /^[A-Z0-9]{4,}$/i.test(klaviyoRaw) ? klaviyoRaw : "";
     const tidio = /^[A-Za-z0-9]{6,}$/.test(tidioRaw) ? tidioRaw : "";
     const judgeMe =
       /^[a-z0-9.-]+\.myshopify\.com$/i.test(judgeMeDomain) && judgeMeTokenRaw
@@ -47,7 +44,6 @@ export function Integrations() {
     if (import.meta.env.DEV) {
       const missing: string[] = [];
       if (!ga4) missing.push("VITE_GA4_MEASUREMENT_ID");
-      if (!klaviyo) missing.push("VITE_KLAVIYO_COMPANY_ID");
       if (!tidio) missing.push("VITE_TIDIO_PUBLIC_KEY");
       if (!judgeMe) missing.push("VITE_JUDGEME_SHOP_DOMAIN + VITE_JUDGEME_PUBLIC_TOKEN");
       if (!metaPixel) missing.push("VITE_META_PIXEL_ID");
@@ -122,14 +118,6 @@ export function Integrations() {
       } else {
         w.gtag?.("consent", "update", { analytics_storage: "denied" });
         removeById("ga4-loader");
-      }
-      if (klaviyo && c.marketing) {
-        inject(
-          "klaviyo-loader",
-          `https://static.klaviyo.com/onsite/js/klaviyo.js?company_id=${klaviyo}`,
-        );
-      } else {
-        removeById("klaviyo-loader");
       }
       if (tidio && c.marketing) {
         inject("tidio-loader", `//code.tidio.co/${tidio}.js`);
