@@ -7,6 +7,7 @@ import {
   CHECKLIST_PATH,
   GIVEAWAY_PATH,
   GIVEAWAY_TERMS_PATH,
+  MAX_RESPONSE_WORDS,
   PRIZE,
   PROMOTER,
   PROMOTION,
@@ -46,9 +47,9 @@ function GiveawayPage() {
 
       <H2>The prize</H2>
       <P>
-        {PRIZE.quantity} × {PRIZE.name} (SKU {PRIZE.sku}), valued at $
-        {PRIZE.valueAud.toFixed(2)} AUD. Roamforge covers standard delivery to one deliverable
-        Australian address. Express shipping is excluded.
+        {PRIZE.quantity} × {PRIZE.name} (SKU {PRIZE.sku}), valued at ${PRIZE.valueAud.toFixed(2)}{" "}
+        AUD. Roamforge covers standard delivery to one deliverable Australian address. Express
+        shipping is excluded.
       </P>
 
       <H2>How to enter</H2>
@@ -56,9 +57,11 @@ function GiveawayPage() {
         <li>Free entry, Australia-wide, open to residents aged 18 or over.</li>
         <li>One entry per person and per email address.</li>
         <li>
-          Answer in {25} words or fewer: “{PROMOTION.question}”
+          Answer in {MAX_RESPONSE_WORDS} words or fewer: “{PROMOTION.question}”
         </li>
-        <li>Opens {PROMOTION.opens}; closes {PROMOTION.closes}.</li>
+        <li>
+          Opens {PROMOTION.opens}; closes {PROMOTION.closes}.
+        </li>
       </UL>
 
       <H2>How entries are judged</H2>
@@ -103,7 +106,7 @@ function GiveawayPage() {
         </a>
         .
       </P>
-      <P className-="">
+      <P>
         This promotion is in no way sponsored, endorsed, administered by, or associated with
         Facebook or Instagram.
       </P>

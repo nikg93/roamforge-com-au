@@ -24,7 +24,9 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as GuidesHowToChooseA4wdAirCompressorRouteImport } from './routes/guides.how-to-choose-a-4wd-air-compressor'
+import { Route as GiveawayRecoveryKitRouteImport } from './routes/giveaway.recovery-kit'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
+import { Route as GiveawayRecoveryKitTermsRouteImport } from './routes/giveaway.recovery-kit.terms'
 
 const WarrantyRoute = WarrantyRouteImport.update({
   id: '/warranty',
@@ -103,11 +105,22 @@ const GuidesHowToChooseA4wdAirCompressorRoute =
     path: '/guides/how-to-choose-a-4wd-air-compressor',
     getParentRoute: () => rootRouteImport,
   } as any)
+const GiveawayRecoveryKitRoute = GiveawayRecoveryKitRouteImport.update({
+  id: '/giveaway/recovery-kit',
+  path: '/giveaway/recovery-kit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategorySlugRoute = CategorySlugRouteImport.update({
   id: '/category/$slug',
   path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GiveawayRecoveryKitTermsRoute =
+  GiveawayRecoveryKitTermsRouteImport.update({
+    id: '/terms',
+    path: '/terms',
+    getParentRoute: () => GiveawayRecoveryKitRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -124,8 +137,10 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/warranty': typeof WarrantyRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/giveaway/recovery-kit': typeof GiveawayRecoveryKitRouteWithChildren
   '/guides/how-to-choose-a-4wd-air-compressor': typeof GuidesHowToChooseA4wdAirCompressorRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/giveaway/recovery-kit/terms': typeof GiveawayRecoveryKitTermsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -142,8 +157,10 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/warranty': typeof WarrantyRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/giveaway/recovery-kit': typeof GiveawayRecoveryKitRouteWithChildren
   '/guides/how-to-choose-a-4wd-air-compressor': typeof GuidesHowToChooseA4wdAirCompressorRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/giveaway/recovery-kit/terms': typeof GiveawayRecoveryKitTermsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -161,8 +178,10 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/warranty': typeof WarrantyRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/giveaway/recovery-kit': typeof GiveawayRecoveryKitRouteWithChildren
   '/guides/how-to-choose-a-4wd-air-compressor': typeof GuidesHowToChooseA4wdAirCompressorRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/giveaway/recovery-kit/terms': typeof GiveawayRecoveryKitTermsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -181,8 +200,10 @@ export interface FileRouteTypes {
     | '/terms'
     | '/warranty'
     | '/category/$slug'
+    | '/giveaway/recovery-kit'
     | '/guides/how-to-choose-a-4wd-air-compressor'
     | '/product/$handle'
+    | '/giveaway/recovery-kit/terms'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -199,8 +220,10 @@ export interface FileRouteTypes {
     | '/terms'
     | '/warranty'
     | '/category/$slug'
+    | '/giveaway/recovery-kit'
     | '/guides/how-to-choose-a-4wd-air-compressor'
     | '/product/$handle'
+    | '/giveaway/recovery-kit/terms'
   id:
     | '__root__'
     | '/'
@@ -217,8 +240,10 @@ export interface FileRouteTypes {
     | '/terms'
     | '/warranty'
     | '/category/$slug'
+    | '/giveaway/recovery-kit'
     | '/guides/how-to-choose-a-4wd-air-compressor'
     | '/product/$handle'
+    | '/giveaway/recovery-kit/terms'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -236,6 +261,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   WarrantyRoute: typeof WarrantyRoute
   CategorySlugRoute: typeof CategorySlugRoute
+  GiveawayRecoveryKitRoute: typeof GiveawayRecoveryKitRouteWithChildren
   GuidesHowToChooseA4wdAirCompressorRoute: typeof GuidesHowToChooseA4wdAirCompressorRoute
   ProductHandleRoute: typeof ProductHandleRoute
 }
@@ -347,6 +373,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesHowToChooseA4wdAirCompressorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/giveaway/recovery-kit': {
+      id: '/giveaway/recovery-kit'
+      path: '/giveaway/recovery-kit'
+      fullPath: '/giveaway/recovery-kit'
+      preLoaderRoute: typeof GiveawayRecoveryKitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/category/$slug': {
       id: '/category/$slug'
       path: '/category/$slug'
@@ -354,8 +387,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/giveaway/recovery-kit/terms': {
+      id: '/giveaway/recovery-kit/terms'
+      path: '/terms'
+      fullPath: '/giveaway/recovery-kit/terms'
+      preLoaderRoute: typeof GiveawayRecoveryKitTermsRouteImport
+      parentRoute: typeof GiveawayRecoveryKitRoute
+    }
   }
 }
+
+interface GiveawayRecoveryKitRouteChildren {
+  GiveawayRecoveryKitTermsRoute: typeof GiveawayRecoveryKitTermsRoute
+}
+
+const GiveawayRecoveryKitRouteChildren: GiveawayRecoveryKitRouteChildren = {
+  GiveawayRecoveryKitTermsRoute: GiveawayRecoveryKitTermsRoute,
+}
+
+const GiveawayRecoveryKitRouteWithChildren =
+  GiveawayRecoveryKitRoute._addFileChildren(GiveawayRecoveryKitRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -372,6 +423,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   WarrantyRoute: WarrantyRoute,
   CategorySlugRoute: CategorySlugRoute,
+  GiveawayRecoveryKitRoute: GiveawayRecoveryKitRouteWithChildren,
   GuidesHowToChooseA4wdAirCompressorRoute:
     GuidesHowToChooseA4wdAirCompressorRoute,
   ProductHandleRoute: ProductHandleRoute,
@@ -379,13 +431,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

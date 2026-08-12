@@ -49,8 +49,8 @@ function TermsPage() {
 
       <H2>2. Nature of the promotion</H2>
       <P>
-        This is a game of skill. Chance plays no part in determining the winner. Entry is free and no
-        purchase is necessary.
+        This is a game of skill. Chance plays no part in determining the winner. Entry is free and
+        no purchase is necessary.
       </P>
 
       <H2>3. Eligibility</H2>
