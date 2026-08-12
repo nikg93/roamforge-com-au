@@ -3,7 +3,6 @@ import { Instagram } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { CATEGORIES } from "@/lib/categories";
 import { openConsentPreferences } from "@/lib/consent";
-import { NewsletterForm } from "@/components/NewsletterForm";
 
 const featuredSlugs: Array<(typeof CATEGORIES)[number]["slug"]> = [
   "performance",
@@ -25,12 +24,10 @@ export function SiteFooter() {
             Premium 4WD, camping and adventure gear designed for touring, exploring and life off the
             beaten track.
           </p>
-          <div className="pt-2 max-w-sm">
-            <h4 className="font-display text-sm tracking-[0.2em] text-rf-cream mb-3">
-              JOIN THE LIST
-            </h4>
-            <NewsletterForm variant="footer" source="footer" />
-          </div>
+          <p className="max-w-sm text-xs text-rf-cream/55">
+            Email updates are temporarily unavailable while Roamforge moves subscriptions to
+            Shopify.
+          </p>
         </div>
 
         <div>

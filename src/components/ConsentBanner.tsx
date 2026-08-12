@@ -217,7 +217,7 @@ export function ConsentBanner() {
                 <div>
                   <p className="text-sm font-semibold">Marketing</p>
                   <p className="text-xs text-rf-dark/70">
-                    Live chat (Tidio) and email capture (Klaviyo).
+                    Live chat (Tidio) and other optional marketing tools.
                   </p>
                 </div>
                 <label className="inline-flex items-center gap-2 text-xs">
