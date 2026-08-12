@@ -4,6 +4,8 @@ import logo from "@/assets/logo.png";
 import { CATEGORIES } from "@/lib/categories";
 import { openConsentPreferences } from "@/lib/consent";
 
+const SHOPIFY_SIGNUP_URL = "https://xmszfz-pj.myshopify.com/pages/roamforge-updates";
+
 const featuredSlugs: Array<(typeof CATEGORIES)[number]["slug"]> = [
   "performance",
   "lighting",
@@ -25,9 +27,15 @@ export function SiteFooter() {
             beaten track.
           </p>
           <p className="max-w-sm text-xs text-rf-cream/55">
-            Email updates are temporarily unavailable while Roamforge moves subscriptions to
-            Shopify.
+            Get new gear, practical recovery tips and Roamforge offers by email. Subscriptions are
+            managed securely through Shopify.
           </p>
+          <a
+            href={SHOPIFY_SIGNUP_URL}
+            className="inline-flex min-h-11 items-center border border-rf-tan px-4 py-2 text-xs font-semibold tracking-widest text-rf-tan transition-colors hover:bg-rf-tan hover:text-rf-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan-bright"
+          >
+            JOIN THE LIST
+          </a>
         </div>
 
         <div>

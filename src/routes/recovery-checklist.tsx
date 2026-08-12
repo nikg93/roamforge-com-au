@@ -3,6 +3,8 @@ import { routeMeta } from "@/lib/seo";
 import { PageShell, H2, H3, P, UL } from "@/components/PageShell";
 import { CHECKLIST_PATH, GIVEAWAY_PATH } from "@/lib/giveaway";
 
+const SHOPIFY_SIGNUP_URL = "https://xmszfz-pj.myshopify.com/pages/roamforge-updates";
+
 const SECTIONS: Array<{ heading: string; items: string[] }> = [
   {
     heading: "Before you leave home",
@@ -105,9 +107,15 @@ function ChecklistPage() {
       <section className="mt-10 border border-rf-dark/15 bg-white p-6 print:hidden">
         <H3>More Roamforge guides are coming</H3>
         <P>
-          This checklist stays free and ungated. Email updates are temporarily unavailable while
-          Roamforge moves subscriptions to Shopify.
+          This checklist stays free and ungated. If you want new guides, gear updates and Roamforge
+          offers, you can join the email list through Shopify.
         </P>
+        <a
+          href={SHOPIFY_SIGNUP_URL}
+          className="inline-flex min-h-11 items-center border border-rf-dark px-4 py-2 text-xs font-semibold tracking-widest text-rf-dark hover:bg-rf-dark hover:text-rf-cream focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rf-tan"
+        >
+          JOIN THE EMAIL LIST
+        </a>
       </section>
 
       <p className="print:hidden text-sm text-rf-dark/70">
