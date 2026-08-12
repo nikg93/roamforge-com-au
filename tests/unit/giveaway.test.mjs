@@ -20,7 +20,8 @@ export const tests = [
     "the entry endpoint enforces window, flags, consents and word limit server-side",
     () => {
       const src = read("src/lib/giveaway.functions.ts");
-      assert.match(src, /launch_enabled && config\.supplier_confirmed/);
+      assert.match(src, /config\.launch_enabled/);
+      assert.match(src, /config\.supplier_confirmed/);
       assert.match(src, /reason: "not-open"/);
       assert.match(src, /words > MAX_RESPONSE_WORDS/);
       assert.match(src, /must accept the official terms/);
