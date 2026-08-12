@@ -14,7 +14,176 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      giveaway_entries: {
+        Row: {
+          age_confirmed: boolean
+          contact_attempts: number
+          contact_outcome: string | null
+          created_at: string
+          eligibility_status: string
+          email: string
+          email_normalized: string
+          exclusion_reason: string | null
+          first_name: string
+          giveaway_id: string
+          id: string
+          ip_hash: string | null
+          judge_name: string | null
+          judged_at: string | null
+          last_name: string
+          marketing_consent: boolean
+          marketing_consent_at: string | null
+          response: string
+          response_word_count: number
+          score_clarity: number | null
+          score_relevance: number | null
+          score_safety: number | null
+          score_total: number | null
+          source: string | null
+          state_territory: string
+          terms_accepted: boolean
+          terms_accepted_at: string
+          terms_version: string
+          updated_at: string
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          winner_status: string
+        }
+        Insert: {
+          age_confirmed: boolean
+          contact_attempts?: number
+          contact_outcome?: string | null
+          created_at?: string
+          eligibility_status?: string
+          email: string
+          email_normalized: string
+          exclusion_reason?: string | null
+          first_name: string
+          giveaway_id: string
+          id?: string
+          ip_hash?: string | null
+          judge_name?: string | null
+          judged_at?: string | null
+          last_name: string
+          marketing_consent?: boolean
+          marketing_consent_at?: string | null
+          response: string
+          response_word_count: number
+          score_clarity?: number | null
+          score_relevance?: number | null
+          score_safety?: number | null
+          score_total?: number | null
+          source?: string | null
+          state_territory: string
+          terms_accepted: boolean
+          terms_accepted_at?: string
+          terms_version: string
+          updated_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          winner_status?: string
+        }
+        Update: {
+          age_confirmed?: boolean
+          contact_attempts?: number
+          contact_outcome?: string | null
+          created_at?: string
+          eligibility_status?: string
+          email?: string
+          email_normalized?: string
+          exclusion_reason?: string | null
+          first_name?: string
+          giveaway_id?: string
+          id?: string
+          ip_hash?: string | null
+          judge_name?: string | null
+          judged_at?: string | null
+          last_name?: string
+          marketing_consent?: boolean
+          marketing_consent_at?: string | null
+          response?: string
+          response_word_count?: number
+          score_clarity?: number | null
+          score_relevance?: number | null
+          score_safety?: number | null
+          score_total?: number | null
+          source?: string | null
+          state_territory?: string
+          terms_accepted?: boolean
+          terms_accepted_at?: string
+          terms_version?: string
+          updated_at?: string
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          winner_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "giveaway_entries_giveaway_id_fkey"
+            columns: ["giveaway_id"]
+            isOneToOne: false
+            referencedRelation: "giveaway_launch_config"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      giveaway_launch_config: {
+        Row: {
+          closes_at: string
+          created_at: string
+          id: string
+          launch_enabled: boolean
+          opens_at: string
+          prize_name: string
+          prize_sku: string
+          prize_value_aud: number
+          supplier_confirmation_note: string | null
+          supplier_confirmed: boolean
+          terms_version: string
+          updated_at: string
+        }
+        Insert: {
+          closes_at: string
+          created_at?: string
+          id: string
+          launch_enabled?: boolean
+          opens_at: string
+          prize_name: string
+          prize_sku: string
+          prize_value_aud: number
+          supplier_confirmation_note?: string | null
+          supplier_confirmed?: boolean
+          terms_version: string
+          updated_at?: string
+        }
+        Update: {
+          closes_at?: string
+          created_at?: string
+          id?: string
+          launch_enabled?: boolean
+          opens_at?: string
+          prize_name?: string
+          prize_sku?: string
+          prize_value_aud?: number
+          supplier_confirmation_note?: string | null
+          supplier_confirmed?: boolean
+          terms_version?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
