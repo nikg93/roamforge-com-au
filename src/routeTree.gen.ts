@@ -15,6 +15,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as ShippingRouteImport } from './routes/shipping'
 import { Route as ReturnsRouteImport } from './routes/returns'
+import { Route as RecoveryChecklistRouteImport } from './routes/recovery-checklist'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as MerchantUrlOverridesDottsvRouteImport } from './routes/merchant-url-overrides[.]tsv'
 import { Route as IntegrationsRouteImport } from './routes/integrations'
@@ -24,7 +25,9 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as GuidesHowToChooseA4wdAirCompressorRouteImport } from './routes/guides.how-to-choose-a-4wd-air-compressor'
+import { Route as GiveawayRecoveryKitRouteImport } from './routes/giveaway.recovery-kit'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
+import { Route as GiveawayRecoveryKitTermsRouteImport } from './routes/giveaway.recovery-kit.terms'
 
 const WarrantyRoute = WarrantyRouteImport.update({
   id: '/warranty',
@@ -54,6 +57,11 @@ const ShippingRoute = ShippingRouteImport.update({
 const ReturnsRoute = ReturnsRouteImport.update({
   id: '/returns',
   path: '/returns',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecoveryChecklistRoute = RecoveryChecklistRouteImport.update({
+  id: '/recovery-checklist',
+  path: '/recovery-checklist',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -103,11 +111,22 @@ const GuidesHowToChooseA4wdAirCompressorRoute =
     path: '/guides/how-to-choose-a-4wd-air-compressor',
     getParentRoute: () => rootRouteImport,
   } as any)
+const GiveawayRecoveryKitRoute = GiveawayRecoveryKitRouteImport.update({
+  id: '/giveaway/recovery-kit',
+  path: '/giveaway/recovery-kit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CategorySlugRoute = CategorySlugRouteImport.update({
   id: '/category/$slug',
   path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GiveawayRecoveryKitTermsRoute =
+  GiveawayRecoveryKitTermsRouteImport.update({
+    id: '/terms',
+    path: '/terms',
+    getParentRoute: () => GiveawayRecoveryKitRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -117,6 +136,7 @@ export interface FileRoutesByFullPath {
   '/integrations': typeof IntegrationsRoute
   '/merchant-url-overrides.tsv': typeof MerchantUrlOverridesDottsvRoute
   '/privacy': typeof PrivacyRoute
+  '/recovery-checklist': typeof RecoveryChecklistRoute
   '/returns': typeof ReturnsRoute
   '/shipping': typeof ShippingRoute
   '/shop': typeof ShopRoute
@@ -124,8 +144,10 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/warranty': typeof WarrantyRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/giveaway/recovery-kit': typeof GiveawayRecoveryKitRouteWithChildren
   '/guides/how-to-choose-a-4wd-air-compressor': typeof GuidesHowToChooseA4wdAirCompressorRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/giveaway/recovery-kit/terms': typeof GiveawayRecoveryKitTermsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -135,6 +157,7 @@ export interface FileRoutesByTo {
   '/integrations': typeof IntegrationsRoute
   '/merchant-url-overrides.tsv': typeof MerchantUrlOverridesDottsvRoute
   '/privacy': typeof PrivacyRoute
+  '/recovery-checklist': typeof RecoveryChecklistRoute
   '/returns': typeof ReturnsRoute
   '/shipping': typeof ShippingRoute
   '/shop': typeof ShopRoute
@@ -142,8 +165,10 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/warranty': typeof WarrantyRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/giveaway/recovery-kit': typeof GiveawayRecoveryKitRouteWithChildren
   '/guides/how-to-choose-a-4wd-air-compressor': typeof GuidesHowToChooseA4wdAirCompressorRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/giveaway/recovery-kit/terms': typeof GiveawayRecoveryKitTermsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -154,6 +179,7 @@ export interface FileRoutesById {
   '/integrations': typeof IntegrationsRoute
   '/merchant-url-overrides.tsv': typeof MerchantUrlOverridesDottsvRoute
   '/privacy': typeof PrivacyRoute
+  '/recovery-checklist': typeof RecoveryChecklistRoute
   '/returns': typeof ReturnsRoute
   '/shipping': typeof ShippingRoute
   '/shop': typeof ShopRoute
@@ -161,8 +187,10 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/warranty': typeof WarrantyRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/giveaway/recovery-kit': typeof GiveawayRecoveryKitRouteWithChildren
   '/guides/how-to-choose-a-4wd-air-compressor': typeof GuidesHowToChooseA4wdAirCompressorRoute
   '/product/$handle': typeof ProductHandleRoute
+  '/giveaway/recovery-kit/terms': typeof GiveawayRecoveryKitTermsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -174,6 +202,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/merchant-url-overrides.tsv'
     | '/privacy'
+    | '/recovery-checklist'
     | '/returns'
     | '/shipping'
     | '/shop'
@@ -181,8 +210,10 @@ export interface FileRouteTypes {
     | '/terms'
     | '/warranty'
     | '/category/$slug'
+    | '/giveaway/recovery-kit'
     | '/guides/how-to-choose-a-4wd-air-compressor'
     | '/product/$handle'
+    | '/giveaway/recovery-kit/terms'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -192,6 +223,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/merchant-url-overrides.tsv'
     | '/privacy'
+    | '/recovery-checklist'
     | '/returns'
     | '/shipping'
     | '/shop'
@@ -199,8 +231,10 @@ export interface FileRouteTypes {
     | '/terms'
     | '/warranty'
     | '/category/$slug'
+    | '/giveaway/recovery-kit'
     | '/guides/how-to-choose-a-4wd-air-compressor'
     | '/product/$handle'
+    | '/giveaway/recovery-kit/terms'
   id:
     | '__root__'
     | '/'
@@ -210,6 +244,7 @@ export interface FileRouteTypes {
     | '/integrations'
     | '/merchant-url-overrides.tsv'
     | '/privacy'
+    | '/recovery-checklist'
     | '/returns'
     | '/shipping'
     | '/shop'
@@ -217,8 +252,10 @@ export interface FileRouteTypes {
     | '/terms'
     | '/warranty'
     | '/category/$slug'
+    | '/giveaway/recovery-kit'
     | '/guides/how-to-choose-a-4wd-air-compressor'
     | '/product/$handle'
+    | '/giveaway/recovery-kit/terms'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -229,6 +266,7 @@ export interface RootRouteChildren {
   IntegrationsRoute: typeof IntegrationsRoute
   MerchantUrlOverridesDottsvRoute: typeof MerchantUrlOverridesDottsvRoute
   PrivacyRoute: typeof PrivacyRoute
+  RecoveryChecklistRoute: typeof RecoveryChecklistRoute
   ReturnsRoute: typeof ReturnsRoute
   ShippingRoute: typeof ShippingRoute
   ShopRoute: typeof ShopRoute
@@ -236,6 +274,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   WarrantyRoute: typeof WarrantyRoute
   CategorySlugRoute: typeof CategorySlugRoute
+  GiveawayRecoveryKitRoute: typeof GiveawayRecoveryKitRouteWithChildren
   GuidesHowToChooseA4wdAirCompressorRoute: typeof GuidesHowToChooseA4wdAirCompressorRoute
   ProductHandleRoute: typeof ProductHandleRoute
 }
@@ -282,6 +321,13 @@ declare module '@tanstack/react-router' {
       path: '/returns'
       fullPath: '/returns'
       preLoaderRoute: typeof ReturnsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recovery-checklist': {
+      id: '/recovery-checklist'
+      path: '/recovery-checklist'
+      fullPath: '/recovery-checklist'
+      preLoaderRoute: typeof RecoveryChecklistRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -347,6 +393,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesHowToChooseA4wdAirCompressorRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/giveaway/recovery-kit': {
+      id: '/giveaway/recovery-kit'
+      path: '/giveaway/recovery-kit'
+      fullPath: '/giveaway/recovery-kit'
+      preLoaderRoute: typeof GiveawayRecoveryKitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/category/$slug': {
       id: '/category/$slug'
       path: '/category/$slug'
@@ -354,8 +407,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/giveaway/recovery-kit/terms': {
+      id: '/giveaway/recovery-kit/terms'
+      path: '/terms'
+      fullPath: '/giveaway/recovery-kit/terms'
+      preLoaderRoute: typeof GiveawayRecoveryKitTermsRouteImport
+      parentRoute: typeof GiveawayRecoveryKitRoute
+    }
   }
 }
+
+interface GiveawayRecoveryKitRouteChildren {
+  GiveawayRecoveryKitTermsRoute: typeof GiveawayRecoveryKitTermsRoute
+}
+
+const GiveawayRecoveryKitRouteChildren: GiveawayRecoveryKitRouteChildren = {
+  GiveawayRecoveryKitTermsRoute: GiveawayRecoveryKitTermsRoute,
+}
+
+const GiveawayRecoveryKitRouteWithChildren =
+  GiveawayRecoveryKitRoute._addFileChildren(GiveawayRecoveryKitRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -365,6 +436,7 @@ const rootRouteChildren: RootRouteChildren = {
   IntegrationsRoute: IntegrationsRoute,
   MerchantUrlOverridesDottsvRoute: MerchantUrlOverridesDottsvRoute,
   PrivacyRoute: PrivacyRoute,
+  RecoveryChecklistRoute: RecoveryChecklistRoute,
   ReturnsRoute: ReturnsRoute,
   ShippingRoute: ShippingRoute,
   ShopRoute: ShopRoute,
@@ -372,6 +444,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   WarrantyRoute: WarrantyRoute,
   CategorySlugRoute: CategorySlugRoute,
+  GiveawayRecoveryKitRoute: GiveawayRecoveryKitRouteWithChildren,
   GuidesHowToChooseA4wdAirCompressorRoute:
     GuidesHowToChooseA4wdAirCompressorRoute,
   ProductHandleRoute: ProductHandleRoute,

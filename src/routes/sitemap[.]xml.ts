@@ -27,6 +27,10 @@ const staticEntries: SitemapEntry[] = [
     priority: "0.7",
   },
   { path: "/contact", changefreq: "monthly", priority: "0.6" },
+  // Free ungated lead-magnet resource — always indexable.
+  { path: "/recovery-checklist", changefreq: "monthly", priority: "0.6" },
+  // NOTE: /giveaway/* is intentionally excluded while the promotion is
+  // noindexed. Add it here once launch_enabled + supplier_confirmed are true.
   { path: "/faq", changefreq: "monthly", priority: "0.5" },
   { path: "/shipping", changefreq: "monthly", priority: "0.5" },
   { path: "/returns", changefreq: "monthly", priority: "0.5" },
