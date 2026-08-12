@@ -1,7 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { routeMeta } from "@/lib/seo";
 import { PageShell, H2, H3, P, UL } from "@/components/PageShell";
-import { NewsletterForm } from "@/components/NewsletterForm";
 import { CHECKLIST_PATH, GIVEAWAY_PATH } from "@/lib/giveaway";
 
 const SECTIONS: Array<{ heading: string; items: string[] }> = [
@@ -104,14 +103,11 @@ function ChecklistPage() {
       </P>
 
       <section className="mt-10 border border-rf-dark/15 bg-white p-6 print:hidden">
-        <H3>Optional: get new Roamforge guides by email</H3>
+        <H3>More Roamforge guides are coming</H3>
         <P>
-          Completely optional and separate from this checklist — the checklist above stays free and
-          ungated either way.
+          This checklist stays free and ungated. Email updates are temporarily unavailable while
+          Roamforge moves subscriptions to Shopify.
         </P>
-        <div className="mt-3">
-          <NewsletterForm source="recovery-checklist" variant="popup" />
-        </div>
       </section>
 
       <p className="print:hidden text-sm text-rf-dark/70">
