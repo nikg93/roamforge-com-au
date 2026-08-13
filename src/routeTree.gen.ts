@@ -9,64 +9,56 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WarrantyRouteImport } from './routes/warranty'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as ShopRouteImport } from './routes/shop'
-import { Route as ShippingRouteImport } from './routes/shipping'
-import { Route as ReturnsRouteImport } from './routes/returns'
-import { Route as RecoveryChecklistRouteImport } from './routes/recovery-checklist'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as MerchantUrlOverridesDottsvRouteImport } from './routes/merchant-url-overrides[.]tsv'
-import { Route as IntegrationsRouteImport } from './routes/integrations'
-import { Route as FaqRouteImport } from './routes/faq'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ProductHandleRouteImport } from './routes/product.$handle'
-import { Route as GuidesHowToChooseA4wdAirCompressorRouteImport } from './routes/guides.how-to-choose-a-4wd-air-compressor'
-import { Route as GiveawayRecoveryKitRouteImport } from './routes/giveaway.recovery-kit'
+import { Route as AboutRouteImport } from './routes/about'
+import { Route as CartRouteImport } from './routes/cart'
+import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FaqRouteImport } from './routes/faq'
+import { Route as IntegrationsRouteImport } from './routes/integrations'
+import { Route as MerchantUrlOverridesDottsvRouteImport } from './routes/merchant-url-overrides[.]tsv'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RecoveryChecklistRouteImport } from './routes/recovery-checklist'
+import { Route as ReturnsRouteImport } from './routes/returns'
+import { Route as ShippingRouteImport } from './routes/shipping'
+import { Route as ShopRouteImport } from './routes/shop'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as TermsRouteImport } from './routes/terms'
+import { Route as WarrantyRouteImport } from './routes/warranty'
+import { Route as CartCartLineRouteImport } from './routes/cart.$cartLine'
 import { Route as CategorySlugRouteImport } from './routes/category.$slug'
+import { Route as GiveawayRecoveryKitRouteImport } from './routes/giveaway.recovery-kit'
+import { Route as GuidesHowToChooseA4wdAirCompressorRouteImport } from './routes/guides.how-to-choose-a-4wd-air-compressor'
+import { Route as ProductHandleRouteImport } from './routes/product.$handle'
 import { Route as GiveawayRecoveryKitTermsRouteImport } from './routes/giveaway.recovery-kit.terms'
 
-const WarrantyRoute = WarrantyRouteImport.update({
-  id: '/warranty',
-  path: '/warranty',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
-  id: '/sitemap.xml',
-  path: '/sitemap.xml',
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ShopRoute = ShopRouteImport.update({
-  id: '/shop',
-  path: '/shop',
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ShippingRoute = ShippingRouteImport.update({
-  id: '/shipping',
-  path: '/shipping',
+const FaqRoute = FaqRouteImport.update({
+  id: '/faq',
+  path: '/faq',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ReturnsRoute = ReturnsRouteImport.update({
-  id: '/returns',
-  path: '/returns',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RecoveryChecklistRoute = RecoveryChecklistRouteImport.update({
-  id: '/recovery-checklist',
-  path: '/recovery-checklist',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
+const IntegrationsRoute = IntegrationsRouteImport.update({
+  id: '/integrations',
+  path: '/integrations',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MerchantUrlOverridesDottsvRoute =
@@ -75,34 +67,59 @@ const MerchantUrlOverridesDottsvRoute =
     path: '/merchant-url-overrides.tsv',
     getParentRoute: () => rootRouteImport,
   } as any)
-const IntegrationsRoute = IntegrationsRouteImport.update({
-  id: '/integrations',
-  path: '/integrations',
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FaqRoute = FaqRouteImport.update({
-  id: '/faq',
-  path: '/faq',
+const RecoveryChecklistRoute = RecoveryChecklistRouteImport.update({
+  id: '/recovery-checklist',
+  path: '/recovery-checklist',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
+const ReturnsRoute = ReturnsRouteImport.update({
+  id: '/returns',
+  path: '/returns',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const ShippingRoute = ShippingRouteImport.update({
+  id: '/shipping',
+  path: '/shipping',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const ShopRoute = ShopRouteImport.update({
+  id: '/shop',
+  path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProductHandleRoute = ProductHandleRouteImport.update({
-  id: '/product/$handle',
-  path: '/product/$handle',
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WarrantyRoute = WarrantyRouteImport.update({
+  id: '/warranty',
+  path: '/warranty',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartCartLineRoute = CartCartLineRouteImport.update({
+  id: '/$cartLine',
+  path: '/$cartLine',
+  getParentRoute: () => CartRoute,
+} as any)
+const CategorySlugRoute = CategorySlugRouteImport.update({
+  id: '/category/$slug',
+  path: '/category/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GiveawayRecoveryKitRoute = GiveawayRecoveryKitRouteImport.update({
+  id: '/giveaway/recovery-kit',
+  path: '/giveaway/recovery-kit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GuidesHowToChooseA4wdAirCompressorRoute =
@@ -111,14 +128,9 @@ const GuidesHowToChooseA4wdAirCompressorRoute =
     path: '/guides/how-to-choose-a-4wd-air-compressor',
     getParentRoute: () => rootRouteImport,
   } as any)
-const GiveawayRecoveryKitRoute = GiveawayRecoveryKitRouteImport.update({
-  id: '/giveaway/recovery-kit',
-  path: '/giveaway/recovery-kit',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CategorySlugRoute = CategorySlugRouteImport.update({
-  id: '/category/$slug',
-  path: '/category/$slug',
+const ProductHandleRoute = ProductHandleRouteImport.update({
+  id: '/product/$handle',
+  path: '/product/$handle',
   getParentRoute: () => rootRouteImport,
 } as any)
 const GiveawayRecoveryKitTermsRoute =
@@ -131,6 +143,7 @@ const GiveawayRecoveryKitTermsRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/cart': typeof CartRouteWithChildren
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/integrations': typeof IntegrationsRoute
@@ -143,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/warranty': typeof WarrantyRoute
+  '/cart/$cartLine': typeof CartCartLineRoute
   '/category/$slug': typeof CategorySlugRoute
   '/giveaway/recovery-kit': typeof GiveawayRecoveryKitRouteWithChildren
   '/guides/how-to-choose-a-4wd-air-compressor': typeof GuidesHowToChooseA4wdAirCompressorRoute
@@ -152,6 +166,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/cart': typeof CartRouteWithChildren
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/integrations': typeof IntegrationsRoute
@@ -164,6 +179,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/warranty': typeof WarrantyRoute
+  '/cart/$cartLine': typeof CartCartLineRoute
   '/category/$slug': typeof CategorySlugRoute
   '/giveaway/recovery-kit': typeof GiveawayRecoveryKitRouteWithChildren
   '/guides/how-to-choose-a-4wd-air-compressor': typeof GuidesHowToChooseA4wdAirCompressorRoute
@@ -174,6 +190,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/cart': typeof CartRouteWithChildren
   '/contact': typeof ContactRoute
   '/faq': typeof FaqRoute
   '/integrations': typeof IntegrationsRoute
@@ -186,6 +203,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/warranty': typeof WarrantyRoute
+  '/cart/$cartLine': typeof CartCartLineRoute
   '/category/$slug': typeof CategorySlugRoute
   '/giveaway/recovery-kit': typeof GiveawayRecoveryKitRouteWithChildren
   '/guides/how-to-choose-a-4wd-air-compressor': typeof GuidesHowToChooseA4wdAirCompressorRoute
@@ -197,6 +215,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/cart'
     | '/contact'
     | '/faq'
     | '/integrations'
@@ -209,6 +228,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/warranty'
+    | '/cart/$cartLine'
     | '/category/$slug'
     | '/giveaway/recovery-kit'
     | '/guides/how-to-choose-a-4wd-air-compressor'
@@ -218,6 +238,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/cart'
     | '/contact'
     | '/faq'
     | '/integrations'
@@ -230,6 +251,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/warranty'
+    | '/cart/$cartLine'
     | '/category/$slug'
     | '/giveaway/recovery-kit'
     | '/guides/how-to-choose-a-4wd-air-compressor'
@@ -239,6 +261,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/cart'
     | '/contact'
     | '/faq'
     | '/integrations'
@@ -251,6 +274,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/warranty'
+    | '/cart/$cartLine'
     | '/category/$slug'
     | '/giveaway/recovery-kit'
     | '/guides/how-to-choose-a-4wd-air-compressor'
@@ -261,6 +285,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  CartRoute: typeof CartRouteWithChildren
   ContactRoute: typeof ContactRoute
   FaqRoute: typeof FaqRoute
   IntegrationsRoute: typeof IntegrationsRoute
@@ -281,88 +306,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/warranty': {
-      id: '/warranty'
-      path: '/warranty'
-      fullPath: '/warranty'
-      preLoaderRoute: typeof WarrantyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sitemap.xml': {
-      id: '/sitemap.xml'
-      path: '/sitemap.xml'
-      fullPath: '/sitemap.xml'
-      preLoaderRoute: typeof SitemapDotxmlRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/shop': {
-      id: '/shop'
-      path: '/shop'
-      fullPath: '/shop'
-      preLoaderRoute: typeof ShopRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/shipping': {
-      id: '/shipping'
-      path: '/shipping'
-      fullPath: '/shipping'
-      preLoaderRoute: typeof ShippingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/returns': {
-      id: '/returns'
-      path: '/returns'
-      fullPath: '/returns'
-      preLoaderRoute: typeof ReturnsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/recovery-checklist': {
-      id: '/recovery-checklist'
-      path: '/recovery-checklist'
-      fullPath: '/recovery-checklist'
-      preLoaderRoute: typeof RecoveryChecklistRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/merchant-url-overrides.tsv': {
-      id: '/merchant-url-overrides.tsv'
-      path: '/merchant-url-overrides.tsv'
-      fullPath: '/merchant-url-overrides.tsv'
-      preLoaderRoute: typeof MerchantUrlOverridesDottsvRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/integrations': {
-      id: '/integrations'
-      path: '/integrations'
-      fullPath: '/integrations'
-      preLoaderRoute: typeof IntegrationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/faq': {
-      id: '/faq'
-      path: '/faq'
-      fullPath: '/faq'
-      preLoaderRoute: typeof FaqRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -372,25 +320,109 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/product/$handle': {
-      id: '/product/$handle'
-      path: '/product/$handle'
-      fullPath: '/product/$handle'
-      preLoaderRoute: typeof ProductHandleRouteImport
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/guides/how-to-choose-a-4wd-air-compressor': {
-      id: '/guides/how-to-choose-a-4wd-air-compressor'
-      path: '/guides/how-to-choose-a-4wd-air-compressor'
-      fullPath: '/guides/how-to-choose-a-4wd-air-compressor'
-      preLoaderRoute: typeof GuidesHowToChooseA4wdAirCompressorRouteImport
+    '/faq': {
+      id: '/faq'
+      path: '/faq'
+      fullPath: '/faq'
+      preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/integrations': {
+      id: '/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof IntegrationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/merchant-url-overrides.tsv': {
+      id: '/merchant-url-overrides.tsv'
+      path: '/merchant-url-overrides.tsv'
+      fullPath: '/merchant-url-overrides.tsv'
+      preLoaderRoute: typeof MerchantUrlOverridesDottsvRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recovery-checklist': {
+      id: '/recovery-checklist'
+      path: '/recovery-checklist'
+      fullPath: '/recovery-checklist'
+      preLoaderRoute: typeof RecoveryChecklistRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/returns': {
+      id: '/returns'
+      path: '/returns'
+      fullPath: '/returns'
+      preLoaderRoute: typeof ReturnsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shipping': {
+      id: '/shipping'
+      path: '/shipping'
+      fullPath: '/shipping'
+      preLoaderRoute: typeof ShippingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shop': {
+      id: '/shop'
+      path: '/shop'
+      fullPath: '/shop'
+      preLoaderRoute: typeof ShopRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/warranty': {
+      id: '/warranty'
+      path: '/warranty'
+      fullPath: '/warranty'
+      preLoaderRoute: typeof WarrantyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart/$cartLine': {
+      id: '/cart/$cartLine'
+      path: '/$cartLine'
+      fullPath: '/cart/$cartLine'
+      preLoaderRoute: typeof CartCartLineRouteImport
+      parentRoute: typeof CartRoute
+    }
+    '/category/$slug': {
+      id: '/category/$slug'
+      path: '/category/$slug'
+      fullPath: '/category/$slug'
+      preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/giveaway/recovery-kit': {
@@ -400,11 +432,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GiveawayRecoveryKitRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/category/$slug': {
-      id: '/category/$slug'
-      path: '/category/$slug'
-      fullPath: '/category/$slug'
-      preLoaderRoute: typeof CategorySlugRouteImport
+    '/guides/how-to-choose-a-4wd-air-compressor': {
+      id: '/guides/how-to-choose-a-4wd-air-compressor'
+      path: '/guides/how-to-choose-a-4wd-air-compressor'
+      fullPath: '/guides/how-to-choose-a-4wd-air-compressor'
+      preLoaderRoute: typeof GuidesHowToChooseA4wdAirCompressorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/product/$handle': {
+      id: '/product/$handle'
+      path: '/product/$handle'
+      fullPath: '/product/$handle'
+      preLoaderRoute: typeof ProductHandleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/giveaway/recovery-kit/terms': {
@@ -416,6 +455,16 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface CartRouteChildren {
+  CartCartLineRoute: typeof CartCartLineRoute
+}
+
+const CartRouteChildren: CartRouteChildren = {
+  CartCartLineRoute: CartCartLineRoute,
+}
+
+const CartRouteWithChildren = CartRoute._addFileChildren(CartRouteChildren)
 
 interface GiveawayRecoveryKitRouteChildren {
   GiveawayRecoveryKitTermsRoute: typeof GiveawayRecoveryKitTermsRoute
@@ -431,6 +480,7 @@ const GiveawayRecoveryKitRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  CartRoute: CartRouteWithChildren,
   ContactRoute: ContactRoute,
   FaqRoute: FaqRoute,
   IntegrationsRoute: IntegrationsRoute,
@@ -452,3 +502,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
