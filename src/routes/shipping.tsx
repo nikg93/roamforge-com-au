@@ -59,7 +59,7 @@ function ShippingPage() {
 
       <H2>Orders Fulfilled by Supplier Partners</H2>
       <P>
-        Some products are fulfilled directly by authorised supplier partners. Where an order
+        Some products are fulfilled directly by supplier partners. Where an order
         includes these items, it may arrive in separate shipments and separate tracking details may
         be provided.
       </P>

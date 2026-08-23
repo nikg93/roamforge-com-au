@@ -17,7 +17,7 @@ const FAQ_GROUPS: Array<{ heading: string; items: Array<[string, string]> }> = [
       ],
       [
         "Will my order arrive in one delivery?",
-        "Some products are fulfilled directly by authorised supplier partners, so an order may arrive in separate shipments and separate tracking details may be provided.",
+        "Some products are fulfilled directly by supplier partners, so an order may arrive in separate shipments and separate tracking details may be provided.",
       ],
       [
         "Can I track my order?",

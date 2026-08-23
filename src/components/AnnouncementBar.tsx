@@ -9,7 +9,7 @@ import { BRAND_CLAIMS } from "@/lib/site";
 export function AnnouncementBar() {
   const lightforceLabel = BRAND_CLAIMS.authorisedLightforceDealer
     ? "Authorised Lightforce dealer"
-    : "Genuine Lightforce lighting in stock";
+    : "Lightforce lighting";
 
   if (!BRAND_CLAIMS.australianOwned && !BRAND_CLAIMS.lightforceStockist) return null;
 
