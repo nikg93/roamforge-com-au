@@ -17,6 +17,7 @@ import { SITE } from "@/lib/site";
  * Center for this store.
  */
 const FEED_COUNTRY = "ZZ";
+const STANDARD_SHIPPING_LABEL = "standard-delivery";
 
 const PRODUCT_SHIPPING_LABELS: Record<string, string> = {
   "15054622458221": "supplier-aob",
@@ -114,7 +115,7 @@ export const Route = createFileRoute("/merchant-url-overrides.tsv")({
             if (!productId || !handle) continue;
 
             const url = `${SITE.url}/product/${handle}`;
-            const shippingLabel = PRODUCT_SHIPPING_LABELS[productId] ?? "";
+            const shippingLabel = PRODUCT_SHIPPING_LABELS[productId] ?? STANDARD_SHIPPING_LABEL;
 
             for (const variant of edge.node.variants.edges) {
               const variantId = numericId(variant.node.id);
