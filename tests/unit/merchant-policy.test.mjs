@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 import { offerShippingDetails, merchantReturnPolicy } from "../../src/lib/merchant-policy.ts";
 
 const productRoute = readFileSync("src/routes/product.$handle.tsx", "utf8");
+const merchantOverrides = readFileSync("src/routes/merchant-url-overrides[.]tsv.ts", "utf8");
 
 export default {
   "shippingDetails: AU destination, honest policy link, no invented rate"() {
@@ -51,5 +52,9 @@ export default {
     assert.doesNotMatch(productRoute, /aggregateRating/);
     assert.doesNotMatch(productRoute, /"@type":\s*"Review"/);
     assert.doesNotMatch(productRoute, /reviewCount|ratingValue/);
+  },
+  "supplemental feed: each offer links to its exact Shopify variant"() {
+    assert.match(merchantOverrides, /\?variant=\$\{variantId\}/);
+    assert.match(merchantOverrides, /rows\.push\(`\$\{id\}\\t\$\{url\}\\t\$\{url\}/);
   },
 };

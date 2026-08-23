@@ -114,12 +114,13 @@ export const Route = createFileRoute("/merchant-url-overrides.tsv")({
             const handle = edge.node.handle;
             if (!productId || !handle) continue;
 
-            const url = `${SITE.url}/product/${handle}`;
             const shippingLabel = PRODUCT_SHIPPING_LABELS[productId] ?? STANDARD_SHIPPING_LABEL;
 
             for (const variant of edge.node.variants.edges) {
               const variantId = numericId(variant.node.id);
               if (!variantId) continue;
+
+              const url = `${SITE.url}/product/${handle}?variant=${variantId}`;
 
               const id = `shopify_${FEED_COUNTRY}_${productId}_${variantId}`;
               if (seen.has(id)) continue;
@@ -132,8 +133,7 @@ export const Route = createFileRoute("/merchant-url-overrides.tsv")({
           after = page.pageInfo.endCursor;
         }
 
-        const body =
-          ["id\tlink\tcanonical_link\tshipping_label", ...rows].join("\n") + "\n";
+        const body = ["id\tlink\tcanonical_link\tshipping_label", ...rows].join("\n") + "\n";
 
         return new Response(body, {
           headers: {

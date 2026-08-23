@@ -54,7 +54,38 @@ function firstAvailableVariant(p: ShopifyProduct["node"]) {
   return p.variants.edges.find((v) => v.node.availableForSale)?.node ?? null;
 }
 
+function numericVariantId(gid: string): string | undefined {
+  return /\/(\d+)$/.exec(gid)?.[1];
+}
+
+function variantSelection(p: ShopifyProduct["node"], requestedVariantId?: string) {
+  const requestedIndex = requestedVariantId
+    ? p.variants.edges.findIndex((edge) => numericVariantId(edge.node.id) === requestedVariantId)
+    : -1;
+  const index =
+    requestedIndex >= 0
+      ? requestedIndex
+      : p.variants.edges.findIndex((edge) => edge.node.availableForSale);
+
+  return {
+    index: index >= 0 ? index : 0,
+    variant: index >= 0 ? p.variants.edges[index]?.node : p.variants.edges[0]?.node,
+    matchesRequestedVariant: requestedIndex >= 0,
+  };
+}
+
+function productUrl(handle: string, variantId?: string): string {
+  const url = canonicalFor(`/product/${handle}`);
+  return variantId ? `${url}?variant=${encodeURIComponent(variantId)}` : url;
+}
+
 export const Route = createFileRoute("/product/$handle")({
+  validateSearch: (search: Record<string, unknown>): { variant?: string } => ({
+    variant:
+      typeof search.variant === "string" && /^\d+$/.test(search.variant)
+        ? search.variant
+        : undefined,
+  }),
   beforeLoad: ({ params }) => {
     const next = resolveLegacyProductHandle(params.handle);
     if (next) {
@@ -62,8 +93,7 @@ export const Route = createFileRoute("/product/$handle")({
     }
   },
   loader: ({ params, context }) => context.queryClient.ensureQueryData(productQuery(params.handle)),
-  head: ({ params, loaderData }) => {
-    const url = canonicalFor(`/product/${params.handle}`);
+  head: ({ params, loaderData, match }) => {
     if (!loaderData) {
       return {
         meta: [
@@ -75,6 +105,11 @@ export const Route = createFileRoute("/product/$handle")({
       };
     }
     const p = (loaderData as ShopifyProduct).node;
+    const selection = variantSelection(p, match.search.variant);
+    const url = productUrl(
+      params.handle,
+      selection.matchesRequestedVariant ? match.search.variant : undefined,
+    );
 
     const displayTitle = normalizeProductTitle(p.title, p.vendor);
     // Curated demand-led metadata (traceable to the live listing) wins over
@@ -96,9 +131,9 @@ export const Route = createFileRoute("/product/$handle")({
       rawDescription.length > 200 ? textFromHtml(rawDescription, 200) : rawDescription;
     const image = p.featuredImage?.url ?? p.images.edges[0]?.node?.url;
 
-    const available = firstAvailableVariant(p);
-    const anyAvailable = p.variants.edges.some((v) => v.node.availableForSale);
+    const available = selection.variant ?? firstAvailableVariant(p);
     const price = available?.price ?? p.priceRange.minVariantPrice;
+    const isAvailable = available?.availableForSale ?? false;
 
     const sku = available?.sku && available.sku.trim() ? available.sku.trim() : undefined;
 
@@ -114,7 +149,7 @@ export const Route = createFileRoute("/product/$handle")({
         url,
         priceCurrency: price.currencyCode,
         price: price.amount,
-        availability: anyAvailable ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        availability: isAvailable ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
         // Merchant listing requirements: shipping + returns policies, both
         // derived from the published Roamforge policies (no invented rates).
         shippingDetails: offerShippingDetails(),
@@ -142,7 +177,7 @@ export const Route = createFileRoute("/product/$handle")({
         { property: "product:price:currency", content: price.currencyCode },
         {
           property: "product:availability",
-          content: anyAvailable ? "in stock" : "out of stock",
+          content: isAvailable ? "in stock" : "out of stock",
         },
         { name: "twitter:title", content: title },
         { name: "twitter:description", content: description },
@@ -249,6 +284,7 @@ function ProductErrorFallback({ reset }: { reset: () => void }) {
 
 function ProductPageInner() {
   const { handle } = useParams({ from: "/product/$handle" });
+  const { variant: requestedVariantId } = Route.useSearch();
   const { data } = useSuspenseQuery(productQuery(handle));
   const addItem = useCartStore((s) => s.addItem);
   const p = data.node;
@@ -258,11 +294,15 @@ function ProductPageInner() {
 
   const descriptionHtml = sanitizeProductHtml(p.descriptionHtml || p.description);
 
-  const initialIdx = useMemo(() => {
-    const idx = p.variants.edges.findIndex((v) => v.node.availableForSale);
-    return idx >= 0 ? idx : 0;
-  }, [p.variants.edges]);
+  const initialIdx = useMemo(
+    () => variantSelection(p, requestedVariantId).index,
+    [p, requestedVariantId],
+  );
   const [variantIdx, setVariantIdx] = useState(initialIdx);
+
+  useEffect(() => {
+    setVariantIdx(initialIdx);
+  }, [initialIdx]);
 
   const selectedVariant = p.variants.edges[variantIdx]?.node;
   const canAdd = !!selectedVariant?.availableForSale;

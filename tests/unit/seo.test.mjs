@@ -55,6 +55,13 @@ export default {
     assert.match(src, /priceCurrency/);
     assert.match(src, /rel:\s*"canonical"/);
   },
+  "product route: supports exact variant landing URLs"() {
+    const src = read("src/routes/product.$handle.tsx");
+    assert.match(src, /validateSearch:/);
+    assert.match(src, /Route\.useSearch\(\)/);
+    assert.match(src, /match\.search\.variant/);
+    assert.match(src, /\?variant=/);
+  },
   "every content route registers head metadata"() {
     const dir = "src/routes";
     const missing = [];
