@@ -92,8 +92,12 @@ export const Route = createFileRoute("/product/$handle")({
       throw redirect({ to: "/product/$handle", params: { handle: next }, replace: true });
     }
   },
-  loader: ({ params, context }) => context.queryClient.ensureQueryData(productQuery(params.handle)),
-  head: ({ params, loaderData, match }) => {
+  loaderDeps: ({ search }) => ({ requestedVariantId: search.variant }),
+  loader: async ({ params, context, deps }) => ({
+    product: await context.queryClient.ensureQueryData(productQuery(params.handle)),
+    requestedVariantId: deps.requestedVariantId,
+  }),
+  head: ({ params, loaderData }) => {
     if (!loaderData) {
       return {
         meta: [
@@ -104,11 +108,11 @@ export const Route = createFileRoute("/product/$handle")({
         ],
       };
     }
-    const p = (loaderData as ShopifyProduct).node;
-    const selection = variantSelection(p, match.search.variant);
+    const p = loaderData.product.node;
+    const selection = variantSelection(p, loaderData.requestedVariantId);
     const url = productUrl(
       params.handle,
-      selection.matchesRequestedVariant ? match.search.variant : undefined,
+      selection.matchesRequestedVariant ? loaderData.requestedVariantId : undefined,
     );
 
     const displayTitle = normalizeProductTitle(p.title, p.vendor);

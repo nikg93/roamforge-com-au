@@ -58,8 +58,9 @@ export default {
   "product route: supports exact variant landing URLs"() {
     const src = read("src/routes/product.$handle.tsx");
     assert.match(src, /validateSearch:/);
+    assert.match(src, /loaderDeps:/);
     assert.match(src, /Route\.useSearch\(\)/);
-    assert.match(src, /match\.search\.variant/);
+    assert.match(src, /requestedVariantId/);
     assert.match(src, /\?variant=/);
   },
   "every content route registers head metadata"() {
