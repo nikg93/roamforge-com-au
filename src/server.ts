@@ -9,6 +9,20 @@ type ServerEntry = {
 
 let serverEntryPromise: Promise<ServerEntry> | undefined;
 
+function syncRuntimeEnvironment(env: unknown) {
+  if (!env || typeof env !== "object") return;
+
+  const workerEnv = env as Record<string, unknown>;
+  for (const name of [
+    "SUPABASE_URL",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "SUPABASE_PUBLISHABLE_KEY",
+  ]) {
+    const value = workerEnv[name];
+    if (typeof value === "string" && value) process.env[name] = value;
+  }
+}
+
 async function getServerEntry(): Promise<ServerEntry> {
   if (!serverEntryPromise) {
     serverEntryPromise = import("@tanstack/react-start/server-entry").then(
@@ -40,6 +54,7 @@ async function normalizeCatastrophicSsrResponse(response: Response): Promise<Res
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      syncRuntimeEnvironment(env);
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
       return await normalizeCatastrophicSsrResponse(response);
