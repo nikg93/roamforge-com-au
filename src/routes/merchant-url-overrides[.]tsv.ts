@@ -120,7 +120,7 @@ export const Route = createFileRoute("/merchant-url-overrides.tsv")({
               const variantId = numericId(variant.node.id);
               if (!variantId) continue;
 
-              const url = `${SITE.url}/product/${handle}?variant=${variantId}`;
+              const url = `${SITE.url}/product/${handle}?variant=%22${variantId}%22`;
 
               const id = `shopify_${FEED_COUNTRY}_${productId}_${variantId}`;
               if (seen.has(id)) continue;

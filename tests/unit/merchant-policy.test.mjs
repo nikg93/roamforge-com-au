@@ -54,7 +54,7 @@ export default {
     assert.doesNotMatch(productRoute, /reviewCount|ratingValue/);
   },
   "supplemental feed: each offer links to its exact Shopify variant"() {
-    assert.match(merchantOverrides, /\?variant=\$\{variantId\}/);
+    assert.match(merchantOverrides, /\?variant=%22\$\{variantId\}%22/);
     assert.match(merchantOverrides, /rows\.push\(`\$\{id\}\\t\$\{url\}\\t\$\{url\}/);
   },
 };

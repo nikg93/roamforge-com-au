@@ -58,6 +58,16 @@ function numericVariantId(gid: string): string | undefined {
   return /\/(\d+)$/.exec(gid)?.[1];
 }
 
+function parseVariantSearch(value: unknown): string | undefined {
+  const candidate =
+    typeof value === "number" && Number.isSafeInteger(value)
+      ? String(value)
+      : typeof value === "string"
+        ? value
+        : "";
+  return /^v?(\d+)$/.exec(candidate)?.[1];
+}
+
 function variantSelection(p: ShopifyProduct["node"], requestedVariantId?: string) {
   const requestedIndex = requestedVariantId
     ? p.variants.edges.findIndex((edge) => numericVariantId(edge.node.id) === requestedVariantId)
@@ -76,15 +86,12 @@ function variantSelection(p: ShopifyProduct["node"], requestedVariantId?: string
 
 function productUrl(handle: string, variantId?: string): string {
   const url = canonicalFor(`/product/${handle}`);
-  return variantId ? `${url}?variant=${encodeURIComponent(variantId)}` : url;
+  return variantId ? `${url}?variant=${encodeURIComponent(JSON.stringify(variantId))}` : url;
 }
 
 export const Route = createFileRoute("/product/$handle")({
   validateSearch: (search: Record<string, unknown>): { variant?: string } => ({
-    variant:
-      typeof search.variant === "string" && /^\d+$/.test(search.variant)
-        ? search.variant
-        : undefined,
+    variant: parseVariantSearch(search.variant),
   }),
   beforeLoad: ({ params }) => {
     const next = resolveLegacyProductHandle(params.handle);

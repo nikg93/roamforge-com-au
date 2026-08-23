@@ -61,7 +61,7 @@ export default {
     assert.match(src, /loaderDeps:/);
     assert.match(src, /Route\.useSearch\(\)/);
     assert.match(src, /requestedVariantId/);
-    assert.match(src, /\?variant=/);
+    assert.match(src, /JSON\.stringify\(variantId\)/);
   },
   "every content route registers head metadata"() {
     const dir = "src/routes";
