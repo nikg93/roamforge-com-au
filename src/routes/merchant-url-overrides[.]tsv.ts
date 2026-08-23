@@ -137,7 +137,7 @@ export const Route = createFileRoute("/merchant-url-overrides.tsv")({
         return new Response(body, {
           headers: {
             "Content-Type": "text/tab-separated-values; charset=utf-8",
-            "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+            "Cache-Control": "no-store, max-age=0",
           },
         });
       },
