@@ -3,6 +3,9 @@
   "name": "roamforge-storefront",
   "compatibility_date": "2026-08-11",
   "compatibility_flags": ["nodejs_compat", "nodejs_compat_populate_process_env"],
+  "vars": {
+    "SUPABASE_URL": "https://vbpiwboypqkdejxbbutu.supabase.co"
+  },
   "main": "src/server.ts",
   "observability": {
     "enabled": true,
