@@ -17,8 +17,7 @@ export const CHECKLIST_PATH = "/recovery-checklist";
 export const MAX_RESPONSE_WORDS = 25;
 
 export const PROMOTER = {
-  name: "Nikola Grujic",
-  structure: "sole trader trading as ROAMFORGE",
+  name: "Roamforge",
   abn: "12 269 090 681",
   location: "WA 6066, Australia",
   email: "info@roamforge.com.au",

@@ -40,7 +40,7 @@ function TermsPage() {
 
       <H2>1. Promoter</H2>
       <P>
-        {PROMOTER.name}, {PROMOTER.structure}, ABN {PROMOTER.abn}, {PROMOTER.location}. Contact{" "}
+        {PROMOTER.name}, ABN {PROMOTER.abn}, {PROMOTER.location}. Contact{" "}
         <a className="text-rf-tan underline" href={`mailto:${PROMOTER.email}`}>
           {PROMOTER.email}
         </a>

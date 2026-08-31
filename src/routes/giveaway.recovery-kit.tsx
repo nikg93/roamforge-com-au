@@ -103,8 +103,7 @@ function GiveawayPage() {
       </P>
 
       <P>
-        Promoter: {PROMOTER.name}, {PROMOTER.structure}, ABN {PROMOTER.abn}, {PROMOTER.location}.
-        Contact{" "}
+        Promoter: {PROMOTER.name}, ABN {PROMOTER.abn}, {PROMOTER.location}. Contact{" "}
         <a className="text-rf-tan underline" href={`mailto:${PROMOTER.email}`}>
           {PROMOTER.email}
         </a>
