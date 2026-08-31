@@ -30,12 +30,16 @@ export const Route = createFileRoute("/giveaway/recovery-kit")({
 
 function GiveawayPage() {
   const status = Route.useLoaderData();
+  const closed =
+    !status.open && !!status.closesAt && Date.now() > new Date(status.closesAt).getTime();
 
   return (
     <PageShell eyebrow="GAME OF SKILL" title="Recovery Safety Giveaway">
       {!status.open ? (
         <p className="border border-rf-tan bg-rf-tan/15 px-4 py-3 text-sm font-semibold text-rf-dark">
-          Coming soon. Entries are not open and no entries are being accepted yet.
+          {closed
+            ? "Entries have closed. Thank you to everyone who entered. Judging is now underway."
+            : "Coming soon. Entries are not open and no entries are being accepted yet."}
         </p>
       ) : null}
 
@@ -79,7 +83,7 @@ function GiveawayPage() {
       </P>
 
       <H2>Enter</H2>
-      <GiveawayEntryForm open={status.open} />
+      <GiveawayEntryForm open={status.open} closed={closed} />
 
       <H2>Before you enter</H2>
       <P>

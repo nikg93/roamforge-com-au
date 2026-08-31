@@ -21,7 +21,7 @@ const labelCls = "block text-xs font-semibold tracking-[0.14em] text-rf-dark/70 
 const fieldCls =
   "min-h-11 w-full bg-white border border-rf-dark/20 px-3 py-2 text-sm text-rf-dark placeholder:text-rf-dark/40 focus:outline-none focus:ring-2 focus:ring-rf-tan focus:border-rf-tan disabled:bg-rf-dark/5 disabled:text-rf-dark/50";
 
-export function GiveawayEntryForm({ open }: { open: boolean }) {
+export function GiveawayEntryForm({ open, closed }: { open: boolean; closed: boolean }) {
   const submit = useServerFn(submitGiveawayEntry);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [response, setResponse] = useState("");
@@ -113,8 +113,9 @@ export function GiveawayEntryForm({ open }: { open: boolean }) {
           role="status"
           className="border border-rf-tan bg-rf-tan/15 px-4 py-3 text-sm font-semibold text-rf-dark"
         >
-          Coming soon — entries are not open yet. The form below is disabled until the promotion
-          opens ({PROMOTION.opens}).
+          {closed
+            ? "Entries have closed. Thank you to everyone who entered. Judging is now underway."
+            : `Entries are not open yet. The form below is disabled until the promotion opens (${PROMOTION.opens}).`}
         </p>
       ) : null}
 
@@ -272,7 +273,7 @@ export function GiveawayEntryForm({ open }: { open: boolean }) {
           className="min-h-11 inline-flex items-center gap-2 bg-rf-dark px-6 py-2 text-xs font-semibold tracking-[0.16em] text-rf-cream hover:bg-rf-dark-2 disabled:opacity-50"
         >
           {status.kind === "submitting" ? <Loader2 className="size-4 animate-spin" /> : null}
-          {open ? "SUBMIT ENTRY" : "ENTRIES COMING SOON"}
+          {open ? "SUBMIT ENTRY" : closed ? "ENTRIES CLOSED" : "ENTRIES COMING SOON"}
         </button>
       </fieldset>
     </form>
